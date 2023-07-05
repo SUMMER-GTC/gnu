@@ -13,7 +13,7 @@
 ######################################
 # target
 ######################################
-TARGET = gnu_demo
+TARGET = bootloader
 
 
 ######################################
@@ -35,18 +35,16 @@ BUILD_DIR = build
 # source
 ######################################
 C_SOURCES_DIR = \
-Core/Src \
-Drivers/STM32F1xx_HAL_Driver/Src \
-Middlewares/Third_Party/FreeRTOS/Source \
-Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS \
-Middlewares/Third_Party/FreeRTOS/Source/portable/MemMang \
-Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM3
+Core \
+FWLIB/src \
+HARDWARE \
+USER
 
 C_SOURCES = $(foreach v, $(C_SOURCES_DIR), $(wildcard $v/*.c))
 
 # ASM sources
 ASM_SOURCES =  \
-startup_stm32f103xe.s
+startup_stm32f10x_hd.s
 
 
 #######################################
@@ -90,9 +88,8 @@ AS_DEFS =
 
 # C defines
 C_DEFS =  \
--DSTM32F103xE \
--DUSE_FULL_LL_DRIVER \
--DUSE_HAL_DRIVER
+-DUSE_STDPERIPH_DRIVER \
+-DSTM32F10X_HD
 
 
 # AS includes
@@ -100,14 +97,10 @@ AS_INCLUDES =
 
 # C includes
 C_INCLUDES =  \
--ICore/Inc \
--IDrivers/STM32F1xx_HAL_Driver/Inc \
--IDrivers/CMSIS/Device/ST/STM32F1xx/Include \
--IDrivers/CMSIS/Include \
--IDrivers/STM32F1xx_HAL_Driver/Inc/Legacy \
--IMiddlewares/Third_Party/FreeRTOS/Source/include \
--IMiddlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS \
--IMiddlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM3
+-ICore \
+-IFWLIB/inc \
+-IHARDWARE \
+-IUSER
 
 
 # compile gcc flags
