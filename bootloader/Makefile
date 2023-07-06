@@ -131,7 +131,7 @@ LDFLAGS = $(MCU) -specs=nano.specs -T$(LDSCRIPT) $(LIBDIR) $(LIBS) -Wl,-Map=$(BU
 OUTPUT_DIR = OUTPUT
 # default action: build all
 all: $(BUILD_DIR)/$(TARGET).elf $(BUILD_DIR)/$(TARGET).hex $(BUILD_DIR)/$(TARGET).bin
-	cp $(BUILD_DIR)/$(TARGET).elf $(BUILD_DIR)/$(TARGET).hex $(BUILD_DIR)/$(TARGET).bin $(OUTPUT_DIR)
+	cp $(wildcard $(BUILD_DIR)/$(TARGET).*) $(OUTPUT_DIR)
 
 
 #######################################
