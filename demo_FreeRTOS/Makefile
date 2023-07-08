@@ -35,10 +35,15 @@ BUILD_DIR = build
 # source
 ######################################
 C_SOURCES_DIR = \
-Core \
+CORE \
 FWLIB/src \
 HARDWARE \
-USER
+USER \
+APP \
+FreeRTOS \
+INIT \
+SYSTEM \
+FreeRTOS/portable/GCC/ARM_CM3
 
 C_SOURCES = $(foreach v, $(C_SOURCES_DIR), $(wildcard $v/*.c))
 
@@ -97,10 +102,18 @@ AS_INCLUDES =
 
 # C includes
 C_INCLUDES =  \
--ICore \
+-ICORE \
 -IFWLIB/inc \
 -IHARDWARE \
--IUSER
+-IUSER \
+-IAPP \
+-IFreeRTOS \
+-IINIT \
+-ISYSTEM/delay \
+-ISYSTEM/sys \
+-ISYSTEM/usart \
+-IFreeRTOS/include \
+-IFreeRTOS/portable/GCC/ARM_CM3
 
 
 # compile gcc flags
@@ -126,7 +139,7 @@ LDSCRIPT = LINKER_SCRIPT/STM32F103VCTx_FLASH.ld
 # libraries
 LIBS = -lc -lm -lnosys 
 LIBDIR = 
-LDFLAGS = $(MCU) -specs=nano.specs -T$(LDSCRIPT) $(LIBDIR) $(LIBS) -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref -Wl,--gc-sections
+LDFLAGS = $(MCU) -specs=nano.specs --specs=nosys.specs -T$(LDSCRIPT) $(LIBDIR) $(LIBS) -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref -Wl,--gc-sections
 
 OUTPUT_DIR = OUTPUT
 # default action: build all
