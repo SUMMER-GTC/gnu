@@ -24,7 +24,6 @@ int main(void)
 	delay_init();	    				//延时函数初始化	 
 	uart_init(115200);					//初始化串口
 	LED_Init();		  					//初始化LED
-
 	
 	//创建开始任务
     xTaskCreate((TaskFunction_t )start_task,            //任务函数

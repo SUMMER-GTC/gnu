@@ -16,9 +16,8 @@ typedef INT32 (*initcall_t)(void);
 #define __define_initcall(fn) \
 		static initcall_t __initcall_##fn __attribute_used__ \
 		__attribute__((__section__(".initcall"))) = fn
-		
 
-#define module_init(x)	__define_initcall(x);
+#define module_init(x) __define_initcall(x);
 
 INT32 Init(void);
 

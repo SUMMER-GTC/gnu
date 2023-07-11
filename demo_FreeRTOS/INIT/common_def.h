@@ -78,7 +78,7 @@ struct platform_info {
 	struct file_operations *fops;
 	void *private_data;
 	UINT16 private_data_len;
-	UINT8 setInterval;
+	UINT16 setInterval;
 	void (*IntervalCall) (void);
 	UINT8 states;
 };

@@ -132,6 +132,7 @@ static void FillSendBuff(char *pStr, char *sendBuff, UINT8 buffIndex, va_list pA
 
 void PrintfLogInfo(UINT8 level, char *str, ...)
 {
+	// return;
 #if defined(PRINT_DEBUG_INFO) || defined(PRINT_WARNING_INFO) || defined(PRINT_ERROR_INFO)
 	if (str == NULL) {
 		return;
@@ -181,4 +182,71 @@ void PrintfLogInfo(UINT8 level, char *str, ...)
 #endif
 }
 
+#include <sys/stat.h>
+#include <unistd.h>
+#include <errno.h>
 
+__attribute__((weak)) int _isatty(int fd)
+{
+    if (fd >= STDIN_FILENO && fd <= STDERR_FILENO)
+        return 1;
+ 
+    errno = EBADF;
+    return 0;
+}
+ 
+__attribute__((weak)) int _close(int fd)
+{
+    if (fd >= STDIN_FILENO && fd <= STDERR_FILENO)
+        return 0;
+ 
+    errno = EBADF;
+    return -1;
+}
+ 
+__attribute__((weak)) int _lseek(int fd, int ptr, int dir)
+{
+    (void)fd;
+    (void)ptr;
+    (void)dir;
+ 
+    errno = EBADF;
+    return -1;
+}
+ 
+__attribute__((weak)) int _fstat(int fd, struct stat *st)
+{
+    if (fd >= STDIN_FILENO && fd <= STDERR_FILENO)
+    {
+        st->st_mode = S_IFCHR;
+        return 0;
+    }
+ 
+    errno = EBADF;
+    return 0;
+}
+
+__attribute__((weak)) int _read(int file, char *ptr, int len)
+{
+    (void)file;
+    int DataIdx;
+    for (DataIdx = 0; DataIdx < len; DataIdx++)
+    {
+        // *ptr++ = __io_getchar();
+		// *ptr++ = getchar();
+    }
+    return len;
+}
+ 
+__attribute__((weak)) int _write(int file, char *ptr, int len)
+{
+    (void)file;
+    int DataIdx;
+
+    for (DataIdx = 0; DataIdx < len; DataIdx++)
+    {
+        // __io_putchar(*ptr++);
+		// fputc((int)*ptr++, (FILE *)file);
+    }
+    return len;
+}

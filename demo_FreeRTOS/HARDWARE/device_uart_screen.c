@@ -120,14 +120,22 @@ static struct file_operations g_fops = {
 	.ioctl = DeviceIoctl
 };
 
+static void DGUSIntervalCall(void);
+
 static struct platform_info g_deviceDGUS = {
 	.tag = TAG_DEVICE_UART_SCREEN,
 	.fops = &g_fops,
 	.private_data = (void *)&g_uartScreenData,
 	.private_data_len = sizeof(g_uartScreenData),
-	.setInterval = 0,
-	.IntervalCall = NULL
+	.setInterval = 1000,
+	.IntervalCall = DGUSIntervalCall
 };
+
+static void DGUSIntervalCall(void)
+{
+	PrintfLogInfo(DEBUG_LEVEL, "[device_uart_screen][DGUSIntervalCall] running\n");
+	DeviceSampleData(SEND_FROM_ISR, TAG_APP_UI, &g_deviceDGUS);
+}
 
 static INT32 DeviceUartScreenInit(void)
 {

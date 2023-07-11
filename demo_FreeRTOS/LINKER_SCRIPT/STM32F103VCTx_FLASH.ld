@@ -142,10 +142,14 @@ SECTIONS
     *(.data*)          /* .data* sections */
 
     . = ALIGN(4);
+    __initcall_start = .;
+    KEEP (*(SORT(.initcall)))
+    __initcall_end = .;
+
+    . = ALIGN(4);
     _edata = .;        /* define a global symbol at data end */
   } >RAM AT> FLASH
 
-  
   /* Uninitialized data section */
   . = ALIGN(4);
   .bss :

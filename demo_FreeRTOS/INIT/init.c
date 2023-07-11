@@ -3,11 +3,8 @@
 #include "device_manager.h"
 #include "app_manager.h"
 
-extern UINT32 initcall$$Base;
-extern UINT32 initcall$$Limit;
-
-static UINT32 *__start_code = &initcall$$Base;
-static UINT32 *__end_code = &initcall$$Limit;
+extern UINT32 __initcall_start;
+extern UINT32 __initcall_end;
 
 static INT32 DoInit(initcall_t fun)
 {
@@ -20,12 +17,13 @@ static INT32 DoInit(initcall_t fun)
 
 INT32 Init(void)
 {
-	initcall_t callFunc = NULL;
+	volatile initcall_t callFunc = NULL;
+	volatile UINT32 *funAddr = &__initcall_start;
 
-	for (UINT32 *funAddr = __start_code; funAddr < __end_code; funAddr++) {
+	do {
 		callFunc = (initcall_t)(*(funAddr));
 		DoInit(callFunc);	
-	}
+	} while(++funAddr < &__initcall_end);
 
 	DeviceManagerInit();
 	AppManagerInit();

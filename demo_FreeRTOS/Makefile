@@ -22,7 +22,7 @@ TARGET = demo_FreeRTOS
 # debug build?
 DEBUG = 1
 # optimization
-OPT = -Og
+OPT = -O0
 
 
 #######################################
@@ -42,10 +42,13 @@ USER \
 APP \
 FreeRTOS \
 INIT \
-SYSTEM \
+SYSTEM/delay \
+SYSTEM/sys \
+SYSTEM/usart \
 FreeRTOS/portable/GCC/ARM_CM3
 
 C_SOURCES = $(foreach v, $(C_SOURCES_DIR), $(wildcard $v/*.c))
+C_SOURCES += FreeRTOS/portable/MemMang/heap_4.c
 
 # ASM sources
 ASM_SOURCES =  \
@@ -139,12 +142,12 @@ LDSCRIPT = LINKER_SCRIPT/STM32F103VCTx_FLASH.ld
 # libraries
 LIBS = -lc -lm -lnosys 
 LIBDIR = 
-LDFLAGS = $(MCU) -specs=nano.specs --specs=nosys.specs -T$(LDSCRIPT) $(LIBDIR) $(LIBS) -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref -Wl,--gc-sections
+LDFLAGS = $(MCU) -specs=nano.specs -T$(LDSCRIPT) $(LIBDIR) $(LIBS) -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref -Wl,--gc-sections
 
 OUTPUT_DIR = OUTPUT
 # default action: build all
 all: $(BUILD_DIR)/$(TARGET).elf $(BUILD_DIR)/$(TARGET).hex $(BUILD_DIR)/$(TARGET).bin
-	cp $(wildcard $(BUILD_DIR)/$(TARGET).*) $(OUTPUT_DIR)
+	cp -f $(wildcard $(BUILD_DIR)/$(TARGET).*) $(OUTPUT_DIR)
 
 
 #######################################

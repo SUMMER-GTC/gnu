@@ -7,7 +7,7 @@
         {
             "name": "Cortex Debug",
             "cwd": "${workspaceFolder}",
-            "executable": "./build/bootloader.elf",
+            "executable": "./OUTPUT/demo_FreeRTOS.elf",
             "request": "launch",
             "type": "cortex-debug",
             "runToEntryPoint": "main",

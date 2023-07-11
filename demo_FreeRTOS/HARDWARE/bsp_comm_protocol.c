@@ -4,8 +4,6 @@
 #include "bsp_usart.h"
 #include "bsp_chip_flash.h"
 
-extern s32 DeviceHardwareCheck(void);
-
 static struct ota_protocol g_otaData;
 static struct comm_ota_data g_commOtaData = {
 	.receiveFinish = false,
@@ -248,6 +246,54 @@ static s32 OtaProgramFlash(struct ota_protocol *otaData)
 	
 	OtaReplyProcess(otaData);
 
+	return SUCC;
+}
+
+static const unsigned char g_bootDeviceNameBuf[] = "this device is test!";
+static const unsigned char g_bootHardwareVersionBuf[] = "VER.1.0"; 
+
+/*
+* @brief  
+* @param  
+* @retval 
+*/
+static s32 DeviceHardwareCheck(void)
+{
+	u32 t;
+	u32 errByte=0;
+	struct sys_config* sysConfig = GetSysConfigOpt()->sysConfig;
+	for(t = 0; t < sizeof(g_bootDeviceNameBuf); t++) // check device name
+	{
+	  if(g_bootDeviceNameBuf[t] != (*(u8*)(DEVICE_NAME_BUFF_ADDRESS+t))) {
+			sysConfig->deviceNameErrCnt++;
+			return FAIL;
+		}
+	}
+
+	for(t = 0; t < sizeof(g_bootHardwareVersionBuf); t++) //check hardware version
+	{
+	  if(g_bootHardwareVersionBuf[t] != (*(u8*)(HARDWARE_VERSION_BUFF_ADDRESS+t))) {
+			sysConfig->hardWareErrCnt++;
+			return FAIL;
+		}
+	}
+	
+	for(t = 0; t < ROM_SIZE_8K; t++) //check 8kbit rom 
+	{
+		if(((*(u8*)(APPLICATION_ADDRESS+t)) == 0xff) || ((*(u8*)(APPLICATION_ADDRESS+t)) == 0x00))
+		{
+		  errByte++;
+			if(errByte >= 200) {
+				sysConfig->romCheckErrCnt++;
+				return FAIL;
+			}
+		}
+		else
+		{
+			errByte=0;
+		}
+	}
+	
 	return SUCC;
 }
 
