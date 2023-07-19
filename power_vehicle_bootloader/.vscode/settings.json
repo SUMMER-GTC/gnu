@@ -1,0 +1,17 @@
+{
+    "cortex-debug.variableUseNaturalFormat": true,
+    "C_Cpp.errorSquiggles": "disabled",
+    "files.associations": {
+        "stm32f4xx_fmc.h": "c",
+        "stm32f4xx.h": "c",
+        "stm32f4xx_conf.h": "c",
+        "sys.h": "c",
+        "comm_protocol.h": "c",
+        "stdlib.h": "c",
+        "common_def.h": "c",
+        "stdint.h": "c",
+        "chip_flash.h": "c",
+        "string.h": "c",
+        "usart_upper_computer.h": "c"
+    }
+}
