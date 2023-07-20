@@ -57,7 +57,7 @@ INT32 SendDataToApp(UINT8 isrFlag, UINT8 tag, struct platform_info* data);
 void AttachDevices(UINT8 appTag, UINT8 devTag);
 void DeattachDevices(UINT8 appTag, UINT8 devTag);
 struct device_attach_app_node * GetDeviceAttachApp(UINT8 devTag);
-
+void TaskRemainStack(void);
 
 
 #ifdef __cplusplus

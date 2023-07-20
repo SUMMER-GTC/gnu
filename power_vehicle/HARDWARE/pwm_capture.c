@@ -179,12 +179,13 @@ static struct file_operations g_fops = {
 static void DeviceIntervalCall (void *dev)
 {
 	DeviceSampleData(SEND_FROM_ISR, TAG_APP_ROTATE_SPEED, dev);
+	DeviceSampleData(SEND_FROM_ISR, TAG_APP_DATA_STORAGE, dev);
 }
 
 static struct platform_info g_devicePwmCapture = {
 	.tag = TAG_DEVICE_PWM_CAPTURE,
 	.fops = &g_fops,
-	.setInterval = 30,
+	.setInterval = 3000,
 	.IntervalCall = DeviceIntervalCall
 };
 

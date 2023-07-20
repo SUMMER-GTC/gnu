@@ -21,6 +21,8 @@ extern "C"{
 #define INT16 	int16_t
 #define UINT32 	uint32_t
 #define INT32 	int32_t
+#define UINT64 	uint64_t
+#define INT64 	int64_t
 
 #define UNUSED(X) (void)X      /* To avoid gcc/g++ warnings */
 
@@ -62,6 +64,7 @@ enum app_device_tag {
 	TAG_APP_WHEEL,
 	TAG_APP_ROTATE_SPEED,
 	TAG_APP_FORCE,
+	TAG_APP_DATA_STORAGE,
 	TAG_APP_END,
 
 	TAG_DEVICE_START		= TAG_APP_END,

@@ -22,6 +22,7 @@
         "stm32f4xx_gpio.h": "c",
         "compare": "c",
         "app_force.h": "c",
-        "taseometer.h": "c"
+        "taseometer.h": "c",
+        "app_task_define.h": "c"
     }
 }

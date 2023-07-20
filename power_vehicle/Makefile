@@ -51,6 +51,9 @@ FreeRTOS/portable/GCC/ARM_CM4F
 
 C_SOURCES = $(foreach v, $(C_SOURCES_DIR), $(wildcard $v/*.c))
 C_SOURCES += FreeRTOS/portable/MemMang/heap_4.c
+C_SOURCES += FATFS/diskio.c
+C_SOURCES += FATFS/ff.c
+C_SOURCES += FATFS/option/cc936.c
 
 # ASM sources
 ASM_SOURCES =  \
@@ -118,8 +121,8 @@ C_INCLUDES =  \
 -ISYSTEM/sys \
 -ISYSTEM/usart \
 -IFreeRTOS/include \
--IFreeRTOS/portable/GCC/ARM_CM4F
-
+-IFreeRTOS/portable/GCC/ARM_CM4F \
+-IFATFS
 
 # compile gcc flags
 ASFLAGS = $(MCU) $(AS_DEFS) $(AS_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections

@@ -59,6 +59,7 @@ void NMI_Handler(void)
   */
 void HardFault_Handler(void)
 {
+  TaskRemainStack();
   /* Go to infinite loop when Hard Fault exception occurs */
   while (1)
   {

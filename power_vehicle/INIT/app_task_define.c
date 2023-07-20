@@ -6,7 +6,7 @@
 
 #define QUEUE_ITEM_SIZE sizeof(struct platform_info)
 
-struct app_define g_appDefine[TAG_APP_END] = {
+static struct app_define g_appDefine[TAG_APP_END] = {
 		{
 			.tag = TAG_APP_UI,
 			.task = {
@@ -102,6 +102,22 @@ struct app_define g_appDefine[TAG_APP_END] = {
 				QUEUE_ITEM_SIZE 
 			}
 		},
+
+		{
+			.tag = TAG_APP_DATA_STORAGE,
+			.task = {
+				NULL,
+				"DataStorageTask",
+				TASK_STASK_SIZE_BYTES_512,
+				NULL,
+				TASK_PRIORITY_ABOVE_NORMAL,
+				NULL
+			},
+			.queue = {
+				10,
+				QUEUE_ITEM_SIZE 
+			}
+		},
 };
 
 static INT32 TaskQueueCreate(void)
@@ -167,6 +183,23 @@ INT32 SendDataToApp(UINT8 isrFlag, UINT8 tag, struct platform_info *data)
 		return FAIL; 
 	}
 	return SUCC;	
+}
+
+static char buff[256] = { 0 };
+void TaskRemainStack(void)
+{
+  UINT64 remainStackSize = 0;
+	INT32 writeNum = 0;
+	char *pBuff = buff;
+
+	writeNum = sprintf(pBuff, "task remain stack size:\n");
+	pBuff += writeNum;
+
+	for (UINT8 i = 0; i < TAG_APP_END; i++) {
+		remainStackSize = uxTaskGetStackHighWaterMark(*g_appDefine[i].task.pxCreatedTask);
+		writeNum = sprintf(pBuff, "%s, %ld\n", g_appDefine[i].task.pcName, (UINT32)remainStackSize);
+		pBuff += writeNum;
+	}
 }
 
 
