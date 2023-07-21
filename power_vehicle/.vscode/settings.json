@@ -23,6 +23,7 @@
         "compare": "c",
         "app_force.h": "c",
         "taseometer.h": "c",
-        "app_task_define.h": "c"
+        "app_task_define.h": "c",
+        "tf_card.h": "c"
     }
 }

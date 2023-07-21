@@ -22,6 +22,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f4xx_it.h"
 #include "sys.h"
+#include "app_task_define.h"
 
 /** @addtogroup STM32F4xx_HAL_Examples
   * @{

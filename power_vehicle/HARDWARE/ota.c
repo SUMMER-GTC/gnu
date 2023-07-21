@@ -2,6 +2,7 @@
 #include "common_def.h"
 #include "usart_upper_computer.h"
 #include "chip_flash.h"
+#include "sys.h"
 
 enum {
 	COMM_IDLE_STATE = 0,

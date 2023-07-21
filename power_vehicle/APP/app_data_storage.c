@@ -7,71 +7,115 @@
 #include "queue.h"
 #include "ff.h"
 
-FATFS fs;													
-FIL fnew;												
-FRESULT res_sd;                
-UINT fnum;            					  
-BYTE ReadBuffer[1024] = {0};
-BYTE WriteBuffer[] = "hello! this is test for fs! 你好！这是个文件系统测试！\r\n";
+#define LOG_PATH "0:/log/debug_log.txt"
+#define LOGICAL_DRIVE_NUMBER "0:"
+
+#define DEBUG_FILE_SIZE (1024 * 1024 * 8)  // 8M bytes
+#define DATA_STORAGE_WRITE_BUFFER_SIZE (50)
+
+__packed struct data_storage_file {
+	UINT32 writePointer;
+	UINT32 fileTotalSize;
+	UINT8 writeBuffer[DATA_STORAGE_WRITE_BUFFER_SIZE];
+	UINT16 writeBufferLen;
+};
+
+static struct data_storage_file g_dataStorageFile = {
+	.writePointer = 0,
+	.fileTotalSize = DEBUG_FILE_SIZE,
+	.writeBuffer = { 0 },
+	.writeBufferLen = 0,
+};
+
+static FATFS g_fs;								
+static FIL g_file;
+
+static BYTE ReadBuffer[1024] = {0};
+
+static INT32 MoutFs(void)
+{
+	FRESULT res;
+
+	res = f_mount(&g_fs, LOGICAL_DRIVE_NUMBER, 1);
+	if(res == FR_NO_FILESYSTEM) {
+		res = f_mkfs(LOGICAL_DRIVE_NUMBER, 0, 0);
+		
+		if(res != FR_OK) {
+			return FAIL;
+		}
+		res = f_mount(NULL, LOGICAL_DRIVE_NUMBER, 1);
+		if (res != FR_OK) {
+				return FAIL;
+		}
+		res = f_mount(&g_fs, LOGICAL_DRIVE_NUMBER, 1);
+		if (res != FR_OK) {
+				return FAIL;
+		}
+	} else if (res == FR_NOT_READY) {
+		return FAIL;
+	} else if (res != FR_OK) {
+		return FAIL;
+	}
+
+	return SUCC;
+}
+
+static void FsWriteData(UINT8 *data, UINT16 dataLen)
+{
+	FRESULT res;
+	FILINFO fileInfo;
+
+	if (g_dataStorageFile.writeBufferLen + dataLen < DATA_STORAGE_WRITE_BUFFER_SIZE) {
+		memcpy(g_dataStorageFile.writeBuffer + g_dataStorageFile.writeBufferLen, data, dataLen);
+		g_dataStorageFile.writeBufferLen += dataLen;
+		return;
+	}
+
+	if (MoutFs() != SUCC) {
+		return;
+	}
+
+	res = f_open(&g_file, LOG_PATH, FA_OPEN_ALWAYS | FA_WRITE | FA_READ);
+	if (res != FR_OK) {
+		return;
+	}
+
+	f_lseek(&g_file, g_dataStorageFile.writePointer);
+
+	UINT fnum;
+	res = f_write(&g_file, g_dataStorageFile.writeBuffer, g_dataStorageFile.writeBufferLen, &fnum);
+	if (res != FR_OK) {
+		return;
+	}
+	g_dataStorageFile.writeBufferLen = 0;
+	g_dataStorageFile.writePointer += fnum;
+
+	f_lseek(&g_file, f_tell(&g_file));
+	// write over 4kB data
+	res = f_write(&g_file, data, dataLen, &fnum);
+	if (res != FR_OK) {
+		return;
+	}
+	g_dataStorageFile.writePointer += fnum;
+
+	if (g_dataStorageFile.writePointer > g_dataStorageFile.fileTotalSize) {
+		g_dataStorageFile.writePointer = 0;
+	}
+
+	res = f_close(&g_file);
+	if (res != FR_OK) {
+		return;
+	}
+}
 
 static void DataStorageProcess(struct platform_info *dev)
 {
 	UNUSED(dev);
-	static UINT8 errState = 0;
-	// mount fs
-	res_sd = f_mount(&fs,"0:",1);
+	UINT8 data[] = "0123456789";	
 
-	if(res_sd == FR_NO_FILESYSTEM) {
-		res_sd=f_mkfs("0:",0,0);		
-		
-		if(res_sd == FR_OK) {
-			res_sd = f_mount(NULL,"0:",1);
-			res_sd = f_mount(&fs,"0:",1);
-		}
-		else {
-			errState = 1;
-		}
-	} else if(res_sd != FR_OK) {
-		errState = 2;
-  }
-  else {
-		errState = 3;
-  }
-
-	// write fs
-	res_sd = f_open(&fnew, "0:FatFsTest.txt",FA_OPEN_ALWAYS | FA_WRITE );
-	if ( res_sd == FR_OK ) {
-		res_sd=f_write(&fnew,WriteBuffer,sizeof(WriteBuffer),&fnum);
-    if(res_sd == FR_OK) {
-			errState = 4;
-    }
-    else {
-			errState = 5;
-    }    
-
-    f_close(&fnew);
+	for (UINT32 i = 0; i < 10; i++) {
+		FsWriteData(data, sizeof(data));
 	}
-	else {	
-		errState = 6;
-	}
-
-	// read
-	res_sd = f_open(&fnew, "0:FatFsTest.txt", FA_OPEN_EXISTING | FA_READ); 	 
-	if(res_sd == FR_OK) {
-		res_sd = f_read(&fnew, ReadBuffer, sizeof(ReadBuffer), &fnum); 
-    if(res_sd==FR_OK) {
-			errState = 7;
-    }
-    else {
-			errState = 8;
-    }		
-	}
-	else {
-		errState = 9;
-	}
-	f_close(&fnew);	
-  
-	f_mount(NULL,"0:",1);
 }
 
 void DataStorageTask(void *pvParameters)
