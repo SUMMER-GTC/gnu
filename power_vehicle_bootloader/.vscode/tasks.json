@@ -31,7 +31,7 @@
 				"-f",
 				"stm32f4x.cfg",
 				"-c",
-				"OUTPUT/F407ZGT6_Mini.elf verify reset exit"
+				"OUTPUT/bootloader.elf verify reset exit"
 			],
 			"problemMatcher": [
 				"$gcc"

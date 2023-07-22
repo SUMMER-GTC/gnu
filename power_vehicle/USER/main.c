@@ -30,10 +30,12 @@ static void GetSystemClockConfig(void)
 
 int main(void)
 {
+  NVIC_SetVectorTable(NVIC_VectTab_FLASH, 0x8000);
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);//设置系统中断优先级分组4
   GetSystemClockConfig();
 	delay_init(168);	    				//延时函数初始化	 
 	uart_init(115200);					  //初始化串口
+  Init();
 
 	
 	//创建开始任务
@@ -51,7 +53,6 @@ void start_task(void *pvParameters)
 {
     taskENTER_CRITICAL();           //进入临界区
 
-		Init();
 		TaskCreate();
 
     vTaskDelete(StartTask_Handler); //删除开始任务

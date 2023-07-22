@@ -13,7 +13,7 @@
 ######################################
 # target
 ######################################
-TARGET = F407ZGT6_Mini
+TARGET = bootloader
 
 
 ######################################
@@ -35,22 +35,13 @@ BUILD_DIR = build
 # source
 ######################################
 # C sources
-C_SOURCES_DIR =  \
 C_SOURCES_DIR = \
 CORE \
 FWLIB/src \
 HARDWARE \
-USER \
-APP \
-FreeRTOS \
-INIT \
-SYSTEM/delay \
-SYSTEM/sys \
-SYSTEM/usart \
-FreeRTOS/portable/GCC/ARM_CM4F
+USER
 
 C_SOURCES = $(foreach v, $(C_SOURCES_DIR), $(wildcard $v/*.c))
-C_SOURCES += FreeRTOS/portable/MemMang/heap_4.c
 
 # ASM sources
 ASM_SOURCES =  \
@@ -110,15 +101,7 @@ C_INCLUDES =  \
 -ICORE \
 -IFWLIB/inc \
 -IHARDWARE \
--IUSER \
--IAPP \
--IFreeRTOS \
--IINIT \
--ISYSTEM/delay \
--ISYSTEM/sys \
--ISYSTEM/usart \
--IFreeRTOS/include \
--IFreeRTOS/portable/GCC/ARM_CM4F
+-IUSER
 
 
 # compile gcc flags

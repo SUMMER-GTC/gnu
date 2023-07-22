@@ -41,8 +41,8 @@ extern "C"{
 #define PLATFOR_INFO_LIST_FLAG		2
 
 #define PRINT_DEBUG_INFO
-#define PRINT_WARNING_INFO
-#define PRINT_ERROR_INFO
+// #define PRINT_WARNING_INFO
+// #define PRINT_ERROR_INFO
 
 #define DEBUG_LEVEL		0
 #define WARNING_LEVEL	1
@@ -53,6 +53,7 @@ extern "C"{
 #define ERROR_INFO_STR		"[ERROR]"
 
 #define PRINTF_BUFF_SIZE 128
+#define COMMON_TICK_STR_SIZE 16
 
 enum app_device_tag {
 	TAG_START				= 0,
@@ -107,11 +108,19 @@ struct round_robin_queue {
 	UINT8  *data;
 };
 
+__packed struct common_time {
+	UINT8 hour;
+	UINT8 minute;
+	UINT8 second;
+	UINT16 msec;
+};
+
 struct platform_info_node *CommonInitList(void);
 INT32 CommonInsertNodeToListTail(struct platform_info_node *headNode, struct platform_info *info);
 INT32 CommonDeleteNodeFromList(struct platform_info_node *headNode, struct platform_info *info);
 struct platform_info *GetPlatformInfo(UINT8 tag);
 void PrintfLogInfo(UINT8 level, char *str, ...);
+void CommonTime(char *timeStr);
 
 #ifdef __cplusplus
 }

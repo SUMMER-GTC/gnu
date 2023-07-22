@@ -82,91 +82,86 @@ struct platform_info *GetPlatformInfo(UINT8 tag)
 	return info;
 }
 
-static void FillSendBuff(char *pStr, char *sendBuff, UINT8 buffIndex, va_list pArgs)
+void CommonTime(char *timeStr)
 {
-  INT32 val, val1, powValue;
-  UINT8 i, cnt;
-  char *argStr;
-  
-	while(*pStr != '\0') {
-			if (buffIndex >= PRINTF_BUFF_SIZE) {
-				break;
-			}
-			
-			if (*pStr == '%') {
-				switch((char)*(++pStr)) {
-					case 'c':
-						sendBuff[buffIndex++] = va_arg(pArgs, int);
-						break;
-					case 'd':
-						val = va_arg(pArgs, int);
-						val1 = val;
-					
-						cnt = 0;
-						while(val != 0) {
-							cnt++;
-							val /= 10;
-						}
-						for (i = 0; i < cnt; i++) {
-							powValue = (INT32)pow(10, cnt-i-1);
-							sendBuff[buffIndex++] = '0' + val1 / powValue;
-							val1 %= powValue;
-						}
-						break;
-					case 's':
-						argStr = va_arg(pArgs, char*);
-						for (i = 0; i < strlen(argStr); i++) {
-							sendBuff[buffIndex++] = argStr[i];
-						}
-						break;
-					default:
-						sendBuff[buffIndex++] = '%';
-						break;
-				}
-			} else {
-				sendBuff[buffIndex++] = *pStr;
-			}
-			++pStr;
-		}
+	UINT32 tick = xTaskGetTickCount();
+
+	struct common_time *pTime = malloc(sizeof(struct common_time));
+	memset(pTime, 0, sizeof(struct common_time));
+
+	pTime->msec = tick % 1000;
+	pTime->second = tick / 1000 % 60;
+	pTime->minute = tick / 1000 / 60 % 60;
+	pTime->hour = tick / 1000 / 60 / 60 % 24;
+	sprintf(timeStr, "%02d-%02d-%02d:%03d ", pTime->hour, pTime->minute, pTime->second, pTime->msec);
+
+	free(pTime);
+	pTime = NULL;
 }
+
+char g_bspDebugBuffer[8192] = { 0 };
+static char g_tickStr[COMMON_TICK_STR_SIZE] = { 0 };
 
 void PrintfLogInfo(UINT8 level, char *str, ...)
 {
-	// return;
-#if defined(PRINT_DEBUG_INFO) || defined(PRINT_WARNING_INFO) || defined(PRINT_ERROR_INFO)
+#if defined(PRINT_DEBUG_INFO)
+
+#elif defined(PRINT_WARNING_INFO)
+	if (level < WARNING_LEVEL) {
+		return;
+	}
+#elif defined(PRINT_ERROR_INFO)
+	if (level < ERROR_LEVEL) {
+		return;
+	}
+#endif
+
 	if (str == NULL) {
 		return;
 	}
 
-	char *pStr = (char *)str;
   char *sendBuff = (char *)malloc(PRINTF_BUFF_SIZE);
+	if (sendBuff == NULL) {
+		return;
+	}
   memset(sendBuff, 0, PRINTF_BUFF_SIZE);
 
 	va_list pArgs;
 	va_start(pArgs, str);
 
+	int infoSize = 0;
 	
 	switch(level) {
-#if defined(PRINT_DEBUG_INFO)		
 		case DEBUG_LEVEL:
-			strcpy(sendBuff, DEBUG_INFO_STR);
-			FillSendBuff(pStr, sendBuff, strlen(DEBUG_INFO_STR), pArgs);
+			infoSize = sprintf(sendBuff, "%s", DEBUG_INFO_STR);
 			break;
-#endif
-#if defined(PRINT_WARNING_INFO)
 		case WARNING_LEVEL:
-			strcpy(sendBuff, WARNING_INFO_STR);
-			FillSendBuff(pStr, sendBuff, strlen(WARNING_INFO_STR), pArgs);
+			infoSize = sprintf(sendBuff, "%s", WARNING_INFO_STR);
 			break;
-#endif
-#if defined(PRINT_ERROR_INFO)
 		case ERROR_LEVEL:
-			strcpy(sendBuff, ERROR_INFO_STR);
-			FillSendBuff(pStr, sendBuff, strlen(ERROR_INFO_STR), pArgs);
+			infoSize = sprintf(sendBuff, "%s", ERROR_INFO_STR);
 			break;
-#endif
 		default:
+			free(sendBuff);
+			sendBuff = NULL;
+			va_end(pArgs);
+			return;
 			break;
+	}
+
+	vsprintf(sendBuff + infoSize, str, pArgs);
+
+	BaseType_t schedulerState = xTaskGetSchedulerState();
+	static int debugBuffOffset = 0;
+
+	if (schedulerState == taskSCHEDULER_RUNNING) {
+		SendDataToQueue(TAG_APP_DATA_STORAGE, TAG_APP_DATA_STORAGE, sendBuff, strlen(sendBuff));
+		debugBuffOffset = 0;
+	} else {
+		if (debugBuffOffset < sizeof(g_bspDebugBuffer)) {
+			CommonTime(g_tickStr);
+			debugBuffOffset += sprintf(g_bspDebugBuffer + debugBuffOffset, "%s%s", g_tickStr, sendBuff);
+		}
 	}
 
 	taskENTER_CRITICAL();
@@ -176,10 +171,6 @@ void PrintfLogInfo(UINT8 level, char *str, ...)
 	free(sendBuff);
   sendBuff = NULL;
 	va_end(pArgs);
-#else
-	UNUSED(level);
-	UNUSED(str);
-#endif
 }
 
 #include <sys/stat.h>

@@ -98,16 +98,9 @@ static struct file_operations g_fops = {
 	.write = DeviceWrite,
 };
 
-static void DeviceIntervalCall (void *dev)
-{
-	DeviceSampleData(SEND_FROM_ISR, TAG_APP_WHEEL, dev);
-}
-
 static struct platform_info g_devicePwmOut = {
 	.tag = TAG_DEVICE_PWM_OUT,
 	.fops = &g_fops,
-	.setInterval = 30,
-	.IntervalCall = DeviceIntervalCall
 };
 
 static INT32 DevicePwmOutInit(void)

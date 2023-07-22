@@ -7,7 +7,7 @@
         {
             "name": "Cortex Debug",
             "cwd": "${workspaceFolder}",
-            "executable": "./OUTPUT/F407ZGT6_Mini.elf",
+            "executable": "./OUTPUT/bootloader.elf",
             "request": "launch",
             "type": "cortex-debug",
             "runToEntryPoint": "main",

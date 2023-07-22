@@ -6,12 +6,37 @@
 #include "stdio.h"
 #include "queue.h"		
 
-static void WheelDeviceProcess(struct platform_info *dev)
-{
-	struct platform_info *devFops = dev;
+__packed struct wheel_control {
+	UINT16 force;
+	UINT16 rpm;
+	UINT16 power;
+};
 
-	UINT32 duty = 750;
-	devFops->fops->write(dev, (void *)&duty, sizeof(duty));
+static struct wheel_control g_wheelControl = { 0 };
+
+static void WheelAppRotateSpeedProcess(struct platform_info *dev)
+{
+	g_wheelControl.rpm = *(UINT16 *)dev->private_data;
+	g_wheelControl.force = g_wheelControl.power / g_wheelControl.rpm;
+	
+}
+
+static void WheelProcess(struct platform_info *dev)
+{
+	switch (dev->tag) {
+		case TAG_APP_FORCE:
+			g_wheelControl.force = *(UINT16 *)dev->private_data;
+			break;
+		case TAG_APP_ROTATE_SPEED:
+			WheelAppRotateSpeedProcess(dev);
+			break;
+		case TAG_DEVICE_UART_SCREEN:
+			g_wheelControl.power = 10;
+			// g_wheelControl.power = *(UINT16 *)dev->private_data;
+			break;
+		default:
+			break;
+	}
 }
 
 void WheelTask(void *pvParameters)
@@ -21,7 +46,7 @@ void WheelTask(void *pvParameters)
 	for(;;) {
 		xQueueReceive(xQueue, &queueData, portMAX_DELAY);
 		
-		WheelDeviceProcess(&queueData);
+		WheelProcess(&queueData);
 	}
 
 }

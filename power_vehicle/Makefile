@@ -35,13 +35,13 @@ BUILD_DIR = build
 # source
 ######################################
 # C sources
-C_SOURCES_DIR =  \
 C_SOURCES_DIR = \
 CORE \
 FWLIB/src \
 HARDWARE \
 USER \
 APP \
+APP/ALG \
 FreeRTOS \
 INIT \
 SYSTEM/delay \
@@ -115,6 +115,7 @@ C_INCLUDES =  \
 -IHARDWARE \
 -IUSER \
 -IAPP \
+-IAPP/ALG \
 -IFreeRTOS \
 -IINIT \
 -ISYSTEM/delay \

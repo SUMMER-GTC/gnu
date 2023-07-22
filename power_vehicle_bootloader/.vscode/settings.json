@@ -12,6 +12,21 @@
         "stdint.h": "c",
         "chip_flash.h": "c",
         "string.h": "c",
-        "usart_upper_computer.h": "c"
+        "usart_upper_computer.h": "c",
+        "device_manager.h": "c",
+        "led.h": "c",
+        "app_wink.h": "c",
+        "init.h": "c",
+        "timer.h": "c",
+        "pwm_capture.h": "c",
+        "stm32f4xx_gpio.h": "c",
+        "compare": "c",
+        "app_force.h": "c",
+        "taseometer.h": "c",
+        "app_task_define.h": "c",
+        "tf_card.h": "c",
+        "string": "c",
+        "core_cm4.h": "c",
+        "bsp_timer.h": "c"
     }
 }

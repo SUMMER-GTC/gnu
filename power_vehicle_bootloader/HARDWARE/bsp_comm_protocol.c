@@ -1,15 +1,9 @@
-#include "ota.h"
-#include "common_def.h"
-#include "usart_upper_computer.h"
-#include "chip_flash.h"
-#include "sys.h"
+#include "bsp_comm_protocol.h"
+#include "bsp_common_define.h"
+#include "bsp_usart.h"
+#include "bsp_chip_flash.h"
 
-enum {
-	COMM_IDLE_STATE = 0,
-	COMM_SYN_HEAD1_STATE = 1,
-	COMM_SYN_HEAD2_STATE,
-	COMM_DATA_LEN_STATE
-};
+extern s32 DeviceHardwareCheck(void);
 
 static struct ota_protocol g_otaData;
 static struct comm_ota_data g_commOtaData = {
@@ -29,7 +23,7 @@ extern struct sys_config_opt* GetSysConfigOpt(void);
 //------------------------------
 #define KEY_SBOX_ARRAY_SIZE 256
 
-static const UINT8 g_keyData[] = {
+static const u8 g_keyData[] = {
         0x29, 0x23, 0xbe, 0x84, 0xe1, 0x6c, 0xd6, 0xae, 0x52, 0x90, 0x49, 0xf1, 0xf1, 0xbb, 0xe9, 0xeb,
         0xb3, 0xa6, 0xdb, 0x3c, 0x87, 0xc , 0x3e, 0x99, 0x24, 0x5e, 0xd , 0x1c, 0x6 , 0xb7, 0x47, 0xde,
 //        0xb3, 0x12, 0x4d, 0xc8, 0x43, 0xbb, 0x8b, 0xa6, 0x1f, 0x3 , 0x5a, 0x7d, 0x9 , 0x38, 0x25, 0x1f,
@@ -124,11 +118,11 @@ void DataDecrypt(unsigned char *data, unsigned int dataLen)
     RC4Crypt(data, dataLen);
 }
 
-static UINT32 CheckSumCalculate(UINT8 *data, UINT32 dataLen)
+static u32 CheckSumCalculate(u8 *data, u32 dataLen)
 {
-	UINT32 checkSum = 0;
+	u32 checkSum = 0;
 
-	for (UINT32 i = 0; i < dataLen; i++) {
+	for (u32 i = 0; i < dataLen; i++) {
 		checkSum += data[i];
 	}
 
@@ -140,10 +134,10 @@ static UINT32 CheckSumCalculate(UINT8 *data, UINT32 dataLen)
 * @param  
 * @retval 
 */
-void CommOtaIrqHandler(UINT8 ch)
+void CommOtaIrqHandler(u8 ch)
 {
 	struct comm_ota_data *comm = &g_commOtaData;
-	UINT8 *rxBuff = (UINT8 *)comm->otaData;
+	u8 *rxBuff = (u8 *)comm->otaData;
 
 	rxBuff[comm->rxCnt] = ch;
 
@@ -166,8 +160,8 @@ void CommOtaIrqHandler(UINT8 ch)
 		case COMM_SYN_HEAD2_STATE:
 			if (++comm->rxCnt >= (comm->otaData->dataLen + COMM_OTA_OFFSET(data))) {
 				comm->state = COMM_IDLE_STATE;
-				UINT32 checkSum = CheckSumCalculate(\
-													(UINT8 *)&comm->otaData->mainCommand, \
+				u32 checkSum = CheckSumCalculate(\
+													(u8 *)&comm->otaData->mainCommand, \
 													(comm->otaData->dataLen + COMM_OTA_OFFSET(data) - COMM_OTA_OFFSET(mainCommand)));
 				if (comm->otaData->checkSum == checkSum) {
 					comm->receiveFinish = true;
@@ -184,20 +178,20 @@ void CommOtaIrqHandler(UINT8 ch)
 #define UASRT_SEND_BUFF_SIZE (32)
 static bool OtaReplyProcess(struct ota_protocol *comData)
 {
- 	UINT8 *sendBuff = NULL;
-	sendBuff = (UINT8 *)malloc(UASRT_SEND_BUFF_SIZE);
+ 	u8 *sendBuff = NULL;
+	sendBuff = (u8 *)malloc(UASRT_SEND_BUFF_SIZE);
 	if (sendBuff == NULL) {
 		return false;
 	}
 
-	UINT8 *dataPtr = (UINT8 *)comData;
-	UINT16 dataLen = COMM_OTA_OFFSET(data);
+	u8 *dataPtr = (u8 *)comData;
+	u16 dataLen = COMM_OTA_OFFSET(data);
 
  	if (dataLen > UASRT_SEND_BUFF_SIZE) {
 		dataLen = UASRT_SEND_BUFF_SIZE;
 	}
 	
-	for (UINT16 i = 0; i < dataLen; i++) {
+	for (u16 i = 0; i < dataLen; i++) {
 		sendBuff[i] = dataPtr[i];
 	}
 
@@ -207,10 +201,10 @@ static bool OtaReplyProcess(struct ota_protocol *comData)
   return true;
 }
 
-UINT32 g_programAddr = APPLICATION_ADDRESS;
-static INT32 OtaSynHead(struct ota_protocol *otaData)
+u32 g_programAddr = APPLICATION_ADDRESS;
+static s32 OtaSynHead(struct ota_protocol *otaData)
 {
-	UINT32 startAddr = *(UINT32*)otaData->data;
+	u32 startAddr = *(u32*)otaData->data;
 
 	if (startAddr < APPLICATION_ADDRESS) {
 		return FAIL;
@@ -225,12 +219,12 @@ static INT32 OtaSynHead(struct ota_protocol *otaData)
 	return SUCC;
 }
 
-static UINT8 g_lastDataBuff[32] = { 0 };
-static UINT32 g_flashCheckSum = 0;
-static INT32 OtaProgramFlash(struct ota_protocol *otaData)
+static u8 g_lastDataBuff[32] = { 0 };
+static u32 g_flashCheckSum = 0;
+static s32 OtaProgramFlash(struct ota_protocol *otaData)
 {
-	UINT8* dataBuff = otaData->data;
-	UINT32 dataLen = otaData->dataLen;
+	u8* dataBuff = otaData->data;
+	u32 dataLen = otaData->dataLen;
 
 	if (dataLen >= SYS_CONFIG_ADDRESS) {
 		return FAIL;
@@ -238,7 +232,7 @@ static INT32 OtaProgramFlash(struct ota_protocol *otaData)
 
 	ChipFlashPageWrite(dataBuff, g_programAddr, dataLen, false);
 
-	UINT32 i;
+	u32 i;
 	for (i = 0; i < sizeof(g_lastDataBuff); i++) {
 		if (g_lastDataBuff[i] != dataBuff[i]) {
 			break;
@@ -256,55 +250,6 @@ static INT32 OtaProgramFlash(struct ota_protocol *otaData)
 	return SUCC;
 }
 
-static const unsigned char g_bootDeviceNameBuf[] = "this device is test!";
-static const unsigned char g_bootHardwareVersionBuf[] = "VER.1.0"; 
-
-/*
-* @brief  
-* @param  
-* @retval 
-*/
-static INT32 DeviceHardwareCheck(void)
-{
-	UINT32 t;
-	UINT32 errByte=0;
-	struct sys_config* sysConfig = GetSysConfigOpt()->sysConfig;
-	for(t = 0; t < sizeof(g_bootDeviceNameBuf); t++) // check device name
-	{
-	  if(g_bootDeviceNameBuf[t] != (*(UINT8*)(DEVICE_NAME_BUFF_ADDRESS+t))) {
-			sysConfig->deviceNameErrCnt++;
-			return FAIL;
-		}
-	}
-
-	for(t = 0; t < sizeof(g_bootHardwareVersionBuf); t++) //check hardware version
-	{
-	  if(g_bootHardwareVersionBuf[t] != (*(UINT8*)(HARDWARE_VERSION_BUFF_ADDRESS+t))) {
-			sysConfig->hardWareErrCnt++;
-			return FAIL;
-		}
-	}
-	
-	for(t = 0; t < ROM_SIZE_8K; t++) //check 8kbit rom 
-	{
-		if(((*(UINT8*)(APPLICATION_ADDRESS+t)) == 0xff) || ((*(UINT8*)(APPLICATION_ADDRESS+t)) == 0x00))
-		{
-		  errByte++;
-			if(errByte >= 200) {
-				sysConfig->romCheckErrCnt++;
-				return FAIL;
-			}
-		}
-		else
-		{
-			errByte=0;
-		}
-	}
-	
-	return SUCC;
-}
-
-typedef void (*jump_t)(void); 
 static void OtaGoApplication(struct ota_protocol *otaData)
 {
 	if(DeviceHardwareCheck() != SUCC) {
@@ -315,20 +260,20 @@ static void OtaGoApplication(struct ota_protocol *otaData)
 		return;
 	}
 
-	if (((*(UINT32*)APPLICATION_ADDRESS) & APPLICATION_SP_MASK ) == APPLICATION_SP_OK) {
-		UINT32 jumpAddress = *(UINT32*) (APPLICATION_ADDRESS + 4);
+	if (((*(u32*)APPLICATION_ADDRESS) & APPLICATION_SP_MASK ) == APPLICATION_SP_OK) {
+		u32 jumpAddress = *(u32*) (APPLICATION_ADDRESS + 4);
 		jump_t RunApplication = (jump_t) jumpAddress;
 
-    	OtaReplyProcess(otaData);
+    OtaReplyProcess(otaData);
 		/* Initialize user application's Stack Pointer */
-		// __set_MSP(*(__IO UINT32*) APPLICATION_ADDRESS);
+		// __set_MSP(*(__IO u32*) APPLICATION_ADDRESS);
 		RunApplication();
 	}
   
   NVIC_SystemReset();
 }
 
-static INT32 OtaRunApplication(struct ota_protocol *otaData)
+static s32 OtaRunApplication(struct ota_protocol *otaData)
 {
 	GetSysConfigOpt()->sysConfig->otaState = OTA_RUN_APPLICATION;
 	GetSysConfigOpt()->Write();
@@ -336,10 +281,10 @@ static INT32 OtaRunApplication(struct ota_protocol *otaData)
 	return SUCC;
 }
 
-static INT32 OtaCheckSumFlash(struct ota_protocol *otaData)
+static s32 OtaCheckSumFlash(struct ota_protocol *otaData)
 {
-	UINT32 otaCheckSum = *(UINT32*)otaData->data;
-	UINT32 flashCheckSum = g_flashCheckSum;
+	u32 otaCheckSum = *(u32*)otaData->data;
+	u32 flashCheckSum = g_flashCheckSum;
 	g_flashCheckSum = 0;
 
 	if (flashCheckSum != otaCheckSum) {
@@ -351,7 +296,7 @@ static INT32 OtaCheckSumFlash(struct ota_protocol *otaData)
 	return SUCC;
 }
 
-static INT32 OtaRunBootloader(struct ota_protocol *otaData)
+static s32 OtaRunBootloader(struct ota_protocol *otaData)
 {
 	OtaReplyProcess(otaData);
 	GetSysConfigOpt()->sysConfig->otaState = OTA_RUN_BOOTLOADER;
@@ -360,7 +305,7 @@ static INT32 OtaRunBootloader(struct ota_protocol *otaData)
 	return SUCC;
 }
 
-static INT32 OtaProcess(struct ota_protocol *otaData)
+static s32 OtaProcess(struct ota_protocol *otaData)
 {
 	struct ota_protocol *pOta = otaData;
 	
@@ -399,7 +344,7 @@ void CommunicationProcess(void)
 {
 	if (g_commOtaData.receiveFinish == true) {
     g_commOtaData.receiveFinish = false;
-		for (UINT8 i = 0; i < MAIN_COMMAND_END; i++) {
+		for (u8 i = 0; i < MAIN_COMMAND_END; i++) {
 			if (g_mainCommandProcess[i].mainCommand == g_commOtaData.otaData->mainCommand) {
 				g_mainCommandProcess[i].mainCommandProcess(g_commOtaData.otaData);
 			} else {

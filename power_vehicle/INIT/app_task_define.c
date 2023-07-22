@@ -108,7 +108,7 @@ static struct app_define g_appDefine[TAG_APP_END] = {
 			.task = {
 				NULL,
 				"DataStorageTask",
-				TASK_STASK_SIZE_BYTES_512,
+				TASK_STASK_SIZE_BYTES_1024,
 				NULL,
 				TASK_PRIORITY_ABOVE_NORMAL,
 				NULL

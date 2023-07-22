@@ -45,7 +45,6 @@ struct app_define {
 	struct queue_define queue;
 };
 
-
 struct device_attach_app_node {
 	UINT8 tag;
 	struct device_attach_app_node *next;

@@ -4,6 +4,7 @@
 
 #define PWM_CAPTURE_TIM_PERIOD 10000
 #define SECONDE_PER_MINUTE 60
+#define ROTATE_TIME_OUT 30
 
 enum {
 	PWM_CAPTURE_IDLE = 0,
@@ -19,6 +20,7 @@ __packed struct pwm_capture {
 };
 
 static struct pwm_capture g_pwmCapture = { 0 };
+static UINT16 g_rpm = 0;
 
 static void FrequencyDetect(UINT8 pinLevel)
 {
@@ -44,6 +46,9 @@ static void FrequencyDetect(UINT8 pinLevel)
 		case PWM_CAPTURE_FIRST_FALL_EDGE:
 			if (lastPinLevel == 0 && pinLevel == 1) { 
 				captureState = PWM_CAPTURE_FIRST_RISE_EDGE;
+				if (g_pwmCapture.duty < 2) { // 0.2ms, pulse width less than 2 ms
+
+				}
 				g_pwmCapture.period = TIM_GetCounter(TIM2) + g_pwmCapture.periodUpdate;
 				g_pwmCapture.periodUpdate = 0;
 				TIM_SetCounter(TIM2, 0);
@@ -99,7 +104,7 @@ static void GpioConfig(void)
 
 void TIM2_IRQHandler(void)
 {
-	if (TIM_GetITStatus( TIM2, TIM_IT_Update) != RESET) {
+	if (TIM_GetITStatus(TIM2, TIM_IT_Update) != RESET) {
 		g_pwmCapture.periodUpdate += PWM_CAPTURE_TIM_PERIOD;
 		TIM_ClearITPendingBit(TIM2 , TIM_IT_Update);
 	}
@@ -123,6 +128,7 @@ static void CaptureTimerConfig(void)
   //				PCLK1 = HCLK / 4 
   //				=> TIMxCLK=HCLK/2=SystemCoreClock/2=84MHz
 	// set timer frequency=TIMxCLK/(TIM_Prescaler+1)=10000Hz
+	// timer interrupt = 10000 * (1 / 10000) = 1Hz = 1s
 	TIM_TimeBaseStructure.TIM_Period = PWM_CAPTURE_TIM_PERIOD - 1;
   TIM_TimeBaseStructure.TIM_Prescaler = 8400-1;
 	TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
@@ -147,17 +153,25 @@ static INT32 DeviceInit(void *dev)
 
 static INT32 DeviceRead(void *dev)
 {
-	UNUSED(dev);
+	struct platform_info *pDev = (struct platform_info *)dev;
+	if (!(pDev->states & DEVICE_INIT)) {
+		return FAIL;
+	}
 
 	double revolutionsPerSecond = 0;
-	UINT32 rpm = 0;
+	UINT16 *prpm = pDev->private_data;
 
-	revolutionsPerSecond = 1.0 / ((double)g_pwmCapture.period / PWM_CAPTURE_TIM_PERIOD);
-	rpm = (UINT32)(revolutionsPerSecond * SECONDE_PER_MINUTE);
-
-	if (rpm != 60000) {
-		rpm = 60000;
+	if (g_pwmCapture.period == 0) {
+		revolutionsPerSecond = 0;
+	} else {
+		revolutionsPerSecond = 1.0 / ((double)g_pwmCapture.period / PWM_CAPTURE_TIM_PERIOD);		
 	}
+
+	if (g_pwmCapture.periodUpdate > ROTATE_TIME_OUT) {
+		revolutionsPerSecond = 0;
+	}
+
+	*prpm = (UINT32)(revolutionsPerSecond * SECONDE_PER_MINUTE);
 
 	return SUCC;
 }
@@ -185,8 +199,10 @@ static void DeviceIntervalCall (void *dev)
 static struct platform_info g_devicePwmCapture = {
 	.tag = TAG_DEVICE_PWM_CAPTURE,
 	.fops = &g_fops,
-	.setInterval = 3000,
-	.IntervalCall = DeviceIntervalCall
+	.setInterval = 500,
+	.IntervalCall = DeviceIntervalCall,
+	.private_data = &g_rpm,
+	.private_data_len = sizeof(g_rpm),
 };
 
 static INT32 DevicePwmCaptureInit(void)

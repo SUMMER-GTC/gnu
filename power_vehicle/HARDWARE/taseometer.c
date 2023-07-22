@@ -4,8 +4,10 @@
 
 #define ADC_RESOLUTION_12BIT 	(0x0001 << 12)
 #define ADC_REF_VOLTAGE 			(3.3)
+#define ADC_MILLIVOLT_FACTOR	(1000)
 
-static volatile UINT16 g_adcConvertedValue = 0;
+static UINT16 g_adcConvertedValue = 0;
+static UINT16 g_millivolt = 0;
 
 static void GpioConfig(void)
 {
@@ -89,10 +91,12 @@ static INT32 DeviceInit(void *dev)
 
 static INT32 DeviceRead(void *dev)
 {
-	UNUSED(dev);
+	struct platform_info *pDev = (struct platform_info *)dev;
 	float adcVoltage = 0;
+	UINT16 *pmillivolt = pDev->private_data;
 
 	adcVoltage = (float)g_adcConvertedValue / ADC_RESOLUTION_12BIT * ADC_REF_VOLTAGE;
+	*pmillivolt = (UINT16)(adcVoltage * ADC_MILLIVOLT_FACTOR);
 	
 	return SUCC;
 }
@@ -120,7 +124,9 @@ static struct platform_info g_deviceTaseometer = {
 	.tag = TAG_DEVICE_TASEOMETER,
 	.fops = &g_fops,
 	.setInterval = 30,
-	.IntervalCall = DeviceIntervalCall
+	.IntervalCall = DeviceIntervalCall,
+	.private_data = &g_millivolt,
+	.private_data_len = sizeof(g_millivolt),
 };
 
 static INT32 DeviceTaseometerInit(void)
