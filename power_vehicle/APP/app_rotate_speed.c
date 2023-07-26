@@ -37,7 +37,8 @@ static UINT16 RotateSpeedDataFilter(UINT16 rpm)
 {
 	UINT16 retRPM = 0;
 	static UINT16 testRpm = 0;
-	UINT16 ret = WeightMovingAverageFilter(&g_rotateSpeedFilter, ++testRpm);
+	++testRpm;
+	UINT16 ret = WeightMovingAverageFilter(&g_rotateSpeedFilter, 10);
 	RotateSpeedSendData(TAG_APP_WHEEL, &ret, sizeof(ret));
 
 	if (rpm < LOW_ROTATE_SPEED_LIMIT) {

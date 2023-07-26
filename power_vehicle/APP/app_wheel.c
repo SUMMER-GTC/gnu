@@ -5,6 +5,7 @@
 #include "init.h"
 #include "stdio.h"
 #include "queue.h"		
+#include "alg.h"
 
 __packed struct wheel_control {
 	UINT16 force;
@@ -12,20 +13,63 @@ __packed struct wheel_control {
 	UINT16 power;
 };
 
-static struct wheel_control g_wheelControl = { 0 };
+static struct wheel_control g_wheelControl = { 
+	.force = 0, 
+	.rpm = 0, 
+	.power = 10
+};
+
+static struct inc_pid g_incPID = {
+	.setpoint = 0,
+	.output = 0,
+  .Kp = 1,
+  .Ki = 1, 
+  .Kd = 1, 
+  .error1 = 0,
+  .error2 = 0,
+  .error = 0
+};
+
+static struct neural_pid g_neuralPID = {
+  .setpoint = 5000,         
+  .Kcoef = 0.12,            
+  .Kp = 0.4,               
+  .Ki = 0.35,               
+  .Kd = 0.4,               
+  .error1 = 0.0,           
+  .error2 = 0.0,           
+  .deadband = (10000 - (- 10000)) * 0.0005,         
+  .output = 0.0,           
+  .outputPercentage = 0.0, 
+  .maximum = 10000,          
+  .minimum = -10000,          
+  .Wp = 0.1,               
+  .Wi = 0.1,               
+  .Wd = 0.1,               
+  .learningMode = HEBBE_LEARNING_MODE,
+};
+
+static void WheelAppForceProcess(struct platform_info *dev)
+{
+	UINT16 force = *(UINT16 *)dev->private_data;
+
+	g_incPID.setpoint = g_wheelControl.force;
+	IncPID(&g_incPID, force);
+	g_neuralPID.setpoint = g_wheelControl.force;
+	NeuralPID(&g_neuralPID, force);
+}
 
 static void WheelAppRotateSpeedProcess(struct platform_info *dev)
 {
 	g_wheelControl.rpm = *(UINT16 *)dev->private_data;
 	g_wheelControl.force = g_wheelControl.power / g_wheelControl.rpm;
-	
 }
 
 static void WheelProcess(struct platform_info *dev)
 {
 	switch (dev->tag) {
 		case TAG_APP_FORCE:
-			g_wheelControl.force = *(UINT16 *)dev->private_data;
+			WheelAppForceProcess(dev);
 			break;
 		case TAG_APP_ROTATE_SPEED:
 			WheelAppRotateSpeedProcess(dev);
