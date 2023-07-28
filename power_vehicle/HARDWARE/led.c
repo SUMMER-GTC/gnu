@@ -50,7 +50,7 @@ static struct file_operations g_fops = {
 
 static void LedIntervalCall(void *dev)
 {
-	DeviceSampleData(SEND_FROM_ISR, TAG_APP_WINK, dev);
+	DeviceSampleData(SEND_FROM_NORMAL, TAG_APP_WINK, dev);
 }
 
 static struct platform_info g_deviceLed = {

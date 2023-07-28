@@ -1,5 +1,5 @@
 #include "app_ui.h"
-#include "app_therapy.h"
+#include "app_computer.h"
 
 #include "app_manager.h"
 #include "app_task_define.h"
@@ -24,7 +24,7 @@ static void UiAppProcessUi(struct platform_info *data)
 static void UiAppProcess(struct platform_info *data)
 {
 	switch(data->tag) {
-		case TAG_APP_THERAPY:
+		case TAG_APP_COMPUTER:
 			UiAppProcessUi(data);
 			break;
 		default:
@@ -77,7 +77,7 @@ void UiTask(void *pvParameters)
 
 }
 
-static UINT8 g_uiData[THERAPY_DATA_BUFF_SIZE] = { 0 };
+static UINT8 g_uiData[COMPUTER_DATA_BUFF_SIZE] = { 0 };
 
 static struct platform_info g_appUi = {
 	.tag = TAG_APP_UI,

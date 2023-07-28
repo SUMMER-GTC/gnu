@@ -86,9 +86,17 @@ static INT32 DeviceWrite(void *dev, void *data, UINT32 dataLen)
 {
 	UNUSED(dev);
 	UNUSED(dataLen);
-	UINT32 wheelDuty = *(UINT32*)data;
-	TIM_SetCompare1(TIM12, wheelDuty);
-	TIM_SetCompare2(TIM12, wheelDuty);
+
+	struct pwm_out pwmOut = *(struct pwm_out*)data;
+
+	switch (pwmOut.dev) {
+		case PWM_OUT_WHEEL: // wheel is oc1
+			TIM_SetCompare1(TIM12, pwmOut.duty);
+			break;
+		case PWM_OUT_EE_SY110: // ee-sy110 is oc2
+			TIM_SetCompare2(TIM12, pwmOut.duty);
+			break;
+	}
 
 	return SUCC;
 }

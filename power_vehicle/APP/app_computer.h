@@ -1,5 +1,5 @@
-#ifndef __APP_THERAPY_H__
-#define __APP_THERAPY_H__
+#ifndef __APP_COMPUTER_H__
+#define __APP_COMPUTER_H__
 
 #ifdef __cplusplus
 extern "C" {
@@ -9,7 +9,7 @@ extern "C" {
 #include "FreeRTOS.h"
 #include "task.h"
 
-#define THERAPY_DATA_BUFF_SIZE 10
+#define COMPUTER_DATA_BUFF_SIZE 10
 
 
 #ifdef __cplusplus

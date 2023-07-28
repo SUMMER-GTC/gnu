@@ -71,6 +71,7 @@ u16 USART_RX_STA=0;       //接收状态标记
 //初始化IO 串口1 
 //bound:波特率
 void uart_init(u32 bound){
+	return;
    //GPIO端口设置
   GPIO_InitTypeDef GPIO_InitStructure;
 	USART_InitTypeDef USART_InitStructure;
@@ -119,7 +120,7 @@ void uart_init(u32 bound){
 }
 
 
-void USART1_IRQHandler(void)                	//串口1中断服务程序
+void USART3_IRQHandler(void)                	//串口1中断服务程序
 {
 	u8 Res;
 #if SYSTEM_SUPPORT_OS 		//如果SYSTEM_SUPPORT_OS为真，则需要支持OS.

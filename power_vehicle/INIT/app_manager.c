@@ -4,7 +4,7 @@
 #include "app_manager.h"
 #include "app_task_define.h"
 #include "app_ui.h"
-#include "app_therapy.h"
+#include "app_computer.h"
 
 static struct platform_info *g_appInfo[TAG_APP_END];
 
@@ -54,9 +54,9 @@ INT32 SendDataToQueue(UINT8 srcTag, UINT8 desTag, void *data, UINT32 dataLen)
 				return FAIL;
 			}
 			break;
-		case TAG_APP_THERAPY:
-			if (dataLen > THERAPY_DATA_BUFF_SIZE) {
-				PrintfLogInfo(ERROR_LEVEL, "[app_manager][SendDataQueue] tag%d data buff overflow\n", TAG_APP_THERAPY);
+		case TAG_APP_COMPUTER:
+			if (dataLen > COMPUTER_DATA_BUFF_SIZE) {
+				PrintfLogInfo(ERROR_LEVEL, "[app_manager][SendDataQueue] tag%d data buff overflow\n", TAG_APP_COMPUTER);
 				return FAIL;
 			}
 			break;

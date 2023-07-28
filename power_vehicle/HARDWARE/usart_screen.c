@@ -126,7 +126,7 @@ static struct file_operations g_fops = {
 static void DGUSIntervalCall(void *dev)
 {
 	PrintfLogInfo(DEBUG_LEVEL, "[device_uart_screen][DGUSIntervalCall] running\n");
-	DeviceSampleData(SEND_FROM_ISR, TAG_APP_UI, dev);
+	DeviceSampleData(SEND_FROM_NORMAL, TAG_APP_UI, dev);
 }
 
 static struct platform_info g_deviceDGUS = {
@@ -134,7 +134,7 @@ static struct platform_info g_deviceDGUS = {
 	.fops = &g_fops,
 	.private_data = (void *)&g_uartScreenData,
 	.private_data_len = sizeof(g_uartScreenData),
-	.setInterval = 1000,
+	.setInterval = 100,
 	.IntervalCall = DGUSIntervalCall
 };
 

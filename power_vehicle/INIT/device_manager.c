@@ -86,7 +86,7 @@ INT32 GetDeviceInfo(UINT8 tag, struct platform_info **dev)
 		return FAIL;
 	}
 
-	*dev = g_deviceInfo[tag];
+	*dev = g_deviceInfo[tag - TAG_DEVICE_START];
 
 	return SUCC;
 }

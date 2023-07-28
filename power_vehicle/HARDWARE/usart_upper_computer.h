@@ -16,11 +16,6 @@ extern "C"{
 #define COMM_UART						USART2
 #define COMM_UART_IRQ				USART2_IRQn
 
-void UsartInit(void);
-void UsartSend(u8 *data, u16 dataLen);
-
-int fputc(int ch, FILE *f);
-int fgetc(FILE *f);
 
 #ifdef __cplusplus
 }

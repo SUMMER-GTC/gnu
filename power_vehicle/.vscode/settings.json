@@ -26,6 +26,8 @@
         "app_task_define.h": "c",
         "tf_card.h": "c",
         "string": "c",
-        "delay.h": "c"
+        "delay.h": "c",
+        "pwm_out.h": "c",
+        "app_manager.h": "c"
     }
 }

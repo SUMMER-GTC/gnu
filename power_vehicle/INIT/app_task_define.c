@@ -24,10 +24,10 @@ static struct app_define g_appDefine[TAG_APP_END] = {
 		},
 
 		{
-			.tag = TAG_APP_THERAPY,
+			.tag = TAG_APP_COMPUTER,
 			.task = {
 				NULL,
-				"TherapyTask",
+				"ComputerTask",
 				TASK_STASK_SIZE_BYTES_256,
 				NULL,
 				TASK_PRIORITY_NORMAL,

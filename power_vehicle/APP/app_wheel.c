@@ -6,6 +6,7 @@
 #include "stdio.h"
 #include "queue.h"		
 #include "alg.h"
+#include "device_manager.h"
 
 __packed struct wheel_control {
 	UINT16 force;
@@ -57,6 +58,20 @@ static void WheelAppForceProcess(struct platform_info *dev)
 	IncPID(&g_incPID, force);
 	g_neuralPID.setpoint = g_wheelControl.force;
 	NeuralPID(&g_neuralPID, force);
+
+	struct platform_info *optDev = NULL;
+	if (GetDeviceInfo(TAG_DEVICE_PWM_OUT, &optDev) != SUCC) {
+		return;
+	}
+	
+	struct pwm_out pwmOut;
+	pwmOut.dev = PWM_OUT_WHEEL;
+	pwmOut.duty = 750;
+	optDev->fops->write(optDev, &pwmOut, sizeof(pwmOut));
+
+	pwmOut.dev = PWM_OUT_EE_SY110;
+	pwmOut.duty = 500;
+	optDev->fops->write(optDev, &pwmOut, sizeof(pwmOut));
 }
 
 static void WheelAppRotateSpeedProcess(struct platform_info *dev)
