@@ -38,26 +38,26 @@ enum ota_sub_command {
 	OTA_SUB_COMMAND_END,
 };
 
-__packed struct ota_protocol {
+struct ota_protocol {
 	u16 synHead;							// 0x6688
 	u32 checkSum;							// check sum
 	u8 	mainCommand;					// main command value
 	u8 	subCommand;						// sub command value
 	u16 dataLen;
 	u8 	data[COMM_DATA_BUFF_SIZE];
-};
+} __packed;
 
-__packed struct comm_ota_data {
+struct comm_ota_data {
 	bool receiveFinish;
 	u8 state;
 	u16 rxCnt;
 	struct ota_protocol *otaData;
-};
+} __packed;
 
-__packed struct main_command_process {
+struct main_command_process {
 	enum main_command mainCommand;
 	s32 (*mainCommandProcess)(struct ota_protocol *);
-};
+} __packed;
 
 struct comm_ota_data *GetCommunicationData(void);
 void CommunicationProcess(void);

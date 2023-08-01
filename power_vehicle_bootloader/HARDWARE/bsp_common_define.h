@@ -17,20 +17,20 @@ extern "C"{
   
 typedef void (*jump_t)(void); 
 
-__packed struct sys_config {
+struct sys_config {
 	u32 firstUseId;
 	u32 otaState;
 	u32 hardWareErrCnt;
 	u32 deviceNameErrCnt;
 	u32 romCheckErrCnt;
-};
+} __packed;
 
-__packed struct sys_config_opt {
+struct sys_config_opt {
 	struct sys_config *sysConfig;
 	void (*Init)(void);
 	void (*Read)(void);
 	void (*Write)(void);
-};
+} __packed;
 
 #ifdef __cplusplus
 }

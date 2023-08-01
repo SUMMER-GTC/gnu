@@ -1,5 +1,6 @@
 #include "bsp_timer.h"
 #include "bsp_led.h"
+#include "misc.h"
 
 void TIM2_InitConfiguration(void)
 {	
@@ -7,7 +8,7 @@ void TIM2_InitConfiguration(void)
 
 	NVIC_InitStructure.NVIC_IRQChannel = TIM2_IRQn;
 
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 6;
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&NVIC_InitStructure);
@@ -19,8 +20,8 @@ void TIM2_InitConfiguration(void)
   //				PCLK1 = HCLK / 4 
   //				=> TIMxCLK=HCLK/2=SystemCoreClock/2=84MHz
 	// set timer frequency=TIMxCLK/(TIM_Prescaler+1)=10000Hz
-	// timer interrupt = 800 * (1 / 10000) = 80ms
-	TIM_TimeBaseStructure.TIM_Period = 800 - 1;
+	// timer interrupt = 800 * (1 / 10000) = 50ms
+	TIM_TimeBaseStructure.TIM_Period = 500 - 1;
   TIM_TimeBaseStructure.TIM_Prescaler = 8400-1;
 	TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
   TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
@@ -49,9 +50,8 @@ static u16 fac_ms=0;							//ms延时倍乘数,在ucos下,代表每个节拍的ms数
 //SYSCLK:系统时钟
 void delay_init(void )
 {
-
-	SysTick_CLKSourceConfig(SysTick_CLKSource_HCLK_Div8);	//选择外部时钟  HCLK/8
-	fac_us=SystemCoreClock/8000000;	//为系统时钟的1/8  
+	SysTick_CLKSourceConfig(SysTick_CLKSource_HCLK);
+	fac_us=SystemCoreClock/168;	//为系统时钟的1/168  
 	fac_ms=(u16)fac_us*1000;//非ucos下,代表每个ms需要的systick时钟数   
 
 }	

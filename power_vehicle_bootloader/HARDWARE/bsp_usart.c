@@ -74,8 +74,8 @@ void UsartSend(u8 *data, u16 dataLen)
 	u8 *pData = data;
 	
 	for (u16 i = 0; i < dataLen; i++) {
-		USART_SendData(COMM_UART, pData[i]);
-		while (USART_GetFlagStatus(COMM_UART, USART_FLAG_TC) == RESET);
+		while (USART_GetFlagStatus(USART1, USART_FLAG_TC) == RESET);    
+		USART_SendData(USART1, pData[i]);
 	}
 }
 

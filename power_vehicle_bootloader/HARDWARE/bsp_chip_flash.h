@@ -29,7 +29,12 @@
 
 #define ROM_SIZE_8K	8192
 
-void ChipFlashEraseAppRom(void);
+struct flash_sector {
+	u16 sectorEndAddr;
+	u16 sectorNum;
+} __packed;
+
+void ChipFlashEraseAppRom(u32 codeEndAddr);
 s32 ChipFlashPageWrite(u8 *dataBuff, u32 chipAddr, u32 dataLen, bool eraseFlag);
 s32 ChipFlashPagRead(u8 *dataBuff, u32 chipAddr, u32 dataLen);
 u32 ChipFlashCheckSum(u32 pageAddress, u32 len);

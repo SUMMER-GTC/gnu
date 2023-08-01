@@ -2,12 +2,43 @@
 #include "bsp_chip_flash.h"
 #include "bsp_common_define.h"
 
-void ChipFlashEraseAppRom(void)
+#define CHIP_SECTOR_TOTAL_NUMBER (12)
+#define CHIP_APPLICATION_START_SECTOR_NUMBER (2)
+#define CHIP_FLASH_SIZE_1KB (1024)
+
+struct flash_sector g_flashSector[CHIP_SECTOR_TOTAL_NUMBER] = {
+	{16, FLASH_Sector_0}, 		// 16KB
+	{32, FLASH_Sector_1}, 		// 16KB
+	{48, FLASH_Sector_2}, 		// 16KB
+	{64, FLASH_Sector_3}, 		// 16KB
+	{128, FLASH_Sector_4}, 		// 64KB
+	{256, FLASH_Sector_5}, 		// 128KB
+	{384, FLASH_Sector_6}, 		// 128KB
+	{512, FLASH_Sector_7}, 		// 128KB
+	{640, FLASH_Sector_8}, 		// 128KB
+	{768, FLASH_Sector_9}, 		// 128KB
+	{896, FLASH_Sector_10}, 	// 128KB
+	{1024, FLASH_Sector_11}, 	// 128KB
+};
+
+void ChipFlashEraseAppRom(u32 codeEndAddr)
 {
 	FLASH_Unlock();
 	FLASH_ClearFlag(FLASH_FLAG_EOP | FLASH_FLAG_PGAERR | FLASH_FLAG_WRPERR);
 
-	for (u16 sector = APPLICATION_START_SECTOR; sector <= APPLICATION_END_SECTOR; sector += APPLICATION_SECTOR_OFFSET) {
+	if (codeEndAddr  > (BOOTLOADER_ADDRESS + g_flashSector[CHIP_SECTOR_TOTAL_NUMBER - 1].sectorEndAddr * CHIP_FLASH_SIZE_1KB)) {
+		return;
+	}
+
+	u16 endSector = APPLICATION_END_SECTOR;
+	for (u8 i = CHIP_APPLICATION_START_SECTOR_NUMBER; i < CHIP_SECTOR_TOTAL_NUMBER; i++) {
+		if (BOOTLOADER_ADDRESS + g_flashSector[i].sectorEndAddr * CHIP_FLASH_SIZE_1KB >= codeEndAddr) {
+			endSector = g_flashSector[i].sectorNum;
+			break;
+		}
+	}
+
+	for (u16 sector = APPLICATION_START_SECTOR; sector <= endSector; sector += APPLICATION_SECTOR_OFFSET) {
   		FLASH_EraseSector(sector, VoltageRange_3);
 	}
 

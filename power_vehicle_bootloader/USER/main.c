@@ -17,6 +17,7 @@ static const unsigned char g_bootHardwareVersionBuf[] = "VER.1.0";
 */
 s32 DeviceHardwareCheck(void)
 {
+	return SUCC;
 	u32 t;
 	u32 errByte=0;
 	struct sys_config* sysConfig = GetSysConfigOpt()->sysConfig;
@@ -91,7 +92,7 @@ static void JumpToApplication(void)
 */
 static void BootloaderMain(void)
 {
-#if 1
+#if 0
 	if (((*(u32*)APPLICATION_ADDRESS) & APPLICATION_SP_MASK ) == APPLICATION_SP_OK) {
 		u32 jumpAddress = *(__IO u32*) (APPLICATION_ADDRESS + 4);
 		jump_t RunApplication = (jump_t) jumpAddress;
@@ -125,14 +126,18 @@ static void GetSystemClockConfig(void)
 */
 int main(void)
 {
+	NVIC_SetVectorTable(NVIC_VectTab_FLASH, 0);
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
-	__enable_irq(); 
+	__enable_irq();
 	LedInit();
 	TIM2_InitConfiguration();
 	GetSystemClockConfig();
 	delay_init();
 	UsartInit();
 	GetSysConfigOpt()->Init();
+
+	// GetSysConfigOpt()->sysConfig->otaState = OTA_RUN_BOOTLOADER;
+	// GetSysConfigOpt()->sysConfig->otaState = OTA_RUN_APPLICATION;
 
 	if (GetSysConfigOpt()->sysConfig->otaState == OTA_RUN_APPLICATION) {
 		JumpToApplication();

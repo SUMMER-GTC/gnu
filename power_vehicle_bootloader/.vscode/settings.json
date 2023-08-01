@@ -1,5 +1,5 @@
 {
-    "cortex-debug.variableUseNaturalFormat": true,
+    "cortex-debug.variableUseNaturalFormat": false,
     "C_Cpp.errorSquiggles": "disabled",
     "files.associations": {
         "stm32f4xx_fmc.h": "c",
@@ -27,6 +27,7 @@
         "tf_card.h": "c",
         "string": "c",
         "core_cm4.h": "c",
-        "bsp_timer.h": "c"
+        "bsp_timer.h": "c",
+        "stat.h": "c"
     }
 }

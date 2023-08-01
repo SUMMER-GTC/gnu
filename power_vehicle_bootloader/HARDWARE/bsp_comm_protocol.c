@@ -134,6 +134,7 @@ static u32 CheckSumCalculate(u8 *data, u32 dataLen)
 * @param  
 * @retval 
 */
+static u16 g_receiveCnt = 0;
 void CommOtaIrqHandler(u8 ch)
 {
 	struct comm_ota_data *comm = &g_commOtaData;
@@ -141,6 +142,7 @@ void CommOtaIrqHandler(u8 ch)
 
 	rxBuff[comm->rxCnt] = ch;
 
+	++g_receiveCnt;
 	switch(comm->state) {
 		case COMM_IDLE_STATE:
 			comm->rxCnt = 0;
@@ -176,14 +178,9 @@ void CommOtaIrqHandler(u8 ch)
 
 
 #define UASRT_SEND_BUFF_SIZE (32)
+static u8 g_sendBuff[UASRT_SEND_BUFF_SIZE] = { 0 };
 static bool OtaReplyProcess(struct ota_protocol *comData)
 {
- 	u8 *sendBuff = NULL;
-	sendBuff = (u8 *)malloc(UASRT_SEND_BUFF_SIZE);
-	if (sendBuff == NULL) {
-		return false;
-	}
-
 	u8 *dataPtr = (u8 *)comData;
 	u16 dataLen = COMM_OTA_OFFSET(data);
 
@@ -192,58 +189,67 @@ static bool OtaReplyProcess(struct ota_protocol *comData)
 	}
 	
 	for (u16 i = 0; i < dataLen; i++) {
-		sendBuff[i] = dataPtr[i];
+		g_sendBuff[i] = dataPtr[i];
 	}
 
-	UsartSend(sendBuff, dataLen);
+	UsartSend(g_sendBuff, dataLen);
 
-	free(sendBuff);
   return true;
 }
 
-u32 g_programAddr = APPLICATION_ADDRESS;
+struct erase_flash {
+	u32 startAddr;
+	u32 codeSize;
+} __packed;
+
+static struct erase_flash g_eraseFlash = {
+	.startAddr = 0,
+	.codeSize = 0
+};
+
 static s32 OtaSynHead(struct ota_protocol *otaData)
 {
-	u32 startAddr = *(u32*)otaData->data;
+	g_eraseFlash = *(struct erase_flash*)otaData->data;
 
-	if (startAddr < APPLICATION_ADDRESS) {
+	if (g_eraseFlash.startAddr != APPLICATION_ADDRESS) {
 		return FAIL;
 	}
 
-	if (startAddr == APPLICATION_ADDRESS) {
-		ChipFlashEraseAppRom();
-	}
+	ChipFlashEraseAppRom(g_eraseFlash.codeSize + g_eraseFlash.startAddr);
 
-	g_programAddr = startAddr;
 	OtaReplyProcess(otaData);
 	return SUCC;
 }
 
-static u8 g_lastDataBuff[32] = { 0 };
 static u32 g_flashCheckSum = 0;
 static s32 OtaProgramFlash(struct ota_protocol *otaData)
 {
-	u8* dataBuff = otaData->data;
-	u32 dataLen = otaData->dataLen;
+	u32 programAddr = *(u32 *)otaData->data;
+	u8* dataBuff = otaData->data + sizeof(programAddr);
+	u32 dataLen = otaData->dataLen - sizeof(programAddr);
+	u32 chipFlashCheckSum = 0;
+	static u32 lastProgramAddr = 0;
+	static u32 lastChipFlashCheckSum = 0;
 
-	if (dataLen >= SYS_CONFIG_ADDRESS) {
+	if (dataLen > COMM_DATA_BUFF_SIZE) {
 		return FAIL;
 	}
 
-	ChipFlashPageWrite(dataBuff, g_programAddr, dataLen, false);
-
-	u32 i;
-	for (i = 0; i < sizeof(g_lastDataBuff); i++) {
-		if (g_lastDataBuff[i] != dataBuff[i]) {
-			break;
-		}
+	if (programAddr > g_eraseFlash.startAddr + g_eraseFlash.codeSize) {
+		return FAIL;
 	}
 
-	if (i != sizeof(g_lastDataBuff)) {
-		g_flashCheckSum += ChipFlashCheckSum(g_programAddr, dataLen);		
-		g_programAddr += dataLen;
-		memcpy(g_lastDataBuff, dataBuff, sizeof(g_lastDataBuff));
+	ChipFlashPageWrite(dataBuff, programAddr, dataLen, false);
+
+	chipFlashCheckSum = ChipFlashCheckSum(programAddr, dataLen);
+
+	if (lastProgramAddr == programAddr) {
+		g_flashCheckSum -= lastChipFlashCheckSum;
 	}
+
+	g_flashCheckSum += chipFlashCheckSum;
+	lastChipFlashCheckSum = chipFlashCheckSum;
+	lastProgramAddr = programAddr;
 	
 	OtaReplyProcess(otaData);
 
