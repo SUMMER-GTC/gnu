@@ -211,7 +211,7 @@ static s32 OtaSynHead(struct ota_protocol *otaData)
 {
 	g_eraseFlash = *(struct erase_flash*)otaData->data;
 
-	if (g_eraseFlash.startAddr != APPLICATION_ADDRESS) {
+	if (g_eraseFlash.startAddr < SYS_CONFIG_ADDRESS) {
 		return FAIL;
 	}
 

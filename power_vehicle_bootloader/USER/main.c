@@ -22,7 +22,7 @@ s32 DeviceHardwareCheck(void)
 	struct sys_config* sysConfig = GetSysConfigOpt()->sysConfig;
 	for(t = 0; t < sizeof(g_bootDeviceNameBuf); t++) // check device name
 	{
-	  if(g_bootDeviceNameBuf[t] != sysConfig->deviceName[t]) {
+	  if(g_bootDeviceNameBuf[t] != *(u8 *)(DEVICE_NAME_BUFF_ADDRESS + t)) {
 			sysConfig->deviceNameErrCnt++;
 			return FAIL;
 		}
@@ -30,7 +30,7 @@ s32 DeviceHardwareCheck(void)
 
 	for(t = 0; t < sizeof(g_bootHardwareVersionBuf); t++) //check hardware version
 	{
-	  if(g_bootHardwareVersionBuf[t] != sysConfig->hardwareVer[t]) {
+	  if(g_bootHardwareVersionBuf[t] != *(u8 *)(HARDWARE_VERSION_BUFF_ADDRESS + t)) {
 			sysConfig->hardWareErrCnt++;
 			return FAIL;
 		}
@@ -65,8 +65,6 @@ static void JumpToApplication(void)
 	if(DeviceHardwareCheck() != SUCC) {
 		GetSysConfigOpt()->sysConfig->otaState = OTA_RUN_BOOTLOADER;
 		GetSysConfigOpt()->Write();
-		//reset MCU	
-		NVIC_SystemReset();
 		return;
 	}
 

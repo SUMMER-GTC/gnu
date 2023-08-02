@@ -6,13 +6,14 @@
 /*
 	FLASH_Sector_0 bootloader(16KB)
 	FLASH_Sector_1 system config parameters(16KB)
-	FLASH_Sector_2 - FLASH_Sector_11 application(992KB)
+	FLASH_Sector_2 boot parameters(16KB)
+	FLASH_Sector_3 - FLASH_Sector_11 application(976KB)
 */
 #define BOOTLOADER_ADDRESS		          0x08000000	// 16KB(0x4000) used by bootloader
-#define SYS_CONFIG_ADDRESS		          0x08004000	// 2KB size
-#define DEVICE_NAME_BUFF_ADDRESS				0x08004800  // 64B size
-#define HARDWARE_VERSION_BUFF_ADDRESS		0x08004840  // 64B size
-#define APPLICATION_ADDRESS							0x08008000	// 992KB used by application			
+#define SYS_CONFIG_ADDRESS		          0x08004000	// 16KB size
+#define DEVICE_NAME_BUFF_ADDRESS				0x08008000  // 32B size
+#define HARDWARE_VERSION_BUFF_ADDRESS		0x08008020  // 32B size
+#define APPLICATION_ADDRESS							0x0800C000	// 976KB used by application			
 
 #define APPLICATION_START_SECTOR		 		FLASH_Sector_2	// application code address
 #define APPLICATION_END_SECTOR		 			FLASH_Sector_11

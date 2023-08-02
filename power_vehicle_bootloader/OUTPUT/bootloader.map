@@ -2311,10 +2311,10 @@ LOAD c:/program files (x86)/arm gnu toolchain arm-none-eabi/12.2 mpacbti-rel1/bi
  .text.NVIC_SystemReset
                 0x08001a74       0x2c build/main.o
  .text.DeviceHardwareCheck
-                0x08001aa0       0xec build/main.o
+                0x08001aa0       0xf0 build/main.o
                 0x08001aa0                DeviceHardwareCheck
  .text.JumpToApplication
-                0x08001b8c       0x94 build/main.o
+                0x08001b90       0x90 build/main.o
  .text.BootloaderMain
                 0x08001c20        0xa build/main.o
  *fill*         0x08001c2a        0x2 
@@ -2552,7 +2552,7 @@ LOAD c:/program files (x86)/arm gnu toolchain arm-none-eabi/12.2 mpacbti-rel1/bi
                 0x10000000                        _eccmram = .
                 0x10000000                        . = ALIGN (0x4)
 
-.bss            0x20000064      0x8b4
+.bss            0x20000064      0x874
                 0x20000064                        _sbss = .
                 0x20000064                        __bss_start__ = _sbss
  *(.bss)
@@ -2562,39 +2562,39 @@ LOAD c:/program files (x86)/arm gnu toolchain arm-none-eabi/12.2 mpacbti-rel1/bi
  *fill*         0x20000065        0x3 
  .bss.object.0  0x20000068       0x18 c:/program files (x86)/arm gnu toolchain arm-none-eabi/12.2 mpacbti-rel1/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7e-m+fp/hard/crtbegin.o
  .bss.g_sysConfig
-                0x20000080       0x54 build/bsp_chip_flash.o
+                0x20000080       0x14 build/bsp_chip_flash.o
  .bss.g_otaData
-                0x200000d4      0x80a build/bsp_comm_protocol.o
+                0x20000094      0x80a build/bsp_comm_protocol.o
  .bss.g_receiveCnt
-                0x200008de        0x2 build/bsp_comm_protocol.o
+                0x2000089e        0x2 build/bsp_comm_protocol.o
  .bss.g_sendBuff
-                0x200008e0       0x20 build/bsp_comm_protocol.o
+                0x200008a0       0x20 build/bsp_comm_protocol.o
  .bss.g_eraseFlash
-                0x20000900        0x8 build/bsp_comm_protocol.o
+                0x200008c0        0x8 build/bsp_comm_protocol.o
  .bss.g_flashCheckSum
-                0x20000908        0x4 build/bsp_comm_protocol.o
+                0x200008c8        0x4 build/bsp_comm_protocol.o
  .bss.lastProgramAddr.1
-                0x2000090c        0x4 build/bsp_comm_protocol.o
+                0x200008cc        0x4 build/bsp_comm_protocol.o
  .bss.lastChipFlashCheckSum.0
-                0x20000910        0x4 build/bsp_comm_protocol.o
- .bss.fac_us    0x20000914        0x1 build/bsp_timer.o
- *fill*         0x20000915        0x1 
- .bss.fac_ms    0x20000916        0x2 build/bsp_timer.o
+                0x200008d0        0x4 build/bsp_comm_protocol.o
+ .bss.fac_us    0x200008d4        0x1 build/bsp_timer.o
+ *fill*         0x200008d5        0x1 
+ .bss.fac_ms    0x200008d6        0x2 build/bsp_timer.o
  *(COMMON)
-                0x20000918                        . = ALIGN (0x4)
-                0x20000918                        _ebss = .
-                0x20000918                        __bss_end__ = _ebss
+                0x200008d8                        . = ALIGN (0x4)
+                0x200008d8                        _ebss = .
+                0x200008d8                        __bss_end__ = _ebss
 
 ._user_heap_stack
-                0x20000918      0x600
-                0x20000918                        . = ALIGN (0x8)
-                0x20000918                        PROVIDE (end = .)
+                0x200008d8      0x600
+                0x200008d8                        . = ALIGN (0x8)
+                0x200008d8                        PROVIDE (end = .)
                 [!provide]                        PROVIDE (_end = .)
-                0x20000b18                        . = (. + _Min_Heap_Size)
- *fill*         0x20000918      0x200 
-                0x20000f18                        . = (. + _Min_Stack_Size)
- *fill*         0x20000b18      0x400 
-                0x20000f18                        . = ALIGN (0x8)
+                0x20000ad8                        . = (. + _Min_Heap_Size)
+ *fill*         0x200008d8      0x200 
+                0x20000ed8                        . = (. + _Min_Stack_Size)
+ *fill*         0x20000ad8      0x400 
+                0x20000ed8                        . = ALIGN (0x8)
 
 /DISCARD/
  libc.a(*)
@@ -2648,7 +2648,7 @@ LOAD c:/program files (x86)/arm gnu toolchain arm-none-eabi/12.2 mpacbti-rel1/bi
 LOAD c:/program files (x86)/arm gnu toolchain arm-none-eabi/12.2 mpacbti-rel1/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7e-m+fp/hard\libm.a
 LOAD c:/program files (x86)/arm gnu toolchain arm-none-eabi/12.2 mpacbti-rel1/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7e-m+fp/hard\libgcc.a
 
-.debug_info     0x00000000     0x8fbf
+.debug_info     0x00000000     0x8f45
  .debug_info    0x00000000      0x6b8 build/system_stm32f4xx.o
  .debug_info    0x000006b8      0x5d0 build/misc.o
  .debug_info    0x00000c88      0xa67 build/stm32f4xx_flash.o
@@ -2656,14 +2656,14 @@ LOAD c:/program files (x86)/arm gnu toolchain arm-none-eabi/12.2 mpacbti-rel1/bi
  .debug_info    0x00001dc8     0x103f build/stm32f4xx_rcc.o
  .debug_info    0x00002e07     0x206c build/stm32f4xx_tim.o
  .debug_info    0x00004e73      0xb51 build/stm32f4xx_usart.o
- .debug_info    0x000059c4      0x65b build/bsp_chip_flash.o
- .debug_info    0x0000601f      0xc7b build/bsp_comm_protocol.o
- .debug_info    0x00006c9a      0x33f build/bsp_led.o
- .debug_info    0x00006fd9      0xa5a build/bsp_timer.o
- .debug_info    0x00007a33      0xd7b build/bsp_usart.o
- .debug_info    0x000087ae      0x6a2 build/main.o
- .debug_info    0x00008e50      0x13f build/stm32f4xx_it.o
- .debug_info    0x00008f8f       0x30 build/startup_stm32f40_41xxx.o
+ .debug_info    0x000059c4      0x62d build/bsp_chip_flash.o
+ .debug_info    0x00005ff1      0xc5d build/bsp_comm_protocol.o
+ .debug_info    0x00006c4e      0x33f build/bsp_led.o
+ .debug_info    0x00006f8d      0xa5a build/bsp_timer.o
+ .debug_info    0x000079e7      0xd7b build/bsp_usart.o
+ .debug_info    0x00008762      0x674 build/main.o
+ .debug_info    0x00008dd6      0x13f build/stm32f4xx_it.o
+ .debug_info    0x00008f15       0x30 build/startup_stm32f40_41xxx.o
 
 .debug_abbrev   0x00000000     0x194e
  .debug_abbrev  0x00000000      0x167 build/system_stm32f4xx.o
@@ -2747,7 +2747,7 @@ LOAD c:/program files (x86)/arm gnu toolchain arm-none-eabi/12.2 mpacbti-rel1/bi
  .debug_ranges  0x00000960       0x50 build/stm32f4xx_it.o
  .debug_ranges  0x000009b0       0x20 build/startup_stm32f40_41xxx.o
 
-.debug_line     0x00000000     0x4e51
+.debug_line     0x00000000     0x4e56
  .debug_line    0x00000000      0x314 build/system_stm32f4xx.o
  .debug_line    0x00000314      0x277 build/misc.o
  .debug_line    0x0000058b      0x8a2 build/stm32f4xx_flash.o
@@ -2760,11 +2760,11 @@ LOAD c:/program files (x86)/arm gnu toolchain arm-none-eabi/12.2 mpacbti-rel1/bi
  .debug_line    0x00003fdf      0x185 build/bsp_led.o
  .debug_line    0x00004164      0x341 build/bsp_timer.o
  .debug_line    0x000044a5      0x44f build/bsp_usart.o
- .debug_line    0x000048f4      0x3e7 build/main.o
- .debug_line    0x00004cdb       0xf5 build/stm32f4xx_it.o
- .debug_line    0x00004dd0       0x81 build/startup_stm32f40_41xxx.o
+ .debug_line    0x000048f4      0x3ec build/main.o
+ .debug_line    0x00004ce0       0xf5 build/stm32f4xx_it.o
+ .debug_line    0x00004dd5       0x81 build/startup_stm32f40_41xxx.o
 
-.debug_str      0x00000000     0x31ad
+.debug_str      0x00000000     0x3196
  .debug_str     0x00000000      0x355 build/system_stm32f4xx.o
                                 0x3c1 (size before relaxing)
  .debug_str     0x00000355      0x1cb build/misc.o
@@ -2779,21 +2779,21 @@ LOAD c:/program files (x86)/arm gnu toolchain arm-none-eabi/12.2 mpacbti-rel1/bi
                                 0xdfa (size before relaxing)
  .debug_str     0x00001e85      0x408 build/stm32f4xx_usart.o
                                 0x6cb (size before relaxing)
- .debug_str     0x0000228d      0x222 build/bsp_chip_flash.o
-                                0x528 (size before relaxing)
- .debug_str     0x000024af      0x40c build/bsp_comm_protocol.o
-                                0x74f (size before relaxing)
- .debug_str     0x000028bb       0x2e build/bsp_led.o
+ .debug_str     0x0000228d      0x20b build/bsp_chip_flash.o
+                                0x511 (size before relaxing)
+ .debug_str     0x00002498      0x40c build/bsp_comm_protocol.o
+                                0x738 (size before relaxing)
+ .debug_str     0x000028a4       0x2e build/bsp_led.o
                                 0x378 (size before relaxing)
- .debug_str     0x000028e9      0x5c3 build/bsp_timer.o
+ .debug_str     0x000028d2      0x5c3 build/bsp_timer.o
                                 0xa7b (size before relaxing)
- .debug_str     0x00002eac      0x19f build/bsp_usart.o
+ .debug_str     0x00002e95      0x19f build/bsp_usart.o
                                 0xc96 (size before relaxing)
- .debug_str     0x0000304b       0x7c build/main.o
-                                0x4fc (size before relaxing)
- .debug_str     0x000030c7       0xa4 build/stm32f4xx_it.o
+ .debug_str     0x00003034       0x7c build/main.o
+                                0x4e5 (size before relaxing)
+ .debug_str     0x000030b0       0xa4 build/stm32f4xx_it.o
                                 0x1f7 (size before relaxing)
- .debug_str     0x0000316b       0x42 build/startup_stm32f40_41xxx.o
+ .debug_str     0x00003154       0x42 build/startup_stm32f40_41xxx.o
                                  0x76 (size before relaxing)
 
 .comment        0x00000000       0x55

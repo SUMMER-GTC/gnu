@@ -25,8 +25,6 @@ struct sys_config {
 	u32 hardWareErrCnt;
 	u32 deviceNameErrCnt;
 	u32 romCheckErrCnt;
-	u8 deviceName[DEVICE_NAME_SIZE];
-	u8 hardwareVer[HARDWARE_VER_SIZE];
 } __packed;
 
 struct sys_config_opt {
