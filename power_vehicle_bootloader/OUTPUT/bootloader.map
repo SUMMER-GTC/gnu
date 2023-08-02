@@ -1781,10 +1781,6 @@ Discarded input sections
  .text          0x00000000        0x0 build/main.o
  .data          0x00000000        0x0 build/main.o
  .bss           0x00000000        0x0 build/main.o
- .rodata.g_bootDeviceNameBuf
-                0x00000000       0x15 build/main.o
- .rodata.g_bootHardwareVersionBuf
-                0x00000000        0x8 build/main.o
  .text          0x00000000        0x0 build/stm32f4xx_it.o
  .data          0x00000000        0x0 build/stm32f4xx_it.o
  .bss           0x00000000        0x0 build/stm32f4xx_it.o
@@ -2118,7 +2114,7 @@ LOAD c:/program files (x86)/arm gnu toolchain arm-none-eabi/12.2 mpacbti-rel1/bi
                 0x08000000                g_pfnVectors
                 0x08000188                        . = ALIGN (0x4)
 
-.text           0x08000188     0x1b10
+.text           0x08000188     0x1bec
                 0x08000188                        . = ALIGN (0x4)
  *(.text)
  *(.text*)
@@ -2315,196 +2311,201 @@ LOAD c:/program files (x86)/arm gnu toolchain arm-none-eabi/12.2 mpacbti-rel1/bi
  .text.NVIC_SystemReset
                 0x08001a74       0x2c build/main.o
  .text.DeviceHardwareCheck
-                0x08001aa0       0x10 build/main.o
+                0x08001aa0       0xec build/main.o
                 0x08001aa0                DeviceHardwareCheck
  .text.JumpToApplication
-                0x08001ab0       0x94 build/main.o
+                0x08001b8c       0x94 build/main.o
  .text.BootloaderMain
-                0x08001b44        0xa build/main.o
- *fill*         0x08001b4e        0x2 
+                0x08001c20        0xa build/main.o
+ *fill*         0x08001c2a        0x2 
  .text.GetSystemClockConfig
-                0x08001b50       0x2c build/main.o
- .text.main     0x08001b7c       0x54 build/main.o
-                0x08001b7c                main
+                0x08001c2c       0x2c build/main.o
+ .text.main     0x08001c58       0x54 build/main.o
+                0x08001c58                main
  .text.NMI_Handler
-                0x08001bd0        0xe build/stm32f4xx_it.o
-                0x08001bd0                NMI_Handler
+                0x08001cac        0xe build/stm32f4xx_it.o
+                0x08001cac                NMI_Handler
  .text.HardFault_Handler
-                0x08001bde        0x8 build/stm32f4xx_it.o
-                0x08001bde                HardFault_Handler
+                0x08001cba        0x8 build/stm32f4xx_it.o
+                0x08001cba                HardFault_Handler
  .text.MemManage_Handler
-                0x08001be6        0x8 build/stm32f4xx_it.o
-                0x08001be6                MemManage_Handler
+                0x08001cc2        0x8 build/stm32f4xx_it.o
+                0x08001cc2                MemManage_Handler
  .text.BusFault_Handler
-                0x08001bee        0x8 build/stm32f4xx_it.o
-                0x08001bee                BusFault_Handler
+                0x08001cca        0x8 build/stm32f4xx_it.o
+                0x08001cca                BusFault_Handler
  .text.UsageFault_Handler
-                0x08001bf6        0x8 build/stm32f4xx_it.o
-                0x08001bf6                UsageFault_Handler
+                0x08001cd2        0x8 build/stm32f4xx_it.o
+                0x08001cd2                UsageFault_Handler
  .text.SVC_Handler
-                0x08001bfe        0xe build/stm32f4xx_it.o
-                0x08001bfe                SVC_Handler
+                0x08001cda        0xe build/stm32f4xx_it.o
+                0x08001cda                SVC_Handler
  .text.DebugMon_Handler
-                0x08001c0c        0xe build/stm32f4xx_it.o
-                0x08001c0c                DebugMon_Handler
+                0x08001ce8        0xe build/stm32f4xx_it.o
+                0x08001ce8                DebugMon_Handler
  .text.PendSV_Handler
-                0x08001c1a        0xe build/stm32f4xx_it.o
-                0x08001c1a                PendSV_Handler
+                0x08001cf6        0xe build/stm32f4xx_it.o
+                0x08001cf6                PendSV_Handler
  .text.SysTick_Handler
-                0x08001c28        0xe build/stm32f4xx_it.o
-                0x08001c28                SysTick_Handler
- *fill*         0x08001c36        0x2 
+                0x08001d04        0xe build/stm32f4xx_it.o
+                0x08001d04                SysTick_Handler
+ *fill*         0x08001d12        0x2 
  .text.Reset_Handler
-                0x08001c38       0x44 build/startup_stm32f40_41xxx.o
-                0x08001c38                Reset_Handler
+                0x08001d14       0x44 build/startup_stm32f40_41xxx.o
+                0x08001d14                Reset_Handler
  .text.Default_Handler
-                0x08001c7c        0x2 build/startup_stm32f40_41xxx.o
-                0x08001c7c                RTC_Alarm_IRQHandler
-                0x08001c7c                HASH_RNG_IRQHandler
-                0x08001c7c                EXTI2_IRQHandler
-                0x08001c7c                TIM8_CC_IRQHandler
-                0x08001c7c                TIM1_CC_IRQHandler
-                0x08001c7c                DMA2_Stream5_IRQHandler
-                0x08001c7c                DMA1_Stream5_IRQHandler
-                0x08001c7c                PVD_IRQHandler
-                0x08001c7c                SDIO_IRQHandler
-                0x08001c7c                TAMP_STAMP_IRQHandler
-                0x08001c7c                CAN2_RX1_IRQHandler
-                0x08001c7c                EXTI3_IRQHandler
-                0x08001c7c                TIM8_TRG_COM_TIM14_IRQHandler
-                0x08001c7c                TIM1_UP_TIM10_IRQHandler
-                0x08001c7c                TIM8_UP_TIM13_IRQHandler
-                0x08001c7c                I2C3_ER_IRQHandler
-                0x08001c7c                EXTI0_IRQHandler
-                0x08001c7c                I2C2_EV_IRQHandler
-                0x08001c7c                DMA1_Stream2_IRQHandler
-                0x08001c7c                CAN1_RX0_IRQHandler
-                0x08001c7c                FPU_IRQHandler
-                0x08001c7c                OTG_HS_WKUP_IRQHandler
-                0x08001c7c                CAN2_SCE_IRQHandler
-                0x08001c7c                DMA2_Stream2_IRQHandler
-                0x08001c7c                SPI1_IRQHandler
-                0x08001c7c                TIM6_DAC_IRQHandler
-                0x08001c7c                TIM1_BRK_TIM9_IRQHandler
-                0x08001c7c                DCMI_IRQHandler
-                0x08001c7c                CAN2_RX0_IRQHandler
-                0x08001c7c                DMA2_Stream3_IRQHandler
-                0x08001c7c                USART6_IRQHandler
-                0x08001c7c                USART3_IRQHandler
-                0x08001c7c                CRYP_IRQHandler
-                0x08001c7c                CAN1_RX1_IRQHandler
-                0x08001c7c                UART5_IRQHandler
-                0x08001c7c                DMA2_Stream0_IRQHandler
-                0x08001c7c                TIM4_IRQHandler
-                0x08001c7c                I2C1_EV_IRQHandler
-                0x08001c7c                DMA1_Stream6_IRQHandler
-                0x08001c7c                DMA1_Stream1_IRQHandler
-                0x08001c7c                UART4_IRQHandler
-                0x08001c7c                TIM3_IRQHandler
-                0x08001c7c                RCC_IRQHandler
-                0x08001c7c                TIM8_BRK_TIM12_IRQHandler
-                0x08001c7c                Default_Handler
-                0x08001c7c                EXTI15_10_IRQHandler
-                0x08001c7c                ADC_IRQHandler
-                0x08001c7c                DMA1_Stream7_IRQHandler
-                0x08001c7c                TIM7_IRQHandler
-                0x08001c7c                CAN2_TX_IRQHandler
-                0x08001c7c                TIM5_IRQHandler
-                0x08001c7c                DMA2_Stream7_IRQHandler
-                0x08001c7c                I2C3_EV_IRQHandler
-                0x08001c7c                EXTI9_5_IRQHandler
-                0x08001c7c                RTC_WKUP_IRQHandler
-                0x08001c7c                ETH_WKUP_IRQHandler
-                0x08001c7c                SPI2_IRQHandler
-                0x08001c7c                OTG_HS_EP1_IN_IRQHandler
-                0x08001c7c                DMA1_Stream0_IRQHandler
-                0x08001c7c                CAN1_TX_IRQHandler
-                0x08001c7c                EXTI4_IRQHandler
-                0x08001c7c                FSMC_IRQHandler
-                0x08001c7c                ETH_IRQHandler
-                0x08001c7c                OTG_HS_EP1_OUT_IRQHandler
-                0x08001c7c                WWDG_IRQHandler
-                0x08001c7c                OTG_FS_WKUP_IRQHandler
-                0x08001c7c                TIM1_TRG_COM_TIM11_IRQHandler
-                0x08001c7c                OTG_HS_IRQHandler
-                0x08001c7c                EXTI1_IRQHandler
-                0x08001c7c                USART2_IRQHandler
-                0x08001c7c                I2C2_ER_IRQHandler
-                0x08001c7c                DMA2_Stream1_IRQHandler
-                0x08001c7c                CAN1_SCE_IRQHandler
-                0x08001c7c                FLASH_IRQHandler
-                0x08001c7c                DMA2_Stream4_IRQHandler
-                0x08001c7c                OTG_FS_IRQHandler
-                0x08001c7c                SPI3_IRQHandler
-                0x08001c7c                DMA1_Stream4_IRQHandler
-                0x08001c7c                I2C1_ER_IRQHandler
-                0x08001c7c                DMA2_Stream6_IRQHandler
-                0x08001c7c                DMA1_Stream3_IRQHandler
+                0x08001d58        0x2 build/startup_stm32f40_41xxx.o
+                0x08001d58                RTC_Alarm_IRQHandler
+                0x08001d58                HASH_RNG_IRQHandler
+                0x08001d58                EXTI2_IRQHandler
+                0x08001d58                TIM8_CC_IRQHandler
+                0x08001d58                TIM1_CC_IRQHandler
+                0x08001d58                DMA2_Stream5_IRQHandler
+                0x08001d58                DMA1_Stream5_IRQHandler
+                0x08001d58                PVD_IRQHandler
+                0x08001d58                SDIO_IRQHandler
+                0x08001d58                TAMP_STAMP_IRQHandler
+                0x08001d58                CAN2_RX1_IRQHandler
+                0x08001d58                EXTI3_IRQHandler
+                0x08001d58                TIM8_TRG_COM_TIM14_IRQHandler
+                0x08001d58                TIM1_UP_TIM10_IRQHandler
+                0x08001d58                TIM8_UP_TIM13_IRQHandler
+                0x08001d58                I2C3_ER_IRQHandler
+                0x08001d58                EXTI0_IRQHandler
+                0x08001d58                I2C2_EV_IRQHandler
+                0x08001d58                DMA1_Stream2_IRQHandler
+                0x08001d58                CAN1_RX0_IRQHandler
+                0x08001d58                FPU_IRQHandler
+                0x08001d58                OTG_HS_WKUP_IRQHandler
+                0x08001d58                CAN2_SCE_IRQHandler
+                0x08001d58                DMA2_Stream2_IRQHandler
+                0x08001d58                SPI1_IRQHandler
+                0x08001d58                TIM6_DAC_IRQHandler
+                0x08001d58                TIM1_BRK_TIM9_IRQHandler
+                0x08001d58                DCMI_IRQHandler
+                0x08001d58                CAN2_RX0_IRQHandler
+                0x08001d58                DMA2_Stream3_IRQHandler
+                0x08001d58                USART6_IRQHandler
+                0x08001d58                USART3_IRQHandler
+                0x08001d58                CRYP_IRQHandler
+                0x08001d58                CAN1_RX1_IRQHandler
+                0x08001d58                UART5_IRQHandler
+                0x08001d58                DMA2_Stream0_IRQHandler
+                0x08001d58                TIM4_IRQHandler
+                0x08001d58                I2C1_EV_IRQHandler
+                0x08001d58                DMA1_Stream6_IRQHandler
+                0x08001d58                DMA1_Stream1_IRQHandler
+                0x08001d58                UART4_IRQHandler
+                0x08001d58                TIM3_IRQHandler
+                0x08001d58                RCC_IRQHandler
+                0x08001d58                TIM8_BRK_TIM12_IRQHandler
+                0x08001d58                Default_Handler
+                0x08001d58                EXTI15_10_IRQHandler
+                0x08001d58                ADC_IRQHandler
+                0x08001d58                DMA1_Stream7_IRQHandler
+                0x08001d58                TIM7_IRQHandler
+                0x08001d58                CAN2_TX_IRQHandler
+                0x08001d58                TIM5_IRQHandler
+                0x08001d58                DMA2_Stream7_IRQHandler
+                0x08001d58                I2C3_EV_IRQHandler
+                0x08001d58                EXTI9_5_IRQHandler
+                0x08001d58                RTC_WKUP_IRQHandler
+                0x08001d58                ETH_WKUP_IRQHandler
+                0x08001d58                SPI2_IRQHandler
+                0x08001d58                OTG_HS_EP1_IN_IRQHandler
+                0x08001d58                DMA1_Stream0_IRQHandler
+                0x08001d58                CAN1_TX_IRQHandler
+                0x08001d58                EXTI4_IRQHandler
+                0x08001d58                FSMC_IRQHandler
+                0x08001d58                ETH_IRQHandler
+                0x08001d58                OTG_HS_EP1_OUT_IRQHandler
+                0x08001d58                WWDG_IRQHandler
+                0x08001d58                OTG_FS_WKUP_IRQHandler
+                0x08001d58                TIM1_TRG_COM_TIM11_IRQHandler
+                0x08001d58                OTG_HS_IRQHandler
+                0x08001d58                EXTI1_IRQHandler
+                0x08001d58                USART2_IRQHandler
+                0x08001d58                I2C2_ER_IRQHandler
+                0x08001d58                DMA2_Stream1_IRQHandler
+                0x08001d58                CAN1_SCE_IRQHandler
+                0x08001d58                FLASH_IRQHandler
+                0x08001d58                DMA2_Stream4_IRQHandler
+                0x08001d58                OTG_FS_IRQHandler
+                0x08001d58                SPI3_IRQHandler
+                0x08001d58                DMA1_Stream4_IRQHandler
+                0x08001d58                I2C1_ER_IRQHandler
+                0x08001d58                DMA2_Stream6_IRQHandler
+                0x08001d58                DMA1_Stream3_IRQHandler
  *(.glue_7)
- .glue_7        0x08001c7e        0x0 linker stubs
+ .glue_7        0x08001d5a        0x0 linker stubs
  *(.glue_7t)
- .glue_7t       0x08001c7e        0x0 linker stubs
+ .glue_7t       0x08001d5a        0x0 linker stubs
  *(.eh_frame)
- *fill*         0x08001c7e        0x2 
- .eh_frame      0x08001c80        0x0 c:/program files (x86)/arm gnu toolchain arm-none-eabi/12.2 mpacbti-rel1/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7e-m+fp/hard/crtbegin.o
+ *fill*         0x08001d5a        0x2 
+ .eh_frame      0x08001d5c        0x0 c:/program files (x86)/arm gnu toolchain arm-none-eabi/12.2 mpacbti-rel1/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7e-m+fp/hard/crtbegin.o
  *(.init)
- .init          0x08001c80        0x4 c:/program files (x86)/arm gnu toolchain arm-none-eabi/12.2 mpacbti-rel1/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7e-m+fp/hard/crti.o
-                0x08001c80                _init
- .init          0x08001c84        0x8 c:/program files (x86)/arm gnu toolchain arm-none-eabi/12.2 mpacbti-rel1/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7e-m+fp/hard/crtn.o
+ .init          0x08001d5c        0x4 c:/program files (x86)/arm gnu toolchain arm-none-eabi/12.2 mpacbti-rel1/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7e-m+fp/hard/crti.o
+                0x08001d5c                _init
+ .init          0x08001d60        0x8 c:/program files (x86)/arm gnu toolchain arm-none-eabi/12.2 mpacbti-rel1/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7e-m+fp/hard/crtn.o
  *(.fini)
- .fini          0x08001c8c        0x4 c:/program files (x86)/arm gnu toolchain arm-none-eabi/12.2 mpacbti-rel1/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7e-m+fp/hard/crti.o
-                0x08001c8c                _fini
- .fini          0x08001c90        0x8 c:/program files (x86)/arm gnu toolchain arm-none-eabi/12.2 mpacbti-rel1/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7e-m+fp/hard/crtn.o
-                0x08001c98                        . = ALIGN (0x4)
-                0x08001c98                        _etext = .
+ .fini          0x08001d68        0x4 c:/program files (x86)/arm gnu toolchain arm-none-eabi/12.2 mpacbti-rel1/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7e-m+fp/hard/crti.o
+                0x08001d68                _fini
+ .fini          0x08001d6c        0x8 c:/program files (x86)/arm gnu toolchain arm-none-eabi/12.2 mpacbti-rel1/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7e-m+fp/hard/crtn.o
+                0x08001d74                        . = ALIGN (0x4)
+                0x08001d74                        _etext = .
 
-.vfp11_veneer   0x08001c98        0x0
- .vfp11_veneer  0x08001c98        0x0 linker stubs
+.vfp11_veneer   0x08001d74        0x0
+ .vfp11_veneer  0x08001d74        0x0 linker stubs
 
-.v4_bx          0x08001c98        0x0
- .v4_bx         0x08001c98        0x0 linker stubs
+.v4_bx          0x08001d74        0x0
+ .v4_bx         0x08001d74        0x0 linker stubs
 
-.iplt           0x08001c98        0x0
- .iplt          0x08001c98        0x0 c:/program files (x86)/arm gnu toolchain arm-none-eabi/12.2 mpacbti-rel1/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7e-m+fp/hard/crtbegin.o
+.iplt           0x08001d74        0x0
+ .iplt          0x08001d74        0x0 c:/program files (x86)/arm gnu toolchain arm-none-eabi/12.2 mpacbti-rel1/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7e-m+fp/hard/crtbegin.o
 
-.rel.dyn        0x08001c98        0x0
- .rel.iplt      0x08001c98        0x0 c:/program files (x86)/arm gnu toolchain arm-none-eabi/12.2 mpacbti-rel1/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7e-m+fp/hard/crtbegin.o
-
-.rodata         0x08001c98        0x0
-                0x08001c98                        . = ALIGN (0x4)
+.rodata         0x08001d74       0x18
+                0x08001d74                        . = ALIGN (0x4)
  *(.rodata)
  *(.rodata*)
-                0x08001c98                        . = ALIGN (0x4)
+ .rodata.g_bootDeviceNameBuf
+                0x08001d74        0xe build/main.o
+ *fill*         0x08001d82        0x2 
+ .rodata.g_bootHardwareVersionBuf
+                0x08001d84        0x8 build/main.o
+                0x08001d8c                        . = ALIGN (0x4)
+
+.rel.dyn        0x08001d8c        0x0
+ .rel.iplt      0x08001d8c        0x0 c:/program files (x86)/arm gnu toolchain arm-none-eabi/12.2 mpacbti-rel1/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7e-m+fp/hard/crtbegin.o
 
 .ARM.extab
  *(.ARM.extab* .gnu.linkonce.armextab.*)
 
-.ARM            0x08001c98        0x0
-                0x08001c98                        __exidx_start = .
+.ARM            0x08001d8c        0x0
+                0x08001d8c                        __exidx_start = .
  *(.ARM.exidx*)
-                0x08001c98                        __exidx_end = .
+                0x08001d8c                        __exidx_end = .
 
-.preinit_array  0x08001c98        0x0
-                0x08001c98                        PROVIDE (__preinit_array_start = .)
+.preinit_array  0x08001d8c        0x0
+                0x08001d8c                        PROVIDE (__preinit_array_start = .)
  *(.preinit_array*)
-                0x08001c98                        PROVIDE (__preinit_array_end = .)
+                0x08001d8c                        PROVIDE (__preinit_array_end = .)
 
-.init_array     0x08001c98        0x4
-                0x08001c98                        PROVIDE (__init_array_start = .)
+.init_array     0x08001d8c        0x4
+                0x08001d8c                        PROVIDE (__init_array_start = .)
  *(SORT_BY_NAME(.init_array.*))
  *(.init_array*)
- .init_array    0x08001c98        0x4 c:/program files (x86)/arm gnu toolchain arm-none-eabi/12.2 mpacbti-rel1/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7e-m+fp/hard/crtbegin.o
-                0x08001c9c                        PROVIDE (__init_array_end = .)
+ .init_array    0x08001d8c        0x4 c:/program files (x86)/arm gnu toolchain arm-none-eabi/12.2 mpacbti-rel1/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7e-m+fp/hard/crtbegin.o
+                0x08001d90                        PROVIDE (__init_array_end = .)
 
-.fini_array     0x08001c9c        0x4
+.fini_array     0x08001d90        0x4
                 [!provide]                        PROVIDE (__fini_array_start = .)
  *(SORT_BY_NAME(.fini_array.*))
  *(.fini_array*)
- .fini_array    0x08001c9c        0x4 c:/program files (x86)/arm gnu toolchain arm-none-eabi/12.2 mpacbti-rel1/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7e-m+fp/hard/crtbegin.o
+ .fini_array    0x08001d90        0x4 c:/program files (x86)/arm gnu toolchain arm-none-eabi/12.2 mpacbti-rel1/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7e-m+fp/hard/crtbegin.o
                 [!provide]                        PROVIDE (__fini_array_end = .)
-                0x08001ca0                        _sidata = LOADADDR (.data)
+                0x08001d94                        _sidata = LOADADDR (.data)
 
-.data           0x20000000       0x64 load address 0x08001ca0
+.data           0x20000000       0x64 load address 0x08001d94
                 0x20000000                        . = ALIGN (0x4)
                 0x20000000                        _sdata = .
  *(.data)
@@ -2530,19 +2531,19 @@ LOAD c:/program files (x86)/arm gnu toolchain arm-none-eabi/12.2 mpacbti-rel1/bi
                 0x20000064                        __initcall_end = .
                 0x20000064                        . = ALIGN (0x4)
                 0x20000064                        _edata = .
-                0x08001d04                        _siccmram = LOADADDR (.ccmram)
+                0x08001df8                        _siccmram = LOADADDR (.ccmram)
 
 .tm_clone_table
-                0x20000064        0x0 load address 0x08001d04
+                0x20000064        0x0 load address 0x08001df8
  .tm_clone_table
                 0x20000064        0x0 c:/program files (x86)/arm gnu toolchain arm-none-eabi/12.2 mpacbti-rel1/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7e-m+fp/hard/crtbegin.o
  .tm_clone_table
                 0x20000064        0x0 c:/program files (x86)/arm gnu toolchain arm-none-eabi/12.2 mpacbti-rel1/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7e-m+fp/hard/crtend.o
 
-.igot.plt       0x20000064        0x0 load address 0x08001d04
+.igot.plt       0x20000064        0x0 load address 0x08001df8
  .igot.plt      0x20000064        0x0 c:/program files (x86)/arm gnu toolchain arm-none-eabi/12.2 mpacbti-rel1/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7e-m+fp/hard/crtbegin.o
 
-.ccmram         0x10000000        0x0 load address 0x08001d04
+.ccmram         0x10000000        0x0 load address 0x08001df8
                 0x10000000                        . = ALIGN (0x4)
                 0x10000000                        _sccmram = .
  *(.ccmram)
@@ -2551,7 +2552,7 @@ LOAD c:/program files (x86)/arm gnu toolchain arm-none-eabi/12.2 mpacbti-rel1/bi
                 0x10000000                        _eccmram = .
                 0x10000000                        . = ALIGN (0x4)
 
-.bss            0x20000064      0x874
+.bss            0x20000064      0x8b4
                 0x20000064                        _sbss = .
                 0x20000064                        __bss_start__ = _sbss
  *(.bss)
@@ -2561,39 +2562,39 @@ LOAD c:/program files (x86)/arm gnu toolchain arm-none-eabi/12.2 mpacbti-rel1/bi
  *fill*         0x20000065        0x3 
  .bss.object.0  0x20000068       0x18 c:/program files (x86)/arm gnu toolchain arm-none-eabi/12.2 mpacbti-rel1/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7e-m+fp/hard/crtbegin.o
  .bss.g_sysConfig
-                0x20000080       0x14 build/bsp_chip_flash.o
+                0x20000080       0x54 build/bsp_chip_flash.o
  .bss.g_otaData
-                0x20000094      0x80a build/bsp_comm_protocol.o
+                0x200000d4      0x80a build/bsp_comm_protocol.o
  .bss.g_receiveCnt
-                0x2000089e        0x2 build/bsp_comm_protocol.o
+                0x200008de        0x2 build/bsp_comm_protocol.o
  .bss.g_sendBuff
-                0x200008a0       0x20 build/bsp_comm_protocol.o
+                0x200008e0       0x20 build/bsp_comm_protocol.o
  .bss.g_eraseFlash
-                0x200008c0        0x8 build/bsp_comm_protocol.o
+                0x20000900        0x8 build/bsp_comm_protocol.o
  .bss.g_flashCheckSum
-                0x200008c8        0x4 build/bsp_comm_protocol.o
+                0x20000908        0x4 build/bsp_comm_protocol.o
  .bss.lastProgramAddr.1
-                0x200008cc        0x4 build/bsp_comm_protocol.o
+                0x2000090c        0x4 build/bsp_comm_protocol.o
  .bss.lastChipFlashCheckSum.0
-                0x200008d0        0x4 build/bsp_comm_protocol.o
- .bss.fac_us    0x200008d4        0x1 build/bsp_timer.o
- *fill*         0x200008d5        0x1 
- .bss.fac_ms    0x200008d6        0x2 build/bsp_timer.o
+                0x20000910        0x4 build/bsp_comm_protocol.o
+ .bss.fac_us    0x20000914        0x1 build/bsp_timer.o
+ *fill*         0x20000915        0x1 
+ .bss.fac_ms    0x20000916        0x2 build/bsp_timer.o
  *(COMMON)
-                0x200008d8                        . = ALIGN (0x4)
-                0x200008d8                        _ebss = .
-                0x200008d8                        __bss_end__ = _ebss
+                0x20000918                        . = ALIGN (0x4)
+                0x20000918                        _ebss = .
+                0x20000918                        __bss_end__ = _ebss
 
 ._user_heap_stack
-                0x200008d8      0x600
-                0x200008d8                        . = ALIGN (0x8)
-                0x200008d8                        PROVIDE (end = .)
+                0x20000918      0x600
+                0x20000918                        . = ALIGN (0x8)
+                0x20000918                        PROVIDE (end = .)
                 [!provide]                        PROVIDE (_end = .)
-                0x20000ad8                        . = (. + _Min_Heap_Size)
- *fill*         0x200008d8      0x200 
-                0x20000ed8                        . = (. + _Min_Stack_Size)
- *fill*         0x20000ad8      0x400 
-                0x20000ed8                        . = ALIGN (0x8)
+                0x20000b18                        . = (. + _Min_Heap_Size)
+ *fill*         0x20000918      0x200 
+                0x20000f18                        . = (. + _Min_Stack_Size)
+ *fill*         0x20000b18      0x400 
+                0x20000f18                        . = ALIGN (0x8)
 
 /DISCARD/
  libc.a(*)
@@ -2647,7 +2648,7 @@ LOAD c:/program files (x86)/arm gnu toolchain arm-none-eabi/12.2 mpacbti-rel1/bi
 LOAD c:/program files (x86)/arm gnu toolchain arm-none-eabi/12.2 mpacbti-rel1/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7e-m+fp/hard\libm.a
 LOAD c:/program files (x86)/arm gnu toolchain arm-none-eabi/12.2 mpacbti-rel1/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7e-m+fp/hard\libgcc.a
 
-.debug_info     0x00000000     0x8f3c
+.debug_info     0x00000000     0x8fbf
  .debug_info    0x00000000      0x6b8 build/system_stm32f4xx.o
  .debug_info    0x000006b8      0x5d0 build/misc.o
  .debug_info    0x00000c88      0xa67 build/stm32f4xx_flash.o
@@ -2655,16 +2656,16 @@ LOAD c:/program files (x86)/arm gnu toolchain arm-none-eabi/12.2 mpacbti-rel1/bi
  .debug_info    0x00001dc8     0x103f build/stm32f4xx_rcc.o
  .debug_info    0x00002e07     0x206c build/stm32f4xx_tim.o
  .debug_info    0x00004e73      0xb51 build/stm32f4xx_usart.o
- .debug_info    0x000059c4      0x62d build/bsp_chip_flash.o
- .debug_info    0x00005ff1      0xc5d build/bsp_comm_protocol.o
- .debug_info    0x00006c4e      0x33f build/bsp_led.o
- .debug_info    0x00006f8d      0xa5a build/bsp_timer.o
- .debug_info    0x000079e7      0xd7b build/bsp_usart.o
- .debug_info    0x00008762      0x66b build/main.o
- .debug_info    0x00008dcd      0x13f build/stm32f4xx_it.o
- .debug_info    0x00008f0c       0x30 build/startup_stm32f40_41xxx.o
+ .debug_info    0x000059c4      0x65b build/bsp_chip_flash.o
+ .debug_info    0x0000601f      0xc7b build/bsp_comm_protocol.o
+ .debug_info    0x00006c9a      0x33f build/bsp_led.o
+ .debug_info    0x00006fd9      0xa5a build/bsp_timer.o
+ .debug_info    0x00007a33      0xd7b build/bsp_usart.o
+ .debug_info    0x000087ae      0x6a2 build/main.o
+ .debug_info    0x00008e50      0x13f build/stm32f4xx_it.o
+ .debug_info    0x00008f8f       0x30 build/startup_stm32f40_41xxx.o
 
-.debug_abbrev   0x00000000     0x1979
+.debug_abbrev   0x00000000     0x194e
  .debug_abbrev  0x00000000      0x167 build/system_stm32f4xx.o
  .debug_abbrev  0x00000167      0x150 build/misc.o
  .debug_abbrev  0x000002b7      0x1a0 build/stm32f4xx_flash.o
@@ -2677,11 +2678,11 @@ LOAD c:/program files (x86)/arm gnu toolchain arm-none-eabi/12.2 mpacbti-rel1/bi
  .debug_abbrev  0x000010bd      0x133 build/bsp_led.o
  .debug_abbrev  0x000011f0      0x23d build/bsp_timer.o
  .debug_abbrev  0x0000142d      0x281 build/bsp_usart.o
- .debug_abbrev  0x000016ae      0x268 build/main.o
- .debug_abbrev  0x00001916       0x46 build/stm32f4xx_it.o
- .debug_abbrev  0x0000195c       0x1d build/startup_stm32f40_41xxx.o
+ .debug_abbrev  0x000016ae      0x23d build/main.o
+ .debug_abbrev  0x000018eb       0x46 build/stm32f4xx_it.o
+ .debug_abbrev  0x00001931       0x1d build/startup_stm32f40_41xxx.o
 
-.debug_loc      0x00000000     0x62f8
+.debug_loc      0x00000000     0x6304
  .debug_loc     0x00000000       0xe4 build/system_stm32f4xx.o
  .debug_loc     0x000000e4      0x1cc build/misc.o
  .debug_loc     0x000002b0      0xc80 build/stm32f4xx_flash.o
@@ -2694,8 +2695,8 @@ LOAD c:/program files (x86)/arm gnu toolchain arm-none-eabi/12.2 mpacbti-rel1/bi
  .debug_loc     0x000059a0       0x50 build/bsp_led.o
  .debug_loc     0x000059f0      0x244 build/bsp_timer.o
  .debug_loc     0x00005c34      0x358 build/bsp_usart.o
- .debug_loc     0x00005f8c      0x168 build/main.o
- .debug_loc     0x000060f4      0x204 build/stm32f4xx_it.o
+ .debug_loc     0x00005f8c      0x174 build/main.o
+ .debug_loc     0x00006100      0x204 build/stm32f4xx_it.o
 
 .debug_aranges  0x00000000      0xab8
  .debug_aranges
@@ -2746,7 +2747,7 @@ LOAD c:/program files (x86)/arm gnu toolchain arm-none-eabi/12.2 mpacbti-rel1/bi
  .debug_ranges  0x00000960       0x50 build/stm32f4xx_it.o
  .debug_ranges  0x000009b0       0x20 build/startup_stm32f40_41xxx.o
 
-.debug_line     0x00000000     0x4db9
+.debug_line     0x00000000     0x4e51
  .debug_line    0x00000000      0x314 build/system_stm32f4xx.o
  .debug_line    0x00000314      0x277 build/misc.o
  .debug_line    0x0000058b      0x8a2 build/stm32f4xx_flash.o
@@ -2759,11 +2760,11 @@ LOAD c:/program files (x86)/arm gnu toolchain arm-none-eabi/12.2 mpacbti-rel1/bi
  .debug_line    0x00003fdf      0x185 build/bsp_led.o
  .debug_line    0x00004164      0x341 build/bsp_timer.o
  .debug_line    0x000044a5      0x44f build/bsp_usart.o
- .debug_line    0x000048f4      0x34f build/main.o
- .debug_line    0x00004c43       0xf5 build/stm32f4xx_it.o
- .debug_line    0x00004d38       0x81 build/startup_stm32f40_41xxx.o
+ .debug_line    0x000048f4      0x3e7 build/main.o
+ .debug_line    0x00004cdb       0xf5 build/stm32f4xx_it.o
+ .debug_line    0x00004dd0       0x81 build/startup_stm32f40_41xxx.o
 
-.debug_str      0x00000000     0x3196
+.debug_str      0x00000000     0x31ad
  .debug_str     0x00000000      0x355 build/system_stm32f4xx.o
                                 0x3c1 (size before relaxing)
  .debug_str     0x00000355      0x1cb build/misc.o
@@ -2778,21 +2779,21 @@ LOAD c:/program files (x86)/arm gnu toolchain arm-none-eabi/12.2 mpacbti-rel1/bi
                                 0xdfa (size before relaxing)
  .debug_str     0x00001e85      0x408 build/stm32f4xx_usart.o
                                 0x6cb (size before relaxing)
- .debug_str     0x0000228d      0x20b build/bsp_chip_flash.o
-                                0x511 (size before relaxing)
- .debug_str     0x00002498      0x40c build/bsp_comm_protocol.o
-                                0x738 (size before relaxing)
- .debug_str     0x000028a4       0x2e build/bsp_led.o
+ .debug_str     0x0000228d      0x222 build/bsp_chip_flash.o
+                                0x528 (size before relaxing)
+ .debug_str     0x000024af      0x40c build/bsp_comm_protocol.o
+                                0x74f (size before relaxing)
+ .debug_str     0x000028bb       0x2e build/bsp_led.o
                                 0x378 (size before relaxing)
- .debug_str     0x000028d2      0x5c3 build/bsp_timer.o
+ .debug_str     0x000028e9      0x5c3 build/bsp_timer.o
                                 0xa7b (size before relaxing)
- .debug_str     0x00002e95      0x19f build/bsp_usart.o
+ .debug_str     0x00002eac      0x19f build/bsp_usart.o
                                 0xc96 (size before relaxing)
- .debug_str     0x00003034       0x7c build/main.o
-                                0x4e5 (size before relaxing)
- .debug_str     0x000030b0       0xa4 build/stm32f4xx_it.o
+ .debug_str     0x0000304b       0x7c build/main.o
+                                0x4fc (size before relaxing)
+ .debug_str     0x000030c7       0xa4 build/stm32f4xx_it.o
                                 0x1f7 (size before relaxing)
- .debug_str     0x00003154       0x42 build/startup_stm32f40_41xxx.o
+ .debug_str     0x0000316b       0x42 build/startup_stm32f40_41xxx.o
                                  0x76 (size before relaxing)
 
 .comment        0x00000000       0x55
@@ -2812,7 +2813,7 @@ LOAD c:/program files (x86)/arm gnu toolchain arm-none-eabi/12.2 mpacbti-rel1/bi
  .comment       0x00000055       0x56 build/main.o
  .comment       0x00000055       0x56 build/stm32f4xx_it.o
 
-.debug_frame    0x00000000     0x2cc4
+.debug_frame    0x00000000     0x2cc8
  .debug_frame   0x00000000       0x7c build/system_stm32f4xx.o
  .debug_frame   0x0000007c       0xd8 build/misc.o
  .debug_frame   0x00000154      0x5b0 build/stm32f4xx_flash.o
@@ -2825,8 +2826,8 @@ LOAD c:/program files (x86)/arm gnu toolchain arm-none-eabi/12.2 mpacbti-rel1/bi
  .debug_frame   0x000027fc       0x34 build/bsp_led.o
  .debug_frame   0x00002830      0x124 build/bsp_timer.o
  .debug_frame   0x00002954      0x198 build/bsp_usart.o
- .debug_frame   0x00002aec       0xc8 build/main.o
- .debug_frame   0x00002bb4      0x110 build/stm32f4xx_it.o
+ .debug_frame   0x00002aec       0xcc build/main.o
+ .debug_frame   0x00002bb8      0x110 build/stm32f4xx_it.o
 
 Cross Reference Table
 

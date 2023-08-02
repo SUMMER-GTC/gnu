@@ -7,8 +7,8 @@
 #include "core_cm4.h"
 #include "bsp_led.h"
 
-static const unsigned char g_bootDeviceNameBuf[] = "this device is test!";
-static const unsigned char g_bootHardwareVersionBuf[] = "VER.1.0"; 
+static const unsigned char g_bootDeviceNameBuf[] = "power vehicle";
+static const unsigned char g_bootHardwareVersionBuf[] = "ver.1.0";
 
 /*
 * @brief  
@@ -17,13 +17,12 @@ static const unsigned char g_bootHardwareVersionBuf[] = "VER.1.0";
 */
 s32 DeviceHardwareCheck(void)
 {
-	return SUCC;
 	u32 t;
 	u32 errByte=0;
 	struct sys_config* sysConfig = GetSysConfigOpt()->sysConfig;
 	for(t = 0; t < sizeof(g_bootDeviceNameBuf); t++) // check device name
 	{
-	  if(g_bootDeviceNameBuf[t] != (*(u8*)(DEVICE_NAME_BUFF_ADDRESS+t))) {
+	  if(g_bootDeviceNameBuf[t] != sysConfig->deviceName[t]) {
 			sysConfig->deviceNameErrCnt++;
 			return FAIL;
 		}
@@ -31,7 +30,7 @@ s32 DeviceHardwareCheck(void)
 
 	for(t = 0; t < sizeof(g_bootHardwareVersionBuf); t++) //check hardware version
 	{
-	  if(g_bootHardwareVersionBuf[t] != (*(u8*)(HARDWARE_VERSION_BUFF_ADDRESS+t))) {
+	  if(g_bootHardwareVersionBuf[t] != sysConfig->hardwareVer[t]) {
 			sysConfig->hardWareErrCnt++;
 			return FAIL;
 		}
@@ -92,18 +91,6 @@ static void JumpToApplication(void)
 */
 static void BootloaderMain(void)
 {
-#if 0
-	if (((*(u32*)APPLICATION_ADDRESS) & APPLICATION_SP_MASK ) == APPLICATION_SP_OK) {
-		u32 jumpAddress = *(__IO u32*) (APPLICATION_ADDRESS + 4);
-		jump_t RunApplication = (jump_t) jumpAddress;
-
-		/* Initialize user application's Stack Pointer */
-	 	 __set_MSP(*(__IO u32*) APPLICATION_ADDRESS);
-		RunApplication();
-	}
-	NVIC_SystemReset();
-#endif
-
 	while(1) {
 		CommunicationProcess();
 	}
@@ -135,9 +122,6 @@ int main(void)
 	delay_init();
 	UsartInit();
 	GetSysConfigOpt()->Init();
-
-	// GetSysConfigOpt()->sysConfig->otaState = OTA_RUN_BOOTLOADER;
-	// GetSysConfigOpt()->sysConfig->otaState = OTA_RUN_APPLICATION;
 
 	if (GetSysConfigOpt()->sysConfig->otaState == OTA_RUN_APPLICATION) {
 		JumpToApplication();
