@@ -8,7 +8,7 @@
 #include "bsp_led.h"
 
 static const unsigned char g_bootDeviceNameBuf[] = "power vehicle";
-static const unsigned char g_bootHardwareVersionBuf[] = "ver.1.0";
+static const unsigned char g_bootHardwareVersionBuf[] = "v1.0";
 
 /*
 * @brief  

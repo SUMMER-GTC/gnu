@@ -2471,8 +2471,9 @@ LOAD c:/program files (x86)/arm gnu toolchain arm-none-eabi/12.2 mpacbti-rel1/bi
                 0x08001d74        0xe build/main.o
  *fill*         0x08001d82        0x2 
  .rodata.g_bootHardwareVersionBuf
-                0x08001d84        0x8 build/main.o
+                0x08001d84        0x5 build/main.o
                 0x08001d8c                        . = ALIGN (0x4)
+ *fill*         0x08001d89        0x3 
 
 .rel.dyn        0x08001d8c        0x0
  .rel.iplt      0x08001d8c        0x0 c:/program files (x86)/arm gnu toolchain arm-none-eabi/12.2 mpacbti-rel1/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7e-m+fp/hard/crtbegin.o
