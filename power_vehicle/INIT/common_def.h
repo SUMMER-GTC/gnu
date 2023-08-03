@@ -109,12 +109,30 @@ struct round_robin_queue {
 	UINT8  *data;
 };
 
-__packed struct common_time {
+struct common_time {
 	UINT8 hour;
 	UINT8 minute;
 	UINT8 second;
 	UINT16 msec;
-};
+} __packed;
+
+#define DEVICE_NAME_SIZE 32
+#define HARDWARE_VER_SIZE 32
+
+struct sys_config {
+	UINT32 firstUseId;
+	UINT32 otaState;
+	UINT32 hardWareErrCnt;
+	UINT32 deviceNameErrCnt;
+	UINT32 romCheckErrCnt;
+} __packed;
+
+struct sys_config_opt {
+	struct sys_config *sysConfig;
+	void (*Init)(void);
+	void (*Read)(void);
+	void (*Write)(void);
+} __packed;
 
 struct platform_info_node *CommonInitList(void);
 INT32 CommonInsertNodeToListTail(struct platform_info_node *headNode, struct platform_info *info);

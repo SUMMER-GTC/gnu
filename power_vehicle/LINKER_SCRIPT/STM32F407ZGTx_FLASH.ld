@@ -63,7 +63,8 @@ MEMORY
 {
 RAM (xrw)      : ORIGIN = 0x20000000, LENGTH = 128K
 CCMRAM (xrw)      : ORIGIN = 0x10000000, LENGTH = 64K
-FLASH (rx)      : ORIGIN = 0x8008000, LENGTH = 992K
+FLASH (rx)      : ORIGIN = 0x800C000, LENGTH = 976K
+BOOT_CHECK (rx)      : ORIGIN = 0x8008000, LENGTH = 16K
 }
 
 /* Define output sections */
@@ -198,7 +199,14 @@ SECTIONS
     . = ALIGN(8);
   } >RAM
 
-  
+  .boot_check :
+  {
+    . = ALIGN(32);
+    KEEP (*(.device_name))
+
+    . = ALIGN(32);
+    KEEP (*(.hardware_ver*))
+  } >BOOT_CHECK
 
   /* Remove information from the standard libraries */
   /DISCARD/ :

@@ -21,13 +21,6 @@ static struct comm_dgus_data g_dgusData = {
 	.dgusData = &g_uartScreenData
 };
 
-static struct code_update_protocol g_codeUpdate;
-static struct comm_code_update_data g_codeUpdateData = {
-	.state = COMM_IDLE_STATE,
-	.rxCnt = 0,
-	.codeUpdateData = &g_codeUpdate
-};
-
 static void DeviceUartInit(void)
 {
 		GPIO_InitTypeDef GPIO_InitStructure;
@@ -123,19 +116,11 @@ static struct file_operations g_fops = {
 	.ioctl = DeviceIoctl
 };
 
-static void DGUSIntervalCall(void *dev)
-{
-	PrintfLogInfo(DEBUG_LEVEL, "[device_uart_screen][DGUSIntervalCall] running\n");
-	DeviceSampleData(SEND_FROM_NORMAL, TAG_APP_UI, dev);
-}
-
 static struct platform_info g_deviceDGUS = {
 	.tag = TAG_DEVICE_UART_SCREEN,
 	.fops = &g_fops,
 	.private_data = (void *)&g_uartScreenData,
 	.private_data_len = sizeof(g_uartScreenData),
-	.setInterval = 100,
-	.IntervalCall = DGUSIntervalCall
 };
 
 static INT32 DeviceUartScreenInit(void)
@@ -153,17 +138,6 @@ static INT32 DeviceUartScreenInit(void)
 }
 
 module_init(DeviceUartScreenInit);
-
-static UINT32 CheckSumCalculate(UINT8 *data, UINT32 dataLen)
-{
-	UINT32 checkSum = 0;
-
-	for (UINT32 i = 0; i < dataLen; i++) {
-		checkSum += data[i];
-	}
-
-	return checkSum;
-}
 
 static void CommDgusIrqHandler(UINT8 ch, struct comm_dgus_data *comm)
 {
@@ -207,46 +181,6 @@ static void CommDgusIrqHandler(UINT8 ch, struct comm_dgus_data *comm)
 	}
 }
 
-static void CommCodeUpdateIrqHandler(UINT8 ch, struct comm_code_update_data *comm)
-{
-	UINT8 *rxBuff = (UINT8 *)comm->codeUpdateData;
-
-	rxBuff[comm->rxCnt] = ch;
-
-	switch(comm->state) {
-		case COMM_IDLE_STATE:
-			comm->rxCnt = 0;
-			if (ch == COMM_CODE_UPDATE_SYN_HEAD1) {
-				comm->state = COMM_SYN_HEAD1_STATE;
-				comm->rxCnt++;
-			}
-			break;
-		case COMM_SYN_HEAD1_STATE:
-			if (ch == COMM_CODE_UPDATE_SYN_HEAD2) {
-				comm->state = COMM_SYN_HEAD2_STATE;
-				comm->rxCnt++;
-			} else {
-				comm->state = COMM_IDLE_STATE;
-			}
-			break;
-		case COMM_SYN_HEAD2_STATE:
-			if (comm->rxCnt++ >= (comm->codeUpdateData->dataLen + COMM_CODE_UPDATE_OFFSET(data))) {
-				comm->state = COMM_IDLE_STATE;
-				UINT32 checkSum = CheckSumCalculate(\
-													(UINT8 *)&comm->codeUpdateData->mainCommand, \
-													(comm->codeUpdateData->dataLen + COMM_CODE_UPDATE_OFFSET(data)));
-				if (comm->codeUpdateData->checkSum == checkSum) {
-					PrintfLogInfo(DEBUG_LEVEL, "code update!");
-				}
-			}
-			break;
-		default:
-			comm->state = COMM_IDLE_STATE;
-			break;
-	}
-
-}
-
 void USART2_IRQHandler(void)
 {
 	UINT8 ch;
@@ -254,7 +188,6 @@ void USART2_IRQHandler(void)
  	if (USART_GetITStatus(USART2, USART_IT_RXNE) != RESET) {
 		ch = USART_ReceiveData(USART2);
 		CommDgusIrqHandler(ch, &g_dgusData);
-		CommCodeUpdateIrqHandler(ch, &g_codeUpdateData);
  	}
 }
 

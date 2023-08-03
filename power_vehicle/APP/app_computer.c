@@ -7,6 +7,7 @@
 #include "stdio.h"
 #include "queue.h"
 #include "device_manager.h"
+#include "chip_flash.h"
 
 static INT32 ComputerSendData(UINT8 desTag, void *data, UINT16 dataLen)
 {
@@ -36,25 +37,84 @@ static void ComputerAppProcess(struct platform_info *data)
 	}
 }
 
-static void ComputerDeviceProcessDac()
+static void RD800Process(struct platform_info *dev)
 {
-	PrintfLogInfo(DEBUG_LEVEL, "[app_computer][ComputerDeviceProcessDac]\n");
 
-	struct platform_info *optDev = NULL;
-	if (GetDeviceInfo(TAG_DEVICE_UPPER_COMPUTER, &optDev) != SUCC) {
-		return;
-	}
-	
-	char *str = "app computer\r\n";
-	optDev->fops->write(optDev, str, strlen(str));
 }
 
-static void ComputerDeviceProcess(struct platform_info *data)
+#define COMPUTER_OTA_SEND_BUFF_SIZE (32)
+static UINT8 g_sendBuff[COMPUTER_OTA_SEND_BUFF_SIZE] = { 0 };
+static UINT16 g_sendCnt = 0;
+static bool OtaReplyProcess(struct platform_info *dev, struct ota_protocol *pOta)
 {
-	struct platform_info *pData = data;
-	switch(pData->tag) {
+	UINT8 *dataPtr = (UINT8 *)pOta;
+	UINT16 dataLen = COMM_OTA_OFFSET(data);
+
+ 	if (dataLen > COMPUTER_OTA_SEND_BUFF_SIZE) {
+		dataLen = COMPUTER_OTA_SEND_BUFF_SIZE;
+	}
+	
+	for (UINT16 i = 0; i < dataLen; i++) {
+		g_sendBuff[i] = dataPtr[i];
+	}
+
+	dev->fops->write(dev, g_sendBuff, dataLen);
+	++g_sendCnt;
+
+  return true;
+}
+
+static INT32 OtaRunBootloader(struct platform_info *dev, struct ota_protocol *pOta)
+{
+  GetSysConfigOpt()->Read();
+	GetSysConfigOpt()->sysConfig->otaState = OTA_RUN_BOOTLOADER;
+	GetSysConfigOpt()->Write();
+  OtaReplyProcess(dev, pOta);
+	NVIC_SystemReset();
+	return SUCC;
+}
+
+static INT32 OtaProcess(struct platform_info *dev)
+{
+	struct upper_computer *upperComputer = (struct upper_computer *)dev->private_data;
+	struct ota_protocol *pOta = upperComputer->ota;
+	
+	if (pOta->subCommand >= OTA_SUB_COMMAND_END) {
+		return FAIL;
+	}
+	
+	switch(pOta->subCommand) {
+		case OTA_RUN_BOOTLOADER:
+			OtaRunBootloader(dev, pOta);
+			break;
+		default:
+			break;
+	}
+
+	return SUCC;
+}
+
+static void UpperComputerDeviceProcess(struct platform_info *dev)
+{
+	struct upper_computer *pUpperComputer = (struct upper_computer *)dev->private_data;
+
+	switch(pUpperComputer->dataType) {
+  	case UPPER_COMPUTER_RD800_DATA:
+			RD800Process(dev);
+			break;
+  	case UPPER_COMPUTER_OTA_DATA:
+			OtaProcess(dev);
+			break;
+		default:
+			break;
+	}
+}
+
+static void ComputerDeviceProcess(struct platform_info *dev)
+{
+	switch(dev->tag) {
 		case TAG_DEVICE_UPPER_COMPUTER:
-			ComputerDeviceProcessDac();
+			UpperComputerDeviceProcess(dev);
 			break;
 		default:
 		

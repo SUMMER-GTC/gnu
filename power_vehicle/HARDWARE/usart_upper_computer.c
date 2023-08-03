@@ -15,7 +15,7 @@
 
 #include "sys.h"
 
-
+#define UPPER_COMPUTER_SEND_BUFF_SIZE 256
 #define UART_UPPER_COMPUTER_DATA_SIZE 10
 
 enum {
@@ -25,16 +25,29 @@ enum {
 	COMM_DATA_LEN_STATE
 };
 
-static UINT8 g_upperComputerData[UART_UPPER_COMPUTER_DATA_SIZE] = { 0 };
+static UINT8 g_upperComputerSendBuff[UPPER_COMPUTER_SEND_BUFF_SIZE] = { 0 };
+static UINT8 g_rd800[UART_UPPER_COMPUTER_DATA_SIZE] = { 0 };
 
-static struct code_update_protocol g_codeUpdate;
-static struct comm_code_update_data g_codeUpdateData = {
-	.state = COMM_IDLE_STATE,
-	.rxCnt = 0,
-	.codeUpdateData = &g_codeUpdate
+static struct ota_protocol g_codeUpdate = { 
+	.synHead = COMM_OTA_SYN_HEAD,
+	.checkSum = 0,
+	.mainCommand = 0,
+	.subCommand = 0,
+	.dataLen = 0,
+	.data = { 0 }
 };
 
-static UINT8 g_upperComputerSendBuff[256] = { 'a' };
+static struct comm_ota_data g_codeUpdateData = {
+	.state = COMM_IDLE_STATE,
+	.rxCnt = 0,
+	.otaData = &g_codeUpdate
+};
+
+static struct upper_computer g_upperComputer = {
+	.dataType = UPPER_COMPUTER_RD800_DATA,
+	.ota = &g_codeUpdate,
+	.rd800 = g_rd800
+};
 
 static void DeviceUartInit(void)
 {
@@ -113,7 +126,7 @@ static void UartUpperComputerDMAConfig(void)
 	NVIC_InitTypeDef NVIC_InitStructure; 
 	/* Enable the USARTy Interrupt */
 	NVIC_InitStructure.NVIC_IRQChannel = DMA2_Stream7_IRQn;
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 6;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&NVIC_InitStructure);
@@ -179,8 +192,8 @@ static void UpperComputerIntervalCall(void *dev)
 static struct platform_info g_deviceUpperComputer = {
 	.tag = TAG_DEVICE_UPPER_COMPUTER,
 	.fops = &g_fops,
-	.private_data = (void *)&g_upperComputerData,
-	.private_data_len = sizeof(g_upperComputerData),
+	.private_data = (void *)&g_upperComputer,
+	.private_data_len = sizeof(g_upperComputer),
 	.setInterval = 1000,
 	.IntervalCall = UpperComputerIntervalCall
 };
@@ -212,36 +225,39 @@ static UINT32 CheckSumCalculate(UINT8 *data, UINT32 dataLen)
 	return checkSum;
 }
 
-static void CommCodeUpdateIrqHandler(UINT8 ch, struct comm_code_update_data *comm)
+static UINT16 g_receiveCnt = 0;
+static void CommOtaIrqHandler(UINT8 ch, struct comm_ota_data *comm)
 {
-	UINT8 *rxBuff = (UINT8 *)comm->codeUpdateData;
+	UINT8 *rxBuff = (UINT8 *)comm->otaData;
 
 	rxBuff[comm->rxCnt] = ch;
 
 	switch(comm->state) {
 		case COMM_IDLE_STATE:
 			comm->rxCnt = 0;
-			if (ch == COMM_CODE_UPDATE_SYN_HEAD1) {
+			if (ch == COMM_OTA_SYN_HEAD1) {
 				comm->state = COMM_SYN_HEAD1_STATE;
-				comm->rxCnt++;
+				++comm->rxCnt;
 			}
 			break;
 		case COMM_SYN_HEAD1_STATE:
-			if (ch == COMM_CODE_UPDATE_SYN_HEAD2) {
+			if (ch == COMM_OTA_SYN_HEAD2) {
 				comm->state = COMM_SYN_HEAD2_STATE;
-				comm->rxCnt++;
+				++comm->rxCnt;
 			} else {
 				comm->state = COMM_IDLE_STATE;
 			}
 			break;
 		case COMM_SYN_HEAD2_STATE:
-			if (comm->rxCnt++ >= (comm->codeUpdateData->dataLen + COMM_CODE_UPDATE_OFFSET(data))) {
+			if (++comm->rxCnt >= (comm->otaData->dataLen + COMM_OTA_OFFSET(data))) {
 				comm->state = COMM_IDLE_STATE;
 				UINT32 checkSum = CheckSumCalculate(\
-													(UINT8 *)&comm->codeUpdateData->mainCommand, \
-													(comm->codeUpdateData->dataLen + COMM_CODE_UPDATE_OFFSET(data)));
-				if (comm->codeUpdateData->checkSum == checkSum) {
-					PrintfLogInfo(DEBUG_LEVEL, "code update!");
+													(UINT8 *)&comm->otaData->mainCommand, \
+													(comm->otaData->dataLen + COMM_OTA_OFFSET(data) - COMM_OTA_OFFSET(mainCommand)));
+				if (comm->otaData->checkSum == checkSum) {
+					++g_receiveCnt;
+					g_upperComputer.dataType = UPPER_COMPUTER_OTA_DATA;
+					DeviceSampleData(SEND_FROM_ISR, TAG_APP_COMPUTER, &g_deviceUpperComputer);
 				}
 			}
 			break;
@@ -249,7 +265,6 @@ static void CommCodeUpdateIrqHandler(UINT8 ch, struct comm_code_update_data *com
 			comm->state = COMM_IDLE_STATE;
 			break;
 	}
-
 }
 
 void USART1_IRQHandler(void)
@@ -258,7 +273,7 @@ void USART1_IRQHandler(void)
 
  	if (USART_GetITStatus(USART1, USART_IT_RXNE) != RESET) {
 		ch = USART_ReceiveData(USART1);
-		CommCodeUpdateIrqHandler(ch, &g_codeUpdateData);
+		CommOtaIrqHandler(ch, &g_codeUpdateData);
  	}
 }
 

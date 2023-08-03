@@ -7,6 +7,7 @@ extern "C"{
 
 #include "common_def.h"
 #include "pwm_out.h"
+#include "usart_upper_computer.h"
 
 enum device_states {
 	DEVICE_INIT 				= (1 << 0),

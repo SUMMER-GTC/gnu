@@ -8,11 +8,11 @@
 #include "alg.h"
 #include "device_manager.h"
 
-__packed struct wheel_control {
+struct wheel_control {
 	UINT16 force;
 	UINT16 rpm;
 	UINT16 power;
-};
+} __packed;
 
 static struct wheel_control g_wheelControl = { 
 	.force = 0, 

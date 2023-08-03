@@ -20,13 +20,13 @@
 #define WRITE_BUFFER_SIZE (1024)
 #define WRITE_POINTER_STR_SIZE 16
 
-__packed struct data_storage_file {
+struct data_storage_file {
 	UINT32 writePointer;
 	char writePointerStr[WRITE_POINTER_STR_SIZE];
 	UINT32 fileTotalSize;
 	UINT8 writeBuffer[WRITE_BUFFER_SIZE];
 	UINT16 writeBufferLen;
-};
+} __packed;
 
 static struct data_storage_file g_debugLogFile = {
 	.writePointer = WRITE_POINTER_STR_SIZE,

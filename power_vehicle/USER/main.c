@@ -30,7 +30,7 @@ static void GetSystemClockConfig(void)
 
 int main(void)
 {
-  NVIC_SetVectorTable(NVIC_VectTab_FLASH, 0x8000);
+  NVIC_SetVectorTable(NVIC_VectTab_FLASH, 0xC000);
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);//设置系统中断优先级分组4
   GetSystemClockConfig();
 	delay_init(168);	    				//延时函数初始化	 
