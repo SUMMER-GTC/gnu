@@ -171,6 +171,10 @@ INT32 SendDataToApp(UINT8 isrFlag, UINT8 tag, struct platform_info *data)
 		return FAIL;
 	}
 
+	if (xTaskGetSchedulerState() != taskSCHEDULER_RUNNING) { 
+		return FAIL;
+	}
+
 	QueueHandle_t xQueue = g_appDefine[tag].task.pvParameters;
 	
 	BaseType_t ret = pdPASS;

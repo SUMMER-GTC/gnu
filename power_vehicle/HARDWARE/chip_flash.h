@@ -36,6 +36,9 @@ s32 ChipFlashPageWrite(u8 *dataBuff, u32 chipAddr, u32 dataLen, bool eraseFlag);
 s32 ChipFlashPagRead(u8 *dataBuff, u32 chipAddr, u32 dataLen);
 u32 ChipFlashCheckSum(u32 pageAddress, u32 len);
 struct sys_config_opt* GetSysConfigOpt(void);
-	
+
+extern const char g_appHardwareVersionBuf[];
+extern const char g_appSoftwareVersionBuf[];
+
 #endif
 

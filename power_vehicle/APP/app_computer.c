@@ -8,10 +8,12 @@
 #include "queue.h"
 #include "device_manager.h"
 #include "chip_flash.h"
+#include "timers.h"
+
+static UINT8 g_computerData[COMPUTER_DATA_BUFF_SIZE] = { 0 };
 
 static INT32 ComputerSendData(UINT8 desTag, void *data, UINT16 dataLen)
 {
-	return SUCC;
 	return SendDataToQueue(TAG_APP_COMPUTER, desTag, data, dataLen);
 }
 
@@ -39,7 +41,15 @@ static void ComputerAppProcess(struct platform_info *data)
 
 static void RD800Process(struct platform_info *dev)
 {
-
+	struct ui_display_data *uiData = (struct ui_display_data *)g_computerData;
+	uiData->rpm = rand() % 2000;
+	uiData->power = rand() % 2000;
+	uiData->d1 = rand() % 2000;
+	uiData->d2 = rand() % 2000;
+	uiData->d3 = rand() % 2000;
+	uiData->d4 = rand() % 2000;
+	uiData->d5 = rand() % 2000;
+	ComputerSendData(TAG_APP_UI, uiData, sizeof(struct ui_display_data));
 }
 
 #define COMPUTER_OTA_SEND_BUFF_SIZE (32)
@@ -142,15 +152,39 @@ static void ComputerTask(void *pvParameters)
 	}
 }
 
-static UINT8 g_computerData[COMPUTER_DATA_BUFF_SIZE] = { 0 };
-
 static struct platform_info g_appComputer = {
 	.tag = TAG_APP_COMPUTER,
 	.private_data = g_computerData,
+	.private_data_len = sizeof(g_computerData),
 };
+
+static TimerHandle_t g_simulatorUiDataHandle = NULL;
+
+static void SimulatorUiDataTimerCall(void)
+{
+	RD800Process(&g_appComputer);
+}
+
+static INT32 SimulatorUiDataTimer(void)
+{
+	g_simulatorUiDataHandle = xTimerCreate(
+																"SimulatorUiDataTimer",
+																pdMS_TO_TICKS(1000),
+																pdTRUE,
+																0,
+																(TimerCallbackFunction_t)SimulatorUiDataTimerCall);
+	if (g_simulatorUiDataHandle == NULL) {
+		return FAIL;
+	}
+
+	xTimerStart(g_simulatorUiDataHandle, 0);
+	return SUCC;
+}
 
 static INT32 AppComputerInit(void)
 {
+	SimulatorUiDataTimer();
+
 	static TaskHandle_t pComputerTCB = NULL;
 	TaskInit(g_appComputer.tag, ComputerTask, &pComputerTCB);
 	RegisterApp(&g_appComputer);

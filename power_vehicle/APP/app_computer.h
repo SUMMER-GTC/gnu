@@ -9,7 +9,7 @@ extern "C" {
 #include "FreeRTOS.h"
 #include "task.h"
 
-#define COMPUTER_DATA_BUFF_SIZE 10
+#define COMPUTER_DATA_BUFF_SIZE 32
 
 
 #ifdef __cplusplus

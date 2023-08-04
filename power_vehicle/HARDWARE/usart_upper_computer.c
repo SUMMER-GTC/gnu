@@ -15,8 +15,10 @@
 
 #include "sys.h"
 
-#define UPPER_COMPUTER_SEND_BUFF_SIZE 256
-#define UART_UPPER_COMPUTER_DATA_SIZE 10
+#define UPPER_COMPUTER_SEND_BUFF_SIZE (256)
+#define UART_UPPER_COMPUTER_DATA_SIZE (10)
+
+#define USART_UPPER_COMPUTER_USE_DMA_SEND (1)
 
 enum {
 	COMM_IDLE_STATE = 0,
@@ -68,8 +70,8 @@ static void DeviceUartInit(void)
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
 	GPIO_Init(GPIOA, &GPIO_InitStructure);
 
-  GPIO_PinAFConfig(GPIOA,GPIO_PinSource9,GPIO_AF_USART1);
-  GPIO_PinAFConfig(GPIOA,GPIO_PinSource10,GPIO_AF_USART1);
+  GPIO_PinAFConfig(GPIOA, GPIO_PinSource9, GPIO_AF_USART1);
+  GPIO_PinAFConfig(GPIOA, GPIO_PinSource10, GPIO_AF_USART1);
 	
 	/* USART1 mode config */
 	USART_InitStructure.USART_BaudRate = 115200;
@@ -95,6 +97,7 @@ static void DeviceUartInit(void)
 
 static void UartUpperComputerDMAConfig(void)
 {
+#if USART_UPPER_COMPUTER_USE_DMA_SEND
   DMA_InitTypeDef DMA_InitStructure;
 
   RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA2, ENABLE);
@@ -122,25 +125,31 @@ static void UartUpperComputerDMAConfig(void)
   DMA_Init(DMA2_Stream7, &DMA_InitStructure);
   
 	USART_DMACmd(USART1, USART_DMAReq_Tx, ENABLE);
-
-	NVIC_InitTypeDef NVIC_InitStructure; 
-	/* Enable the USARTy Interrupt */
-	NVIC_InitStructure.NVIC_IRQChannel = DMA2_Stream7_IRQn;
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
-	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-	NVIC_Init(&NVIC_InitStructure);
-	DMA_ITConfig(DMA2_Stream7, DMA_IT_TC, ENABLE);
+#else
+	return;
+#endif
 }
 
 static void UsarUpperComputertSend(UINT8 *data, UINT16 dataLen)
 {
+#if USART_UPPER_COMPUTER_USE_DMA_SEND
 	if (dataLen > sizeof(g_upperComputerSendBuff)) {
 		dataLen = sizeof(g_upperComputerSendBuff);
 	}
 	memcpy(g_upperComputerSendBuff, data, dataLen);
 	DMA_SetCurrDataCounter(DMA2_Stream7, dataLen);
   DMA_Cmd(DMA2_Stream7, ENABLE);
+	while(DMA_GetFlagStatus(DMA2_Stream7, DMA_FLAG_TCIF7) == RESET) {
+	}
+	DMA_ClearFlag(DMA2_Stream7, DMA_FLAG_TCIF7);
+#else
+	UINT8 *pData = data;
+	
+	for (UINT16 i = 0; i < dataLen; i++) {
+		while (USART_GetFlagStatus(USART1, USART_FLAG_TC) == RESET);    
+		USART_SendData(USART1, pData[i]);
+	}
+#endif
 }
 
 static INT32 DeviceInit(void *dev)
@@ -184,18 +193,11 @@ static struct file_operations g_fops = {
 	.write = DeviceWrite,
 };
 
-static void UpperComputerIntervalCall(void *dev)
-{
-	DeviceSampleData(SEND_FROM_NORMAL, TAG_APP_COMPUTER, dev);
-}
-
 static struct platform_info g_deviceUpperComputer = {
 	.tag = TAG_DEVICE_UPPER_COMPUTER,
 	.fops = &g_fops,
 	.private_data = (void *)&g_upperComputer,
 	.private_data_len = sizeof(g_upperComputer),
-	.setInterval = 1000,
-	.IntervalCall = UpperComputerIntervalCall
 };
 
 static INT32 DeviceUpperComputerInit(void)
@@ -275,16 +277,6 @@ void USART1_IRQHandler(void)
 		ch = USART_ReceiveData(USART1);
 		CommOtaIrqHandler(ch, &g_codeUpdateData);
  	}
-}
-
-void DMA2_Stream7_IRQHandler(void)
-{
-	if(DMA_GetITStatus(DMA2_Stream7, DMA_IT_TCIF7) != RESET) {
-		if(DMA_GetFlagStatus(DMA2_Stream7, DMA_FLAG_TCIF7)!=RESET) {
-			DMA_ClearFlag(DMA2_Stream7, DMA_FLAG_TCIF7);
-		}
-		DMA_ClearITPendingBit(DMA2_Stream7, DMA_IT_TCIF7);
-	}
 }
 
 /*********************************************END OF FILE**********************/

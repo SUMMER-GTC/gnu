@@ -85,7 +85,7 @@ struct file_operations {
 	INT32 (*close) (void *);
 	INT32 (*read) (void *);
 	INT32 (*write) (void *, void *data, UINT32 dataLen);
-	INT32 (*ioctl) (void *, void *data, UINT32 dataLen);
+	INT32 (*ioctl) (void *, UINT32 cmd, void *data, UINT32 dataLen);
 };
 
 struct platform_info {

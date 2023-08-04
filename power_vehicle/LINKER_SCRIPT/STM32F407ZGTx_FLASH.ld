@@ -206,6 +206,9 @@ SECTIONS
 
     . = ALIGN(32);
     KEEP (*(.hardware_ver*))
+
+    . = ALIGN(32);
+    KEEP (*(.software_ver*))
   } >BOOT_CHECK
 
   /* Remove information from the standard libraries */
