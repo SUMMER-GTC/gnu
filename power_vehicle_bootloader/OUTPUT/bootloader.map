@@ -2260,48 +2260,49 @@ LOAD c:/program files (x86)/arm gnu toolchain arm-none-eabi/12.2 mpacbti-rel1/bi
  .text.CheckSumCalculate
                 0x0800134c       0x40 build/bsp_comm_protocol.o
  .text.CommOtaIrqHandler
-                0x0800138c      0x108 build/bsp_comm_protocol.o
+                0x0800138c       0xf8 build/bsp_comm_protocol.o
                 0x0800138c                CommOtaIrqHandler
  .text.OtaReplyProcess
-                0x08001494       0x54 build/bsp_comm_protocol.o
+                0x08001484       0x54 build/bsp_comm_protocol.o
  .text.OtaSynHead
-                0x080014e8       0x50 build/bsp_comm_protocol.o
+                0x080014d8       0x50 build/bsp_comm_protocol.o
  .text.OtaProgramFlash
-                0x08001538       0xb0 build/bsp_comm_protocol.o
+                0x08001528       0xb0 build/bsp_comm_protocol.o
  .text.OtaGoApplication
-                0x080015e8       0x78 build/bsp_comm_protocol.o
+                0x080015d8       0x78 build/bsp_comm_protocol.o
  .text.OtaRunApplication
-                0x08001660       0x3e build/bsp_comm_protocol.o
- *fill*         0x0800169e        0x2 
+                0x08001650       0x3e build/bsp_comm_protocol.o
+ *fill*         0x0800168e        0x2 
  .text.OtaCheckSumFlash
-                0x080016a0       0x40 build/bsp_comm_protocol.o
+                0x08001690       0x40 build/bsp_comm_protocol.o
  .text.OtaRunBootloader
-                0x080016e0       0x42 build/bsp_comm_protocol.o
- *fill*         0x08001722        0x2 
+                0x080016d0       0x42 build/bsp_comm_protocol.o
+ *fill*         0x08001712        0x2 
  .text.OtaProcess
-                0x08001724       0x70 build/bsp_comm_protocol.o
+                0x08001714       0x70 build/bsp_comm_protocol.o
  .text.CommunicationProcess
-                0x08001794       0x68 build/bsp_comm_protocol.o
-                0x08001794                CommunicationProcess
- .text.LedInit  0x080017fc       0x3c build/bsp_led.o
-                0x080017fc                LedInit
+                0x08001784       0x68 build/bsp_comm_protocol.o
+                0x08001784                CommunicationProcess
+ .text.LedInit  0x080017ec       0x3c build/bsp_led.o
+                0x080017ec                LedInit
  .text.TIM2_InitConfiguration
-                0x08001838       0x70 build/bsp_timer.o
-                0x08001838                TIM2_InitConfiguration
+                0x08001828       0x70 build/bsp_timer.o
+                0x08001828                TIM2_InitConfiguration
  .text.TIM2_IRQHandler
-                0x080018a8       0x30 build/bsp_timer.o
-                0x080018a8                TIM2_IRQHandler
+                0x08001898       0x30 build/bsp_timer.o
+                0x08001898                TIM2_IRQHandler
  .text.delay_init
-                0x080018d8       0x48 build/bsp_timer.o
-                0x080018d8                delay_init
+                0x080018c8       0x48 build/bsp_timer.o
+                0x080018c8                delay_init
  .text.USART_Config
-                0x08001920       0x94 build/bsp_usart.o
+                0x08001910       0x94 build/bsp_usart.o
  .text.NVIC_Configuration
-                0x080019b4       0x26 build/bsp_usart.o
+                0x080019a4       0x26 build/bsp_usart.o
+ .text.UsartDMAConfig
+                0x080019ca        0xe build/bsp_usart.o
  .text.UsartInit
-                0x080019da       0x10 build/bsp_usart.o
-                0x080019da                UsartInit
- *fill*         0x080019ea        0x2 
+                0x080019d8       0x14 build/bsp_usart.o
+                0x080019d8                UsartInit
  .text.UsartSend
                 0x080019ec       0x54 build/bsp_usart.o
                 0x080019ec                UsartSend
@@ -2566,8 +2567,7 @@ LOAD c:/program files (x86)/arm gnu toolchain arm-none-eabi/12.2 mpacbti-rel1/bi
                 0x20000080       0x14 build/bsp_chip_flash.o
  .bss.g_otaData
                 0x20000094      0x80a build/bsp_comm_protocol.o
- .bss.g_receiveCnt
-                0x2000089e        0x2 build/bsp_comm_protocol.o
+ *fill*         0x2000089e        0x2 
  .bss.g_sendBuff
                 0x200008a0       0x20 build/bsp_comm_protocol.o
  .bss.g_eraseFlash
@@ -2649,7 +2649,7 @@ LOAD c:/program files (x86)/arm gnu toolchain arm-none-eabi/12.2 mpacbti-rel1/bi
 LOAD c:/program files (x86)/arm gnu toolchain arm-none-eabi/12.2 mpacbti-rel1/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7e-m+fp/hard\libm.a
 LOAD c:/program files (x86)/arm gnu toolchain arm-none-eabi/12.2 mpacbti-rel1/bin/../lib/gcc/arm-none-eabi/12.2.1/thumb/v7e-m+fp/hard\libgcc.a
 
-.debug_info     0x00000000     0x8f45
+.debug_info     0x00000000     0x8f49
  .debug_info    0x00000000      0x6b8 build/system_stm32f4xx.o
  .debug_info    0x000006b8      0x5d0 build/misc.o
  .debug_info    0x00000c88      0xa67 build/stm32f4xx_flash.o
@@ -2658,15 +2658,15 @@ LOAD c:/program files (x86)/arm gnu toolchain arm-none-eabi/12.2 mpacbti-rel1/bi
  .debug_info    0x00002e07     0x206c build/stm32f4xx_tim.o
  .debug_info    0x00004e73      0xb51 build/stm32f4xx_usart.o
  .debug_info    0x000059c4      0x62d build/bsp_chip_flash.o
- .debug_info    0x00005ff1      0xc5d build/bsp_comm_protocol.o
- .debug_info    0x00006c4e      0x33f build/bsp_led.o
- .debug_info    0x00006f8d      0xa5a build/bsp_timer.o
- .debug_info    0x000079e7      0xd7b build/bsp_usart.o
- .debug_info    0x00008762      0x674 build/main.o
- .debug_info    0x00008dd6      0x13f build/stm32f4xx_it.o
- .debug_info    0x00008f15       0x30 build/startup_stm32f40_41xxx.o
+ .debug_info    0x00005ff1      0xc4b build/bsp_comm_protocol.o
+ .debug_info    0x00006c3c      0x33f build/bsp_led.o
+ .debug_info    0x00006f7b      0xa5a build/bsp_timer.o
+ .debug_info    0x000079d5      0xd91 build/bsp_usart.o
+ .debug_info    0x00008766      0x674 build/main.o
+ .debug_info    0x00008dda      0x13f build/stm32f4xx_it.o
+ .debug_info    0x00008f19       0x30 build/startup_stm32f40_41xxx.o
 
-.debug_abbrev   0x00000000     0x194e
+.debug_abbrev   0x00000000     0x1966
  .debug_abbrev  0x00000000      0x167 build/system_stm32f4xx.o
  .debug_abbrev  0x00000167      0x150 build/misc.o
  .debug_abbrev  0x000002b7      0x1a0 build/stm32f4xx_flash.o
@@ -2678,12 +2678,12 @@ LOAD c:/program files (x86)/arm gnu toolchain arm-none-eabi/12.2 mpacbti-rel1/bi
  .debug_abbrev  0x00000da9      0x314 build/bsp_comm_protocol.o
  .debug_abbrev  0x000010bd      0x133 build/bsp_led.o
  .debug_abbrev  0x000011f0      0x23d build/bsp_timer.o
- .debug_abbrev  0x0000142d      0x281 build/bsp_usart.o
- .debug_abbrev  0x000016ae      0x23d build/main.o
- .debug_abbrev  0x000018eb       0x46 build/stm32f4xx_it.o
- .debug_abbrev  0x00001931       0x1d build/startup_stm32f40_41xxx.o
+ .debug_abbrev  0x0000142d      0x299 build/bsp_usart.o
+ .debug_abbrev  0x000016c6      0x23d build/main.o
+ .debug_abbrev  0x00001903       0x46 build/stm32f4xx_it.o
+ .debug_abbrev  0x00001949       0x1d build/startup_stm32f40_41xxx.o
 
-.debug_loc      0x00000000     0x6304
+.debug_loc      0x00000000     0x6348
  .debug_loc     0x00000000       0xe4 build/system_stm32f4xx.o
  .debug_loc     0x000000e4      0x1cc build/misc.o
  .debug_loc     0x000002b0      0xc80 build/stm32f4xx_flash.o
@@ -2695,11 +2695,11 @@ LOAD c:/program files (x86)/arm gnu toolchain arm-none-eabi/12.2 mpacbti-rel1/bi
  .debug_loc     0x0000545c      0x544 build/bsp_comm_protocol.o
  .debug_loc     0x000059a0       0x50 build/bsp_led.o
  .debug_loc     0x000059f0      0x244 build/bsp_timer.o
- .debug_loc     0x00005c34      0x358 build/bsp_usart.o
- .debug_loc     0x00005f8c      0x174 build/main.o
- .debug_loc     0x00006100      0x204 build/stm32f4xx_it.o
+ .debug_loc     0x00005c34      0x39c build/bsp_usart.o
+ .debug_loc     0x00005fd0      0x174 build/main.o
+ .debug_loc     0x00006144      0x204 build/stm32f4xx_it.o
 
-.debug_aranges  0x00000000      0xab8
+.debug_aranges  0x00000000      0xac0
  .debug_aranges
                 0x00000000       0x30 build/system_stm32f4xx.o
  .debug_aranges
@@ -2723,15 +2723,15 @@ LOAD c:/program files (x86)/arm gnu toolchain arm-none-eabi/12.2 mpacbti-rel1/bi
  .debug_aranges
                 0x00000920       0x58 build/bsp_timer.o
  .debug_aranges
-                0x00000978       0x70 build/bsp_usart.o
+                0x00000978       0x78 build/bsp_usart.o
  .debug_aranges
-                0x000009e8       0x48 build/main.o
+                0x000009f0       0x48 build/main.o
  .debug_aranges
-                0x00000a30       0x60 build/stm32f4xx_it.o
+                0x00000a38       0x60 build/stm32f4xx_it.o
  .debug_aranges
-                0x00000a90       0x28 build/startup_stm32f40_41xxx.o
+                0x00000a98       0x28 build/startup_stm32f40_41xxx.o
 
-.debug_ranges   0x00000000      0x9d0
+.debug_ranges   0x00000000      0x9d8
  .debug_ranges  0x00000000       0x20 build/system_stm32f4xx.o
  .debug_ranges  0x00000020       0x30 build/misc.o
  .debug_ranges  0x00000050      0x148 build/stm32f4xx_flash.o
@@ -2743,12 +2743,12 @@ LOAD c:/program files (x86)/arm gnu toolchain arm-none-eabi/12.2 mpacbti-rel1/bi
  .debug_ranges  0x000007e0       0x90 build/bsp_comm_protocol.o
  .debug_ranges  0x00000870       0x10 build/bsp_led.o
  .debug_ranges  0x00000880       0x48 build/bsp_timer.o
- .debug_ranges  0x000008c8       0x60 build/bsp_usart.o
- .debug_ranges  0x00000928       0x38 build/main.o
- .debug_ranges  0x00000960       0x50 build/stm32f4xx_it.o
- .debug_ranges  0x000009b0       0x20 build/startup_stm32f40_41xxx.o
+ .debug_ranges  0x000008c8       0x68 build/bsp_usart.o
+ .debug_ranges  0x00000930       0x38 build/main.o
+ .debug_ranges  0x00000968       0x50 build/stm32f4xx_it.o
+ .debug_ranges  0x000009b8       0x20 build/startup_stm32f40_41xxx.o
 
-.debug_line     0x00000000     0x4e56
+.debug_line     0x00000000     0x4e72
  .debug_line    0x00000000      0x314 build/system_stm32f4xx.o
  .debug_line    0x00000314      0x277 build/misc.o
  .debug_line    0x0000058b      0x8a2 build/stm32f4xx_flash.o
@@ -2757,15 +2757,15 @@ LOAD c:/program files (x86)/arm gnu toolchain arm-none-eabi/12.2 mpacbti-rel1/bi
  .debug_line    0x00001d51     0x114b build/stm32f4xx_tim.o
  .debug_line    0x00002e9c      0x722 build/stm32f4xx_usart.o
  .debug_line    0x000035be      0x3a4 build/bsp_chip_flash.o
- .debug_line    0x00003962      0x67d build/bsp_comm_protocol.o
- .debug_line    0x00003fdf      0x185 build/bsp_led.o
- .debug_line    0x00004164      0x341 build/bsp_timer.o
- .debug_line    0x000044a5      0x44f build/bsp_usart.o
- .debug_line    0x000048f4      0x3ec build/main.o
- .debug_line    0x00004ce0       0xf5 build/stm32f4xx_it.o
- .debug_line    0x00004dd5       0x81 build/startup_stm32f40_41xxx.o
+ .debug_line    0x00003962      0x67a build/bsp_comm_protocol.o
+ .debug_line    0x00003fdc      0x185 build/bsp_led.o
+ .debug_line    0x00004161      0x341 build/bsp_timer.o
+ .debug_line    0x000044a2      0x46e build/bsp_usart.o
+ .debug_line    0x00004910      0x3ec build/main.o
+ .debug_line    0x00004cfc       0xf5 build/stm32f4xx_it.o
+ .debug_line    0x00004df1       0x81 build/startup_stm32f40_41xxx.o
 
-.debug_str      0x00000000     0x3196
+.debug_str      0x00000000     0x3198
  .debug_str     0x00000000      0x355 build/system_stm32f4xx.o
                                 0x3c1 (size before relaxing)
  .debug_str     0x00000355      0x1cb build/misc.o
@@ -2782,19 +2782,19 @@ LOAD c:/program files (x86)/arm gnu toolchain arm-none-eabi/12.2 mpacbti-rel1/bi
                                 0x6cb (size before relaxing)
  .debug_str     0x0000228d      0x20b build/bsp_chip_flash.o
                                 0x511 (size before relaxing)
- .debug_str     0x00002498      0x40c build/bsp_comm_protocol.o
-                                0x738 (size before relaxing)
- .debug_str     0x000028a4       0x2e build/bsp_led.o
+ .debug_str     0x00002498      0x3ff build/bsp_comm_protocol.o
+                                0x72b (size before relaxing)
+ .debug_str     0x00002897       0x2e build/bsp_led.o
                                 0x378 (size before relaxing)
- .debug_str     0x000028d2      0x5c3 build/bsp_timer.o
+ .debug_str     0x000028c5      0x5c3 build/bsp_timer.o
                                 0xa7b (size before relaxing)
- .debug_str     0x00002e95      0x19f build/bsp_usart.o
-                                0xc96 (size before relaxing)
- .debug_str     0x00003034       0x7c build/main.o
+ .debug_str     0x00002e88      0x1ae build/bsp_usart.o
+                                0xca5 (size before relaxing)
+ .debug_str     0x00003036       0x7c build/main.o
                                 0x4e5 (size before relaxing)
- .debug_str     0x000030b0       0xa4 build/stm32f4xx_it.o
+ .debug_str     0x000030b2       0xa4 build/stm32f4xx_it.o
                                 0x1f7 (size before relaxing)
- .debug_str     0x00003154       0x42 build/startup_stm32f40_41xxx.o
+ .debug_str     0x00003156       0x42 build/startup_stm32f40_41xxx.o
                                  0x76 (size before relaxing)
 
 .comment        0x00000000       0x55
@@ -2814,7 +2814,7 @@ LOAD c:/program files (x86)/arm gnu toolchain arm-none-eabi/12.2 mpacbti-rel1/bi
  .comment       0x00000055       0x56 build/main.o
  .comment       0x00000055       0x56 build/stm32f4xx_it.o
 
-.debug_frame    0x00000000     0x2cc8
+.debug_frame    0x00000000     0x2ce8
  .debug_frame   0x00000000       0x7c build/system_stm32f4xx.o
  .debug_frame   0x0000007c       0xd8 build/misc.o
  .debug_frame   0x00000154      0x5b0 build/stm32f4xx_flash.o
@@ -2826,9 +2826,9 @@ LOAD c:/program files (x86)/arm gnu toolchain arm-none-eabi/12.2 mpacbti-rel1/bi
  .debug_frame   0x0000258c      0x270 build/bsp_comm_protocol.o
  .debug_frame   0x000027fc       0x34 build/bsp_led.o
  .debug_frame   0x00002830      0x124 build/bsp_timer.o
- .debug_frame   0x00002954      0x198 build/bsp_usart.o
- .debug_frame   0x00002aec       0xcc build/main.o
- .debug_frame   0x00002bb8      0x110 build/stm32f4xx_it.o
+ .debug_frame   0x00002954      0x1b8 build/bsp_usart.o
+ .debug_frame   0x00002b0c       0xcc build/main.o
+ .debug_frame   0x00002bd8      0x110 build/stm32f4xx_it.o
 
 Cross Reference Table
 

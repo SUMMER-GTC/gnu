@@ -134,7 +134,6 @@ static u32 CheckSumCalculate(u8 *data, u32 dataLen)
 * @param  
 * @retval 
 */
-static u16 g_receiveCnt = 0;
 void CommOtaIrqHandler(u8 ch)
 {
 	struct comm_ota_data *comm = &g_commOtaData;
@@ -142,7 +141,6 @@ void CommOtaIrqHandler(u8 ch)
 
 	rxBuff[comm->rxCnt] = ch;
 
-	++g_receiveCnt;
 	switch(comm->state) {
 		case COMM_IDLE_STATE:
 			comm->rxCnt = 0;

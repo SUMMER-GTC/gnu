@@ -11,6 +11,12 @@
 #include "bsp_usart.h"
 #include "bsp_comm_protocol.h"
 
+#define USART_USE_DMA_SEND (0)
+
+#if USART_USE_DMA_SEND
+static u8 g_usartDmaSendBuff[32] = { 0 };
+#endif
+
  /**
   * @brief  
   * @param  
@@ -63,20 +69,68 @@ static void NVIC_Configuration(void)
 	NVIC_Init(&NVIC_InitStructure);
 }
 
+static void UsartDMAConfig(void)
+{
+#if USART_USE_DMA_SEND
+  DMA_InitTypeDef DMA_InitStructure;
+
+  RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA2, ENABLE);
+
+  DMA_DeInit(DMA2_Stream7);
+  while (DMA_GetCmdStatus(DMA2_Stream7) != DISABLE) {
+  }
+
+  DMA_InitStructure.DMA_Channel = DMA_Channel_4;  
+  DMA_InitStructure.DMA_PeripheralBaseAddr = ((u32)&USART1->DR);
+  DMA_InitStructure.DMA_Memory0BaseAddr = (u32)g_usartDmaSendBuff;
+  DMA_InitStructure.DMA_DIR = DMA_DIR_MemoryToPeripheral;	
+  DMA_InitStructure.DMA_BufferSize = sizeof(g_usartDmaSendBuff);
+  DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable; 
+  DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;	
+  DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
+  DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;	
+	DMA_InitStructure.DMA_Mode = DMA_Mode_Normal;
+
+  DMA_InitStructure.DMA_Priority = DMA_Priority_Medium;      
+  DMA_InitStructure.DMA_FIFOMode = DMA_FIFOMode_Disable;        
+  DMA_InitStructure.DMA_FIFOThreshold = DMA_FIFOThreshold_Full;    
+  DMA_InitStructure.DMA_MemoryBurst = DMA_MemoryBurst_Single;    
+  DMA_InitStructure.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;      
+  DMA_Init(DMA2_Stream7, &DMA_InitStructure);
+  
+	USART_DMACmd(USART1, USART_DMAReq_Tx, ENABLE);
+#else
+	return;
+#endif
+}
+
 void UsartInit(void)
 {
 	USART_Config();
 	NVIC_Configuration();
+  UsartDMAConfig();
 }
 
 void UsartSend(u8 *data, u16 dataLen)
 {
+#if USART_USE_DMA_SEND
+	if (dataLen > sizeof(g_usartDmaSendBuff)) {
+		dataLen = sizeof(g_usartDmaSendBuff);
+	}
+	memcpy(g_usartDmaSendBuff, data, dataLen);
+	DMA_SetCurrDataCounter(DMA2_Stream7, dataLen);
+  DMA_Cmd(DMA2_Stream7, ENABLE);
+	while(DMA_GetFlagStatus(DMA2_Stream7, DMA_FLAG_TCIF7) == RESET) {
+	}
+	DMA_ClearFlag(DMA2_Stream7, DMA_FLAG_TCIF7);
+#else
 	u8 *pData = data;
 	
 	for (u16 i = 0; i < dataLen; i++) {
 		while (USART_GetFlagStatus(USART1, USART_FLAG_TC) == RESET);    
 		USART_SendData(USART1, pData[i]);
 	}
+#endif
 }
 
 void USART1_IRQHandler(void)
