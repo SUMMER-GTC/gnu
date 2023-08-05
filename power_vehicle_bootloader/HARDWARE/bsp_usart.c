@@ -43,7 +43,7 @@ static void USART_Config(void)
 	GPIO_Init(GPIOA,&GPIO_InitStructure); //初始化PA9，PA10
 
    //USART1 初始化设置
-	USART_InitStructure.USART_BaudRate = 115200;//波特率设置
+	USART_InitStructure.USART_BaudRate = 460800;//波特率设置
 	USART_InitStructure.USART_WordLength = USART_WordLength_8b;//字长为8位数据格式
 	USART_InitStructure.USART_StopBits = USART_StopBits_1;//一个停止位
 	USART_InitStructure.USART_Parity = USART_Parity_No;//无奇偶校验位
