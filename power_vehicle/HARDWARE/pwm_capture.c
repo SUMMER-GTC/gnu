@@ -140,11 +140,8 @@ static void CaptureTimerConfig(void)
 	TIM_Cmd(TIM2, ENABLE);	
 }
 
-static INT32 DeviceInit(void *dev)
+static INT32 DeviceInit(void)
 {
-	struct platform_info *pDev = (struct platform_info *)dev;
-	pDev->states |= DEVICE_INIT;
-
 	GpioConfig();
 	CaptureTimerConfig();
 	
@@ -203,14 +200,16 @@ static struct platform_info g_devicePwmCapture = {
 	.IntervalCall = DeviceIntervalCall,
 	.private_data = &g_rpm,
 	.private_data_len = sizeof(g_rpm),
+	.states = 0,
 };
 
 static INT32 DevicePwmCaptureInit(void)
 {
-	if (DeviceInit((void*)&g_devicePwmCapture) != SUCC) {
+	if (DeviceInit() != SUCC) {
 		return FAIL;
 	}
 
+	g_devicePwmCapture.states |= DEVICE_INIT;
 	RegisterDevice(&g_devicePwmCapture);
 	return SUCC;
 }

@@ -78,11 +78,8 @@ static void ADCModeConfig(void)
   ADC_SoftwareStartConv(ADC1);
 }
 
-static INT32 DeviceInit(void *dev)
+static INT32 DeviceInit(void)
 {
-	struct platform_info *pDev = (struct platform_info *)dev;
-	pDev->states |= DEVICE_INIT;
-	
 	GpioConfig();
 	ADCModeConfig();
 
@@ -127,14 +124,16 @@ static struct platform_info g_deviceTaseometer = {
 	.IntervalCall = DeviceIntervalCall,
 	.private_data = &g_millivolt,
 	.private_data_len = sizeof(g_millivolt),
+	.states = 0,
 };
 
 static INT32 DeviceTaseometerInit(void)
 {
-	if (DeviceInit((void*)&g_deviceTaseometer) != SUCC) {
+	if (DeviceInit() != SUCC) {
 		return FAIL;
 	}
 
+	g_deviceTaseometer.states |= DEVICE_INIT;
 	RegisterDevice(&g_deviceTaseometer);
 	return SUCC;
 }

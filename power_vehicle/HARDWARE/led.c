@@ -3,20 +3,17 @@
 #include "init.h"
 #include "led.h"
 
-static INT32 DeviceInit(void *dev)
+static INT32 DeviceInit(void)
 {
-	struct platform_info *pDev = (struct platform_info *)dev;
-	pDev->states |= DEVICE_INIT;
+	GPIO_InitTypeDef  GPIO_InitStructure;
 
-    GPIO_InitTypeDef  GPIO_InitStructure;
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOF, ENABLE);	 
 
-    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOF, ENABLE);	 
-
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9;				 
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT; 		     
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;		 
-    GPIO_Init(GPIOF, &GPIO_InitStructure);
-    GPIO_SetBits(GPIOF, GPIO_Pin_9);
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9;				 
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT; 		     
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;		 
+	GPIO_Init(GPIOF, &GPIO_InitStructure);
+	GPIO_SetBits(GPIOF, GPIO_Pin_9);
 	
 	return SUCC;
 }
@@ -57,15 +54,17 @@ static struct platform_info g_deviceLed = {
 	.tag = TAG_DEVICE_LED,
 	.fops = &g_fops,
 	.setInterval = 200,
-	.IntervalCall = LedIntervalCall
+	.IntervalCall = LedIntervalCall,
+	.states = 0,
 };
 
 static INT32 DeviceLedInit(void)
 {
-	if (DeviceInit((void*)&g_deviceLed) != SUCC) {
+	if (DeviceInit() != SUCC) {
 		return FAIL;
 	}
 
+	g_deviceLed.states |= DEVICE_INIT;
 	RegisterDevice(&g_deviceLed);
 	return SUCC;
 }

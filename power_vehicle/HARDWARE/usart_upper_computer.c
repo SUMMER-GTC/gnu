@@ -152,11 +152,8 @@ static void UsarUpperComputertSend(UINT8 *data, UINT16 dataLen)
 #endif
 }
 
-static INT32 DeviceInit(void *dev)
+static INT32 DeviceInit(void)
 {
-	struct platform_info *pDev = (struct platform_info *)dev;
-	pDev->states |= DEVICE_INIT;
-
 	DeviceUartInit();
 	UartUpperComputerDMAConfig();
 
@@ -198,11 +195,12 @@ static struct platform_info g_deviceUpperComputer = {
 	.fops = &g_fops,
 	.private_data = (void *)&g_upperComputer,
 	.private_data_len = sizeof(g_upperComputer),
+	.states = 0,
 };
 
 static INT32 DeviceUpperComputerInit(void)
 {
-	if (DeviceInit((void*)&g_deviceUpperComputer) != SUCC) {
+	if (DeviceInit() != SUCC) {
 		return FAIL;
 	}
 
@@ -210,6 +208,7 @@ static INT32 DeviceUpperComputerInit(void)
 		return FAIL;
 	}
 
+	g_deviceUpperComputer.states |= DEVICE_INIT;
 	RegisterDevice(&g_deviceUpperComputer);
 	return SUCC;
 }

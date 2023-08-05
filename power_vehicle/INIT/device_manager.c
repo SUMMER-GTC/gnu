@@ -88,11 +88,18 @@ INT32 GetDeviceInfo(UINT8 tag, struct platform_info **dev)
 
 	*dev = g_deviceInfo[tag - TAG_DEVICE_START];
 
+	if (*dev == NULL) {
+		return FAIL;
+	}
+
 	return SUCC;
 }
 
 INT32 DeviceSampleData(UINT8 isrFlag, UINT8 tag, struct platform_info *data)
 {
+	if (!(data->states & DEVICE_INIT)) {
+		return FAIL;
+	}
 	return SendDataToApp(isrFlag, tag, data);
 }
 

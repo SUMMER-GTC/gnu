@@ -107,11 +107,8 @@ static void UartScreenDMAConfig(void)
 #endif
 }
 
-static INT32 DeviceInit(void *dev)
+static INT32 DeviceInit(void)
 {
-	struct platform_info *pDev = (struct platform_info *)dev;
-	pDev->states |= DEVICE_INIT;
-
 	DeviceUartInit();
 	UartScreenDMAConfig();
 
@@ -313,11 +310,12 @@ static struct platform_info g_deviceDGUS = {
 	.fops = &g_fops,
 	.private_data = (void *)&g_uartScreenData,
 	.private_data_len = sizeof(g_uartScreenData),
+	.states = 0,
 };
 
 static INT32 DeviceUartScreenInit(void)
 {
-	if (DeviceInit((void*)&g_deviceDGUS) != SUCC) {
+	if (DeviceInit() != SUCC) {
 		return FAIL;
 	}
 
@@ -325,6 +323,7 @@ static INT32 DeviceUartScreenInit(void)
 		return FAIL;
 	}
 
+	g_deviceDGUS.states |= DEVICE_INIT;
 	RegisterDevice(&g_deviceDGUS);
 	return SUCC;
 }

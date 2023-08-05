@@ -62,11 +62,8 @@ static void PwmModeConfig(void)
 	TIM_Cmd(TIM12, ENABLE);		
 }
 
-static INT32 DeviceInit(void *dev)
+static INT32 DeviceInit(void)
 {
-	struct platform_info *pDev = (struct platform_info *)dev;
-	pDev->states |= DEVICE_INIT;
-
 	GpioConfig();
 	PwmModeConfig();
 	
@@ -109,14 +106,16 @@ static struct file_operations g_fops = {
 static struct platform_info g_devicePwmOut = {
 	.tag = TAG_DEVICE_PWM_OUT,
 	.fops = &g_fops,
+	.states = 0,
 };
 
 static INT32 DevicePwmOutInit(void)
 {
-	if (DeviceInit((void*)&g_devicePwmOut) != SUCC) {
+	if (DeviceInit() != SUCC) {
 		return FAIL;
 	}
 
+	g_devicePwmOut.states |= DEVICE_INIT;
 	RegisterDevice(&g_devicePwmOut);
 	return SUCC;
 }
