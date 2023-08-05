@@ -1,5 +1,5 @@
 {
-    "cortex-debug.variableUseNaturalFormat": false,
+    "cortex-debug.variableUseNaturalFormat": true,
     "C_Cpp.errorSquiggles": "disabled",
     "files.associations": {
         "stm32f4xx_fmc.h": "c",
@@ -28,6 +28,7 @@
         "string": "c",
         "delay.h": "c",
         "pwm_out.h": "c",
-        "app_manager.h": "c"
+        "app_manager.h": "c",
+        "timers.h": "c"
     }
 }

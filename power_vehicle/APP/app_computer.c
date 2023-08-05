@@ -10,6 +10,8 @@
 #include "chip_flash.h"
 #include "timers.h"
 
+static char g_powerVehicleDeviceId[] = "0900P10V757";
+
 static UINT8 g_computerData[COMPUTER_DATA_BUFF_SIZE] = { 0 };
 
 static INT32 ComputerSendData(UINT8 desTag, void *data, UINT16 dataLen)
@@ -39,17 +41,41 @@ static void ComputerAppProcess(struct platform_info *data)
 	}
 }
 
-static void RD800Process(struct platform_info *dev)
+static void RD800DataSimulator(struct platform_info *dev)
 {
 	struct ui_display_data *uiData = (struct ui_display_data *)g_computerData;
-	uiData->rpm = rand() % 2000;
-	uiData->power = rand() % 2000;
-	uiData->d1 = rand() % 2000;
-	uiData->d2 = rand() % 2000;
-	uiData->d3 = rand() % 2000;
-	uiData->d4 = rand() % 2000;
-	uiData->d5 = rand() % 2000;
+	uiData->rpm = rand() % 1000;
+	uiData->power = rand() % 1000;
+	uiData->d1 = rand() % 1000;
+	uiData->d2 = rand() % 1000;
+	uiData->d3 = rand() % 1000;
+	uiData->d4 = rand() % 1000;
+	uiData->d5 = rand() % 1000;
 	ComputerSendData(TAG_APP_UI, uiData, sizeof(struct ui_display_data));
+}
+
+static UINT8 g_rd800SetPower = 0;
+static void RD800Process(struct platform_info *dev)
+{
+	struct upper_computer *upperComputer = (struct upper_computer *)dev->private_data;
+	struct ui_display_data *uiData = (struct ui_display_data *)g_computerData;	
+	UINT8 *powerVehicle = upperComputer->rd800;
+	char sendData[5] = "n000";
+
+	switch(powerVehicle[0]) {
+		case COMM_POWER_VEHICLE_CONNECT:
+			dev->fops->write(dev, g_powerVehicleDeviceId, strlen(g_powerVehicleDeviceId));
+			break;
+		case COMM_POWER_VEHICLE_READ_SPEED:
+			itoa(uiData->rpm % 1000, &sendData[1], 10);
+			dev->fops->write(dev, sendData, strlen(sendData));
+			break;
+		case COMM_POWER_VEHICLE_SET_POWER:
+			char *numStr = (char *)&powerVehicle[1];
+			g_rd800SetPower = atoi(numStr);
+		break;
+		default: break;
+	}
 }
 
 #define COMPUTER_OTA_SEND_BUFF_SIZE (32)
@@ -162,7 +188,7 @@ static TimerHandle_t g_simulatorUiDataHandle = NULL;
 
 static void SimulatorUiDataTimerCall(void)
 {
-	RD800Process(&g_appComputer);
+	RD800DataSimulator(&g_appComputer);
 }
 
 static INT32 SimulatorUiDataTimer(void)

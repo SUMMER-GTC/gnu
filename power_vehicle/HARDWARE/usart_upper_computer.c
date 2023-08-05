@@ -15,8 +15,8 @@
 
 #include "sys.h"
 
-#define UPPER_COMPUTER_SEND_BUFF_SIZE (256)
-#define UART_UPPER_COMPUTER_DATA_SIZE (10)
+#define UPPER_COMPUTER_DMA_SEND_BUFF_SIZE (256)
+#define UART_POWER_VEHICLE_DATA_SIZE (5)
 
 #define USART_UPPER_COMPUTER_USE_DMA_SEND (1)
 
@@ -27,8 +27,8 @@ enum {
 	COMM_DATA_LEN_STATE
 };
 
-static UINT8 g_upperComputerSendBuff[UPPER_COMPUTER_SEND_BUFF_SIZE] = { 0 };
-static UINT8 g_rd800[UART_UPPER_COMPUTER_DATA_SIZE] = { 0 };
+static UINT8 g_upperComputerDmaSendBuff[UPPER_COMPUTER_DMA_SEND_BUFF_SIZE] = { 0 };
+static UINT8 g_rd800[UART_POWER_VEHICLE_DATA_SIZE] = { 0 };
 
 static struct ota_protocol g_codeUpdate = { 
 	.synHead = COMM_OTA_SYN_HEAD,
@@ -43,6 +43,12 @@ static struct comm_ota_data g_codeUpdateData = {
 	.state = COMM_IDLE_STATE,
 	.rxCnt = 0,
 	.otaData = &g_codeUpdate
+};
+
+struct comm_power_vehicle_data g_powerVehicleData = {
+	.state = COMM_IDLE_STATE,
+	.rxCnt = 0,
+	.powVehData = g_rd800,
 };
 
 static struct upper_computer g_upperComputer = {
@@ -74,7 +80,7 @@ static void DeviceUartInit(void)
   GPIO_PinAFConfig(GPIOA, GPIO_PinSource10, GPIO_AF_USART1);
 	
 	/* USART1 mode config */
-	USART_InitStructure.USART_BaudRate = 115200;
+	USART_InitStructure.USART_BaudRate = 4800;
 	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
 	USART_InitStructure.USART_StopBits = USART_StopBits_1;
 	USART_InitStructure.USART_Parity = USART_Parity_No ;
@@ -108,9 +114,9 @@ static void UartUpperComputerDMAConfig(void)
 
   DMA_InitStructure.DMA_Channel = DMA_Channel_4;  
   DMA_InitStructure.DMA_PeripheralBaseAddr = ((UINT32)&USART1->DR);
-  DMA_InitStructure.DMA_Memory0BaseAddr = (UINT32)g_upperComputerSendBuff;
+  DMA_InitStructure.DMA_Memory0BaseAddr = (UINT32)g_upperComputerDmaSendBuff;
   DMA_InitStructure.DMA_DIR = DMA_DIR_MemoryToPeripheral;	
-  DMA_InitStructure.DMA_BufferSize = sizeof(g_upperComputerSendBuff);
+  DMA_InitStructure.DMA_BufferSize = sizeof(g_upperComputerDmaSendBuff);
   DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable; 
   DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;	
   DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
@@ -133,10 +139,10 @@ static void UartUpperComputerDMAConfig(void)
 static void UsarUpperComputertSend(UINT8 *data, UINT16 dataLen)
 {
 #if USART_UPPER_COMPUTER_USE_DMA_SEND
-	if (dataLen > sizeof(g_upperComputerSendBuff)) {
-		dataLen = sizeof(g_upperComputerSendBuff);
+	if (dataLen > sizeof(g_upperComputerDmaSendBuff)) {
+		dataLen = sizeof(g_upperComputerDmaSendBuff);
 	}
-	memcpy(g_upperComputerSendBuff, data, dataLen);
+	memcpy(g_upperComputerDmaSendBuff, data, dataLen);
 	DMA_SetCurrDataCounter(DMA2_Stream7, dataLen);
   DMA_Cmd(DMA2_Stream7, ENABLE);
 	while(DMA_GetFlagStatus(DMA2_Stream7, DMA_FLAG_TCIF7) == RESET) {
@@ -226,7 +232,6 @@ static UINT32 CheckSumCalculate(UINT8 *data, UINT32 dataLen)
 	return checkSum;
 }
 
-static UINT16 g_receiveCnt = 0;
 static void CommOtaIrqHandler(UINT8 ch, struct comm_ota_data *comm)
 {
 	UINT8 *rxBuff = (UINT8 *)comm->otaData;
@@ -256,11 +261,50 @@ static void CommOtaIrqHandler(UINT8 ch, struct comm_ota_data *comm)
 													(UINT8 *)&comm->otaData->mainCommand, \
 													(comm->otaData->dataLen + COMM_OTA_OFFSET(data) - COMM_OTA_OFFSET(mainCommand)));
 				if (comm->otaData->checkSum == checkSum) {
-					++g_receiveCnt;
 					g_upperComputer.dataType = UPPER_COMPUTER_OTA_DATA;
 					DeviceSampleData(SEND_FROM_ISR, TAG_APP_COMPUTER, &g_deviceUpperComputer);
 				}
 			}
+			break;
+		default:
+			comm->state = COMM_IDLE_STATE;
+			break;
+	}
+}
+
+static UINT8 g_testData[12] = { 0 };
+static UINT8 g_testDataCnt = 0;
+static void CommPowerVehicleIrqHandler(UINT8 ch, struct comm_power_vehicle_data *comm)
+{
+	UINT8 *rxBuff = (UINT8 *)comm->powVehData;
+
+	rxBuff[comm->rxCnt] = ch;
+	g_testData[g_testDataCnt++] = ch;
+	if (g_testDataCnt > sizeof(g_testData)) {
+		g_testDataCnt = 0;
+	}
+
+	switch(comm->state) {
+		case COMM_IDLE_STATE:
+			comm->rxCnt = 0;
+			if (ch == COMM_POWER_VEHICLE_CONNECT || ch == COMM_POWER_VEHICLE_READ_SPEED || ch == COMM_POWER_VEHICLE_SET_POWER) {
+				comm->state = COMM_SYN_HEAD1_STATE;
+				++comm->rxCnt;
+			}
+			break;
+		case COMM_SYN_HEAD1_STATE:
+				if (ch == COMM_POWER_VEHICLE_CHECK) {
+					comm->rxCnt = 0;
+					comm->state = COMM_IDLE_STATE;
+					g_upperComputer.dataType = UPPER_COMPUTER_RD800_DATA;
+					DeviceSampleData(SEND_FROM_ISR, TAG_APP_COMPUTER, &g_deviceUpperComputer);
+					break;
+				}
+				++comm->rxCnt;
+				if (comm->rxCnt > sizeof(comm->powVehData)) {
+					comm->rxCnt = 0;
+					comm->state = COMM_IDLE_STATE;
+				}
 			break;
 		default:
 			comm->state = COMM_IDLE_STATE;
@@ -275,6 +319,7 @@ void USART1_IRQHandler(void)
  	if (USART_GetITStatus(USART1, USART_IT_RXNE) != RESET) {
 		ch = USART_ReceiveData(USART1);
 		CommOtaIrqHandler(ch, &g_codeUpdateData);
+		CommPowerVehicleIrqHandler(ch, &g_powerVehicleData);
  	}
 }
 

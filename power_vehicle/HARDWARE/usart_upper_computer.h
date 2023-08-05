@@ -21,6 +21,11 @@ extern "C"{
 #define COMM_OTA_SYN_HEAD1	0x88
 #define COMM_OTA_SYN_HEAD2	0x66
 
+#define COMM_POWER_VEHICLE_CONNECT		0x49
+#define COMM_POWER_VEHICLE_READ_SPEED	0x44
+#define COMM_POWER_VEHICLE_SET_POWER	0x57
+#define COMM_POWER_VEHICLE_CHECK			0x0d
+
 #define COMM_OTA_OFFSET(member) (UINT32)&(((struct ota_protocol *)0)->member)
 
 typedef enum {
@@ -58,6 +63,12 @@ struct comm_ota_data {
 	UINT8 state;
 	UINT16 rxCnt;
 	struct ota_protocol *otaData;
+} __packed;
+
+struct comm_power_vehicle_data {
+	UINT8 state;
+	UINT16 rxCnt;
+	UINT8 *powVehData;
 } __packed;
 
 struct upper_computer {
