@@ -46,33 +46,36 @@ static void RD800DataSimulator(struct platform_info *dev)
 	struct ui_display_data *uiData = (struct ui_display_data *)g_computerData;
 	uiData->rpm = rand() % 1000;
 	uiData->power = rand() % 1000;
-	uiData->d1 = rand() % 1000;
-	uiData->d2 = rand() % 1000;
-	uiData->d3 = rand() % 1000;
-	uiData->d4 = rand() % 1000;
-	uiData->d5 = rand() % 1000;
+	uiData->spo2 = rand() % 1000;
+	uiData->vo2 = rand() % 1000;
+	uiData->vco2 = rand() % 1000;
+	uiData->heartRate = rand() % 1000;
+	uiData->lbp = rand() % 1000;
+	uiData->hbp = rand() % 1000;
 	ComputerSendData(TAG_APP_UI, uiData, sizeof(struct ui_display_data));
 }
 
-static UINT8 g_rd800SetPower = 0;
 static void RD800Process(struct platform_info *dev)
 {
 	struct upper_computer *upperComputer = (struct upper_computer *)dev->private_data;
 	struct ui_display_data *uiData = (struct ui_display_data *)g_computerData;	
 	UINT8 *powerVehicle = upperComputer->rd800;
 	char sendData[5] = "n000";
+  UINT8 rd800SetPower = 0;
 
 	switch(powerVehicle[0]) {
 		case COMM_POWER_VEHICLE_CONNECT:
 			dev->fops->write(dev, g_powerVehicleDeviceId, strlen(g_powerVehicleDeviceId));
 			break;
 		case COMM_POWER_VEHICLE_READ_SPEED:
+			// RD800DataSimulator(dev);
 			itoa(uiData->rpm % 1000, &sendData[1], 10);
 			dev->fops->write(dev, sendData, strlen(sendData));
 			break;
 		case COMM_POWER_VEHICLE_SET_POWER:
 			char *numStr = (char *)&powerVehicle[1];
-			g_rd800SetPower = atoi(numStr);
+			rd800SetPower = atoi(numStr);
+			ComputerSendData(TAG_APP_WHEEL, &rd800SetPower, sizeof(rd800SetPower));
 		break;
 		default: break;
 	}
@@ -188,7 +191,9 @@ static TimerHandle_t g_simulatorUiDataHandle = NULL;
 
 static void SimulatorUiDataTimerCall(void)
 {
+#if 1
 	RD800DataSimulator(&g_appComputer);
+#endif
 }
 
 static INT32 SimulatorUiDataTimer(void)

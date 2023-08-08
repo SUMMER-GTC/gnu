@@ -25,7 +25,14 @@ static struct comm_dgus_data g_dgusData = {
 	.dgusData = &g_uartScreenData
 };
 
+static struct uart_screen g_uartScreen =  {
+	.dataType = UART_SCREEN_OTHER_DATA,
+	.data = (UINT8 *)&g_uartScreenData
+};
+
+#if UART_SCREEN_USE_DMA_SEND
 static UINT8 g_uartScreenDmaSendBuff[64] = { 0 };
+#endif
 
 static void DeviceUartInit(void)
 {
@@ -107,10 +114,41 @@ static void UartScreenDMAConfig(void)
 #endif
 }
 
+static void UartScreenTimerConfig(void)
+{
+	NVIC_InitTypeDef NVIC_InitStructure; 
+
+	NVIC_InitStructure.NVIC_IRQChannel = TIM3_IRQn;
+
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 6;
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_Init(&NVIC_InitStructure);
+
+	TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
+
+  RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
+	// timer source TIMxCLK = 2 * PCLK1  
+  //				PCLK1 = HCLK / 4 
+  //				=> TIMxCLK=HCLK/2=SystemCoreClock/2=84MHz
+	// set timer frequency=TIMxCLK/(TIM_Prescaler+1)=10000Hz
+	// timer interrupt = 10000 * (1 / 10000) = 1Hz = 1s
+	TIM_TimeBaseStructure.TIM_Period = 10000 - 1;
+  TIM_TimeBaseStructure.TIM_Prescaler = 8400-1;
+	TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;
+  TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
+	// normal timer TIMx, x[2,3,4,5]
+	TIM_TimeBaseInit(TIM3, &TIM_TimeBaseStructure);
+	TIM_ClearFlag(TIM3, TIM_FLAG_Update);
+	TIM_ITConfig(TIM3, TIM_IT_Update,DISABLE);
+	TIM_Cmd(TIM3, DISABLE);
+}
+
 static INT32 DeviceInit(void)
 {
 	DeviceUartInit();
 	UartScreenDMAConfig();
+	UartScreenTimerConfig();
 
 	PrintfLogInfo(DEBUG_LEVEL, "[device_uart_screen][DeviceInit]...\n");
 	
@@ -225,13 +263,13 @@ static INT32 DeviceWrite(void *dev, void *data, UINT32 dataLen)
 static void DgusDataWriteCmd(void *data, UINT32 dataLen)
 {
 	struct dgus_addr_data *addrData = (struct dgus_addr_data *)data;
-	DgusWriteData(addrData->addr, *(UINT16 *)addrData->data);
+	DgusWriteData(addrData->addr, addrData->data[0]);
 }
 
 static void DgusTextWriteCmd(void *data, UINT32 dataLen)
 {
 	struct dgus_addr_data *addrData = (struct dgus_addr_data *)data;
-	DgusWriteString(addrData->addr, addrData->data, dataLen - sizeof(addrData->addr));
+	DgusWriteString(addrData->addr, (UINT8 *)addrData->data, dataLen - sizeof(addrData->addr));
 }
 
 static void DgusPageWriteCmd(void *data, UINT32 dataLen)
@@ -240,6 +278,20 @@ static void DgusPageWriteCmd(void *data, UINT32 dataLen)
 		return;
 	}
 	DgusSelectPage(*(UINT16 *)data);
+}
+
+static bool g_startTimerFlag = false;
+static void UartScreenStartTimerCmd(void *data, UINT32 dataLen)
+{
+	g_startTimerFlag = *(bool *)data;
+	if (g_startTimerFlag) {
+		TIM_SetCounter(TIM3, 0);
+		TIM_ITConfig(TIM3, TIM_IT_Update, ENABLE);
+		TIM_Cmd(TIM3, ENABLE);		
+	} else {
+		TIM_ITConfig(TIM3, TIM_IT_Update, DISABLE);
+		TIM_Cmd(TIM3, DISABLE);		
+	}
 }
 
 static INT32 DeviceIoctl(void *dev, UINT32 cmd, void *data, UINT32 dataLen)
@@ -259,6 +311,9 @@ static INT32 DeviceIoctl(void *dev, UINT32 cmd, void *data, UINT32 dataLen)
 			DgusPageWriteCmd(data, dataLen);
 			break;
 		case DGUS_PAGE_R_CMD:
+			break;
+		case UART_SCREEN_START_TIMER_CMD:
+			UartScreenStartTimerCmd(data, dataLen);
 			break;
 		default: break;
 	}
@@ -289,12 +344,26 @@ static INT32 DgusCheckPowerOn( void )
 	return FAIL;
 }
 
+static INT16 g_logDelayTimeSecond;
 static INT32 DeviceProbe(void)
 {
 	if (DgusCheckPowerOn() != SUCC) {
 		return FAIL;
 	}
-	DgusSelectPage(PAGE_HOME);
+
+	// clear version
+	UINT8 data[8] = { 0 };
+	memset(data, 0, sizeof(data));
+	DgusWriteString(TEXT_SOFTWARE_VER, data, sizeof(data));
+
+	// write version
+	memcpy(data, g_appSoftwareVersionBuf, strlen(g_appSoftwareVersionBuf));
+	DgusWriteString(TEXT_SOFTWARE_VER, data, sizeof(data));
+
+	DgusSelectPage(PAGE_LOG);
+	TIM_ITConfig(TIM3, TIM_IT_Update, ENABLE);
+	TIM_Cmd(TIM3, ENABLE);
+	g_logDelayTimeSecond = 3;
 	PrintfLogInfo(DEBUG_LEVEL, "[device_uart_screen][DeviceProbe]...\n");
 	return SUCC;
 }
@@ -308,8 +377,8 @@ static struct file_operations g_fops = {
 static struct platform_info g_deviceDGUS = {
 	.tag = TAG_DEVICE_UART_SCREEN,
 	.fops = &g_fops,
-	.private_data = (void *)&g_uartScreenData,
-	.private_data_len = sizeof(g_uartScreenData),
+	.private_data = (void *)&g_uartScreen,
+	.private_data_len = sizeof(g_uartScreen),
 	.states = 0,
 };
 
@@ -364,6 +433,7 @@ static void CommDgusIrqHandler(UINT8 ch, struct comm_dgus_data *comm)
 			if (comm->rxCnt++ >= (comm->dgusData->dataLen + COMM_DGUS_OFFSET(command) - 1)) {
 				comm->state = COMM_IDLE_STATE;
 				g_dgusCheckPowerOnFlag = 1;
+				g_uartScreen.dataType = UART_SCREEN_DGUS_DATA;
 				DeviceSampleData(SEND_FROM_ISR, TAG_APP_UI, &g_deviceDGUS);
 			}
 			break;
@@ -383,3 +453,26 @@ void USART2_IRQHandler(void)
  	}
 }
 
+void TIM3_IRQHandler(void)
+{
+	if (TIM_GetITStatus(TIM3, TIM_IT_Update) != RESET) {
+		TIM_ClearITPendingBit(TIM3 , TIM_IT_Update);
+
+		if (g_logDelayTimeSecond > 0) {
+			--g_logDelayTimeSecond;
+		}
+
+		if (g_logDelayTimeSecond == 0) {
+			g_logDelayTimeSecond = -1;
+			g_uartScreen.dataType = UART_SCREEN_LOG_DELAY_DATA;
+			TIM_ITConfig(TIM3, TIM_IT_Update, DISABLE);
+			TIM_Cmd(TIM3, DISABLE);
+			DeviceSampleData(SEND_FROM_ISR, TAG_APP_UI, &g_deviceDGUS);
+		}
+
+		if (g_startTimerFlag) {
+			g_uartScreen.dataType = UART_SCREEN_TIMER_DATA;
+			DeviceSampleData(SEND_FROM_ISR, TAG_APP_UI, &g_deviceDGUS);
+		}
+	}
+}

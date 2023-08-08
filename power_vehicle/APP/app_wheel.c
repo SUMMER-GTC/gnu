@@ -80,6 +80,16 @@ static void WheelAppRotateSpeedProcess(struct platform_info *dev)
 	g_wheelControl.force = g_wheelControl.power / g_wheelControl.rpm;
 }
 
+static void WheelAppComputerProcess(struct platform_info *dev)
+{
+	g_wheelControl.power = *(UINT8 *)dev->private_data;
+}
+
+static void WheelAppUiProcess(struct platform_info *dev)
+{
+	g_wheelControl.power = *(UINT8 *)dev->private_data;
+}
+
 static void WheelProcess(struct platform_info *dev)
 {
 	switch (dev->tag) {
@@ -89,9 +99,11 @@ static void WheelProcess(struct platform_info *dev)
 		case TAG_APP_ROTATE_SPEED:
 			WheelAppRotateSpeedProcess(dev);
 			break;
-		case TAG_DEVICE_UART_SCREEN:
-			g_wheelControl.power = 10;
-			// g_wheelControl.power = *(UINT16 *)dev->private_data;
+		case TAG_APP_COMPUTER:
+			WheelAppComputerProcess(dev);
+			break;
+		case TAG_APP_UI:
+			WheelAppUiProcess(dev);
 			break;
 		default:
 			break;

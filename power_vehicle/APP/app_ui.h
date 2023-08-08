@@ -14,11 +14,12 @@ extern "C" {
 struct ui_display_data {
   UINT16 rpm;
   UINT16 power;
-  UINT16 d1;
-  UINT16 d2;
-  UINT16 d3;
-  UINT16 d4;
-  UINT16 d5;
+  UINT16 spo2;
+  UINT16 vo2;
+  UINT16 vco2;
+  UINT16 heartRate;
+  UINT16 lbp;
+  UINT16 hbp;
 } __packed;
 
 #ifdef __cplusplus

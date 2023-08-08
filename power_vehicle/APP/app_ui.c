@@ -7,64 +7,94 @@
 #include "stdio.h"
 #include "queue.h"
 #include "device_manager.h"	
+#include "timers.h"
 
-static UINT16 g_dgusPage = 0xff;
+#define RMP_WARNING_VALUE 400
+
+static UINT16 g_dgusPage = 0;
+static bool g_startRun = false;
 
 static INT32 UiSendData(UINT8 desTag, void *data, UINT16 dataLen)
 {
-	return SUCC;
 	return SendDataToQueue(TAG_APP_UI, desTag, data, dataLen);
 }
 
-static void UiStandaloneDataUpdate(UINT16 *uiData)
+static void UiWriteData(struct platform_info *dev, UINT16 addr, UINT16 value)
 {
 	struct dgus_addr_data dgus;
-	struct platform_info *dev;
-	UINT16 *displayData = uiData;
 
-	if (GetDeviceInfo(TAG_DEVICE_UART_SCREEN, &dev) == FAIL) {
-		return;
+	dgus.addr = addr;
+	dgus.data[0] = value;
+	dev->fops->ioctl(dev, DGUS_DATA_W_CMD, (void*)&dgus, sizeof(dgus.addr) + sizeof(UINT16));
+}
+
+static void UiIconUpdata(struct platform_info *dev, UINT16 addr, UINT16 data)
+{
+	UINT16 val = data;
+
+	UINT16 dataHun = val / 100;
+	UINT16 dataTen = val % 100 / 10;
+	UINT16 dataOne = val % 10;
+
+	if (dataHun == 0) {
+		UiWriteData(dev, addr + 2, VAR_ICON_NUM_NC);
+	} else {
+		UiWriteData(dev, addr + 2, dataHun);
 	}
 
-	UINT16 *data = (UINT16 *)dgus.data;
-	for (UINT16 i = DATA_RPM; i <= DATA_POWER; i++) {
-		dgus.addr = i;
-		*data = *(displayData++);
-		dev->fops->ioctl(dev, DGUS_DATA_W_CMD, (void*)&dgus, sizeof(dgus.addr) + sizeof(UINT16));		
+	if (dataHun == 0 && dataTen == 0) {
+		UiWriteData(dev, addr + 1, VAR_ICON_NUM_NC);
+	} else {
+		UiWriteData(dev, addr + 1, dataTen);
 	}
+
+	UiWriteData(dev, addr, dataOne);
 
 }
 
-static void UiHeartLungDataUpdate(UINT16 *uiData)
+static void UiHomeUpdate(struct ui_display_data *uiData)
 {
-	struct dgus_addr_data dgus;
 	struct platform_info *dev;
-	UINT16 *displayData = uiData;
 
 	if (GetDeviceInfo(TAG_DEVICE_UART_SCREEN, &dev) == FAIL) {
 		return;
 	}
 
-	UINT16 *data = (UINT16 *)dgus.data;
-	for (UINT16 i = DATA_RPM; i <= DATA_D5; i++) {
-		dgus.addr = i;
-		*data = *(displayData++);
-		dev->fops->ioctl(dev, DGUS_DATA_W_CMD, (void*)&dgus, sizeof(dgus.addr) + sizeof(UINT16));		
+	static UINT16 lastRpm = 0;
+
+	UiWriteData(dev, DATA_RPM, uiData->rpm);
+	// change font color
+	if (uiData->rpm <= RMP_WARNING_VALUE && lastRpm > RMP_WARNING_VALUE) {
+		UiWriteData(dev, DATA_RPM_SP_COLOR, DATA_RPM_RED);
+		UiWriteData(dev, DATA_RPM_SP_COLOR, DATA_RPM_RED);
+	} else if (uiData->rpm > RMP_WARNING_VALUE && lastRpm <= RMP_WARNING_VALUE) {
+		UiWriteData(dev, DATA_RPM_SP_COLOR, DATA_RPM_GREEN);
+		UiWriteData(dev, DATA_RPM_SP_COLOR, DATA_RPM_GREEN);
 	}
+
+	lastRpm = uiData->rpm;
+
+	UiIconUpdata(dev, VAR_ICON_SPO2_L, uiData->spo2);
+	UiIconUpdata(dev, VAR_ICON_VO2_L, uiData->vo2);
+	UiIconUpdata(dev, VAR_ICON_VCO2_L, uiData->vco2);
+	UiIconUpdata(dev, VAR_ICON_HEART_RATE_L, uiData->heartRate);
+	UiIconUpdata(dev, VAR_ICON_LBP_L, uiData->lbp);
+	UiIconUpdata(dev, VAR_ICON_HBP_L, uiData->hbp);
 }
 
 static void UiAppProcessUi(struct platform_info *app)
 {
-	UINT16 *uiData = (UINT16 *)app->private_data;
+	struct ui_display_data *uiData = (struct ui_display_data *)app->private_data;
+	if (!g_startRun) {
+		return;
+	}
 
 	switch(g_dgusPage) {
-		case PAGE_STANDALONE:
-			UiStandaloneDataUpdate(uiData);
+		case PAGE_HOME:
+			UiHomeUpdate(uiData);
 			break;
-		case PAGE_HEART_LUNG:
-			UiHeartLungDataUpdate(uiData);
+		default: 
 			break;
-		default: break;
 	}
 }
 
@@ -105,101 +135,84 @@ static bool DgusPackageAnalyze( UINT16 *pAddress, UINT16 *pKeyData, UINT8 *aucRx
 	return true;
 }
 
-static void StandaloneProcess(struct platform_info *dev)
+static void PowerIncDecProcess(struct platform_info *dev, UINT16 value)
 {
-	struct dgus_addr_data dgus;
+	UiWriteData(dev, DATA_POWER, value);
+}
 
-	// clear data
-	UINT16 *data = (UINT16 *)dgus.data;
-	for (UINT16 i = DATA_RPM; i <= DATA_POWER; i++) {
-		dgus.addr = i;
-		*data = 0;
-		dev->fops->ioctl(dev, DGUS_DATA_W_CMD, (void*)&dgus, sizeof(dgus.addr) + sizeof(UINT16));
+static UINT16 g_timerSecond = 0;
+static void StartProcess(struct platform_info *dev)
+{
+	g_startRun = !g_startRun;
+
+	if (g_startRun) {
+		g_timerSecond = 0;
+		UiWriteData(dev, DATA_TIME, g_timerSecond);
 	}
 
-	// change to standalone page 
-	g_dgusPage = PAGE_STANDALONE;
-	dev->fops->ioctl(dev, DGUS_PAGE_W_CMD, (void*)&g_dgusPage, sizeof(g_dgusPage));
+	dev->fops->ioctl(dev, UART_SCREEN_START_TIMER_CMD, (void*)&g_startRun, sizeof(g_startRun));
 }
 
-static void HeartLungProcess(struct platform_info *dev)
+static void IconNumClear(struct platform_info *dev)
 {
-	struct dgus_addr_data dgus;
-
-	// clear data
-	UINT16 *data = (UINT16 *)dgus.data;
-	for (UINT16 i = DATA_RPM; i <= DATA_D5; i++) {
-		dgus.addr = i;
-		*data = 0;
-		dev->fops->ioctl(dev, DGUS_DATA_W_CMD, (void*)&dgus, sizeof(dgus.addr) + sizeof(UINT16));
+	for (UINT16 i = VAR_ICON_SPO2_L; i <= VAR_ICON_HBP_H; i++) {
+		UiWriteData(dev, i, VAR_ICON_NUM___);
 	}
-
-	// change to heart lung page 
-	g_dgusPage = PAGE_HEART_LUNG;
-	dev->fops->ioctl(dev, DGUS_PAGE_W_CMD, (void*)&g_dgusPage, sizeof(g_dgusPage));
 }
 
-static void VersionQueryProcess(struct platform_info *dev)
+static void UiLogDelayProcess(struct platform_info *dev)
 {
-	struct dgus_addr_data dgus;
-
-	// clear
-	dgus.addr = TEXT_SOFTWARE_VER;
-	memset(dgus.data, 0, sizeof(dgus.data));
-	dev->fops->ioctl(dev, DGUS_TEXT_W_CMD, (void*)&dgus, sizeof(dgus));
-
-	dgus.addr = TEXT_HARDWARE_VER;
-	dev->fops->ioctl(dev, DGUS_TEXT_W_CMD, (void*)&dgus, sizeof(dgus));
-
-	// write
-	dgus.addr = TEXT_SOFTWARE_VER;
-	char *data = (char *)dgus.data;
-	memcpy(data, g_appSoftwareVersionBuf, strlen(g_appSoftwareVersionBuf));
-	dev->fops->ioctl(dev, DGUS_TEXT_W_CMD, (void*)&dgus, sizeof(dgus.addr) + strlen(data));
-
-	memset(dgus.data, 0, sizeof(dgus.data));
-	dgus.addr = TEXT_HARDWARE_VER;
-	memcpy(data, g_appHardwareVersionBuf, strlen(g_appHardwareVersionBuf));
-	dev->fops->ioctl(dev, DGUS_TEXT_W_CMD, (void*)&dgus, sizeof(dgus.addr) + strlen(data));
-
-	// change to version page 
-	g_dgusPage = PAGE_VERSION;
-	dev->fops->ioctl(dev, DGUS_PAGE_W_CMD, (void*)&g_dgusPage, sizeof(g_dgusPage));
-}
-
-static void HomeProcess(struct platform_info *dev)
-{
+	IconNumClear(dev);
 	// change to home page 
 	g_dgusPage = PAGE_HOME;
 	dev->fops->ioctl(dev, DGUS_PAGE_W_CMD, (void*)&g_dgusPage, sizeof(g_dgusPage));
 }
 
-static void UiDeviceProcessUartScreen(struct platform_info *dev)
+static void UiTimerProcess(struct platform_info *dev)
 {
-	UINT8* pdate = (UINT8 *)dev->private_data;
+	++g_timerSecond;
+	UiWriteData(dev, DATA_TIME, g_timerSecond);
+}
+
+static void UiDgusProcess(struct platform_info *dev, UINT8 *data)
+{
 	UINT16 keyAddr = 0;
 	UINT16 keyData = 0;
-	if (!DgusPackageAnalyze(&keyAddr, &keyData, pdate)) {
+	if (!DgusPackageAnalyze(&keyAddr, &keyData, data)) {
 		return;
 	}
 
 	switch( keyAddr ) {
-		case KEY_RETURE_STANDALONE:
-			StandaloneProcess(dev);
+		case KEY_RETURN_POWER_INC_DEC:
+			PowerIncDecProcess(dev, keyData);
 			break;
-		case KEY_RETURE_HEART_LUNG:
-			HeartLungProcess(dev);
-			break;
-		case KEY_RETURN_VER_QUERY:
-			VersionQueryProcess(dev);
-			break;
-		case KEY_RETURN_HOME:
-			HomeProcess(dev);
+		case KEY_RETURN_START:
+			StartProcess(dev);
 			break;
 		default:
 			break;
 	}
-	
+}
+
+static void UiDeviceProcessUartScreen(struct platform_info *dev)
+{
+	struct uart_screen* pUartScreen = (struct uart_screen *)dev->private_data;
+	UINT8 dataType = pUartScreen->dataType;
+	UINT8 *pData = pUartScreen->data;
+
+	switch(dataType) {
+		case UART_SCREEN_LOG_DELAY_DATA:
+			UiLogDelayProcess(dev);
+			break;
+		case UART_SCREEN_TIMER_DATA:
+			UiTimerProcess(dev);
+			break;
+		case UART_SCREEN_DGUS_DATA:
+			UiDgusProcess(dev, pData);
+			break;
+		default:
+			break;
+	}
 	PrintfLogInfo(DEBUG_LEVEL, "[app_ui][UiDeviceProcessUartScreen]\n");
 }
 
