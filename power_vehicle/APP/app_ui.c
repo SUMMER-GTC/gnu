@@ -28,38 +28,8 @@ static void UiWriteData(struct platform_info *dev, UINT16 addr, UINT16 value)
 	dev->fops->ioctl(dev, DGUS_DATA_W_CMD, (void*)&dgus, sizeof(dgus.addr) + sizeof(UINT16));
 }
 
-static void UiIconUpdata(struct platform_info *dev, UINT16 addr, UINT16 data)
+static void UiUpdate(struct platform_info *dev, struct ui_display_data *uiData, UINT16 flag)
 {
-	UINT16 val = data;
-
-	UINT16 dataHun = val / 100;
-	UINT16 dataTen = val % 100 / 10;
-	UINT16 dataOne = val % 10;
-
-	if (dataHun == 0) {
-		UiWriteData(dev, addr + 2, VAR_ICON_NUM_NC);
-	} else {
-		UiWriteData(dev, addr + 2, dataHun);
-	}
-
-	if (dataHun == 0 && dataTen == 0) {
-		UiWriteData(dev, addr + 1, VAR_ICON_NUM_NC);
-	} else {
-		UiWriteData(dev, addr + 1, dataTen);
-	}
-
-	UiWriteData(dev, addr, dataOne);
-
-}
-
-static void UiHomeUpdate(struct ui_display_data *uiData)
-{
-	struct platform_info *dev;
-
-	if (GetDeviceInfo(TAG_DEVICE_UART_SCREEN, &dev) == FAIL) {
-		return;
-	}
-
 	static UINT16 lastRpm = 0;
 
 	UiWriteData(dev, DATA_RPM, uiData->rpm);
@@ -74,12 +44,15 @@ static void UiHomeUpdate(struct ui_display_data *uiData)
 
 	lastRpm = uiData->rpm;
 
-	UiIconUpdata(dev, VAR_ICON_SPO2_L, uiData->spo2);
-	UiIconUpdata(dev, VAR_ICON_VO2_L, uiData->vo2);
-	UiIconUpdata(dev, VAR_ICON_VCO2_L, uiData->vco2);
-	UiIconUpdata(dev, VAR_ICON_HEART_RATE_L, uiData->heartRate);
-	UiIconUpdata(dev, VAR_ICON_LBP_L, uiData->lbp);
-	UiIconUpdata(dev, VAR_ICON_HBP_L, uiData->hbp);
+	if (flag == PAGE_HEART_LUNG) {
+		UiWriteData(dev, DATA_SPO2, uiData->spo2);
+		UiWriteData(dev, DATA_VO2, uiData->vo2);
+		UiWriteData(dev, DATA_VCO2, uiData->vco2);
+		UiWriteData(dev, DATA_HR, uiData->heartRate);
+		UiWriteData(dev, DATA_LBP, uiData->lbp);
+		UiWriteData(dev, DATA_HBP, uiData->hbp);		
+	}
+
 }
 
 static void UiAppProcessUi(struct platform_info *app)
@@ -89,13 +62,23 @@ static void UiAppProcessUi(struct platform_info *app)
 		return;
 	}
 
-	switch(g_dgusPage) {
-		case PAGE_HOME:
-			UiHomeUpdate(uiData);
-			break;
-		default: 
-			break;
+	struct platform_info *dev;
+	static UINT16 lastSpo2 = 0xFFFF;
+	if (GetDeviceInfo(TAG_DEVICE_UART_SCREEN, &dev) == FAIL) {
+		return;
 	}
+
+	if (uiData->spo2 != 0xFFFF && lastSpo2 == 0xFFFF) {
+		g_dgusPage = PAGE_HEART_LUNG;
+		dev->fops->ioctl(dev, DGUS_PAGE_W_CMD, (void*)&g_dgusPage, sizeof(g_dgusPage));
+	} else if (uiData->spo2 == 0xFFFF && lastSpo2 != 0xFFFF) {
+		g_dgusPage = PAGE_STANDALONE;
+		dev->fops->ioctl(dev, DGUS_PAGE_W_CMD, (void*)&g_dgusPage, sizeof(g_dgusPage));
+	}
+
+	lastSpo2 = uiData->spo2;
+	UiUpdate(dev, uiData, g_dgusPage);
+
 }
 
 static void UiAppProcess(struct platform_info *data)
@@ -153,18 +136,10 @@ static void StartProcess(struct platform_info *dev)
 	dev->fops->ioctl(dev, UART_SCREEN_START_TIMER_CMD, (void*)&g_startRun, sizeof(g_startRun));
 }
 
-static void IconNumClear(struct platform_info *dev)
-{
-	for (UINT16 i = VAR_ICON_SPO2_L; i <= VAR_ICON_HBP_H; i++) {
-		UiWriteData(dev, i, VAR_ICON_NUM___);
-	}
-}
-
 static void UiLogDelayProcess(struct platform_info *dev)
 {
-	IconNumClear(dev);
 	// change to home page 
-	g_dgusPage = PAGE_HOME;
+	g_dgusPage = PAGE_STANDALONE;
 	dev->fops->ioctl(dev, DGUS_PAGE_W_CMD, (void*)&g_dgusPage, sizeof(g_dgusPage));
 }
 

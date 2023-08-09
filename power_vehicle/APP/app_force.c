@@ -48,7 +48,10 @@ void ForceTask(void *pvParameters)
 	QueueHandle_t xQueue = (QueueHandle_t)pvParameters;
 	for(;;) {
 		xQueueReceive(xQueue, &queueData, portMAX_DELAY);
-		
+
+		UINT8 cnt = uxQueueSpacesAvailable(xQueue);
+		PrintfLogInfo(DEBUG_LEVEL, "[app_force][ForceTask] queue remain %d\n", cnt);
+
 		ForceDeviceProcess(&queueData);
 	}
 

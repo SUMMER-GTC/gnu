@@ -33,8 +33,9 @@ extern "C" {
 #define DGUS_MEMORD_DATAL		8
 
 /* page define */
-#define PAGE_LOG						0		/* home */
-#define PAGE_HOME						1		/* main */
+#define PAGE_LOG						0		/* log */
+#define PAGE_STANDALONE			1		/* standalone */
+#define PAGE_HEART_LUNG			2		/* heart lung */
 
 #define KEY_RETURN_POWER_INC_DEC	0x0001
 #define KEY_RETURN_START					0x0002
@@ -42,49 +43,18 @@ extern "C" {
 #define DATA_POWER	0x0010
 #define DATA_RPM		0x0011
 #define DATA_TIME		0x0012
+#define DATA_SPO2		0x0013
+#define DATA_VO2		0x0014
+#define DATA_VCO2		0x0015
+#define DATA_HR			0x0016
+#define DATA_LBP		0x0017
+#define DATA_HBP		0x0018
 
 #define TEXT_SOFTWARE_VER		0x0020
-
-#define VAR_ICON_SPO2_L	0x0030
-#define VAR_ICON_SPO2_M	0x0031
-#define VAR_ICON_SPO2_H	0x0032
-
-#define VAR_ICON_VO2_L	0x0033
-#define VAR_ICON_VO2_M	0x0034
-#define VAR_ICON_VO2_H	0x0035
-
-#define VAR_ICON_VCO2_L	0x0036
-#define VAR_ICON_VCO2_M	0x0037
-#define VAR_ICON_VCO2_H	0x0038
-
-#define VAR_ICON_HEART_RATE_L	0x0039
-#define VAR_ICON_HEART_RATE_M	0x003A
-#define VAR_ICON_HEART_RATE_H	0x003B
-
-#define VAR_ICON_LBP_L	0x003C
-#define VAR_ICON_LBP_M	0x003D
-#define VAR_ICON_LBP_H	0x003E
-
-#define VAR_ICON_HBP_L	0x003F
-#define VAR_ICON_HBP_M	0x0040
-#define VAR_ICON_HBP_H	0x0041
 
 #define DATA_RPM_SP_COLOR	0x6003
 #define DATA_RPM_RED			0xF800
 #define DATA_RPM_GREEN		0x07E8
-
-#define VAR_ICON_NUM_0	0
-#define VAR_ICON_NUM_1	1
-#define VAR_ICON_NUM_2	2
-#define VAR_ICON_NUM_3	3
-#define VAR_ICON_NUM_4	4
-#define VAR_ICON_NUM_5	5
-#define VAR_ICON_NUM_6	6
-#define VAR_ICON_NUM_7	7
-#define VAR_ICON_NUM_8	8
-#define VAR_ICON_NUM_9	9
-#define VAR_ICON_NUM___	10
-#define VAR_ICON_NUM_NC	11
 
 
 #define GET_UINT16_H(wValue) (UINT8)((wValue & 0xff00) >> 8)
