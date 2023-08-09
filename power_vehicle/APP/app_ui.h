@@ -12,6 +12,7 @@ extern "C" {
 #define UI_DATA_BUFF_SIZE 10
 
 struct ui_display_data {
+  UINT8 dataType;
   UINT16 rpm;
   UINT16 power;
   UINT16 spo2;
@@ -21,6 +22,8 @@ struct ui_display_data {
   UINT16 lbp;
   UINT16 hbp;
 } __packed;
+
+#define UI_DISPLAY_DATA_OFFSET(member) (UINT32)&(((struct ui_display_data *)0)->member)
 
 #ifdef __cplusplus
 }

@@ -29,6 +29,7 @@
         "delay.h": "c",
         "pwm_out.h": "c",
         "app_manager.h": "c",
-        "timers.h": "c"
+        "timers.h": "c",
+        "freertos.h": "c"
     }
 }

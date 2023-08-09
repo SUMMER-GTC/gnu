@@ -86,7 +86,8 @@ void CommonTime(char *timeStr)
 {
 	UINT32 tick = xTaskGetTickCount();
 
-	struct common_time *pTime = malloc(sizeof(struct common_time));
+	// struct common_time *pTime = malloc(sizeof(struct common_time));
+	struct common_time *pTime = pvPortMalloc(sizeof(struct common_time));
 	memset(pTime, 0, sizeof(struct common_time));
 
 	pTime->msec = tick % 1000;
@@ -95,7 +96,8 @@ void CommonTime(char *timeStr)
 	pTime->hour = tick / 1000 / 60 / 60 % 24;
 	sprintf(timeStr, "%02d-%02d-%02d:%03d ", pTime->hour, pTime->minute, pTime->second, pTime->msec);
 
-	free(pTime);
+	// free(pTime);
+	vPortFree(pTime);
 	pTime = NULL;
 }
 
@@ -120,7 +122,8 @@ void PrintfLogInfo(UINT8 level, char *str, ...)
 		return;
 	}
 
-  char *sendBuff = (char *)malloc(PRINTF_BUFF_SIZE);
+  // char *sendBuff = (char *)malloc(PRINTF_BUFF_SIZE);
+	char *sendBuff = (char *)pvPortMalloc(PRINTF_BUFF_SIZE);
 	if (sendBuff == NULL) {
 		return;
 	}
@@ -142,7 +145,8 @@ void PrintfLogInfo(UINT8 level, char *str, ...)
 			infoSize = sprintf(sendBuff, "%s", ERROR_INFO_STR);
 			break;
 		default:
-			free(sendBuff);
+			// free(sendBuff);
+			vPortFree(sendBuff);
 			sendBuff = NULL;
 			va_end(pArgs);
 			return;
@@ -168,7 +172,8 @@ void PrintfLogInfo(UINT8 level, char *str, ...)
   printf("%s\n", sendBuff);
 	taskEXIT_CRITICAL();
 
-	free(sendBuff);
+	// free(sendBuff);
+	vPortFree(sendBuff);
   sendBuff = NULL;
 	va_end(pArgs);
 }

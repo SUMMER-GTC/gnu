@@ -158,7 +158,8 @@ extern char g_bspDebugBuffer[8192];
 
 static void FsLogSave(UINT8 *data, UINT16 dataLen)
 {
-	char *buff = malloc(COMMON_TICK_STR_SIZE + dataLen);
+	// char *buff = malloc(COMMON_TICK_STR_SIZE + dataLen);
+	char *buff = pvPortMalloc(COMMON_TICK_STR_SIZE + dataLen);
 	memset(buff, 0, COMMON_TICK_STR_SIZE + dataLen);
 
 	CommonTime(buff);
@@ -172,13 +173,15 @@ static void FsLogSave(UINT8 *data, UINT16 dataLen)
 
 	FsWriteLogData(buff, strlen(buff), &g_debugLogFile, &g_logFile, LOG_PATH, LOG_DIR);
 
-	free(buff);
+	// free(buff);
+	vPortFree(buff);
 	buff = NULL;
 }
 
 static void FsPowerSpeedSave(UINT8 *data, UINT16 dataLen)
 {
-	char *buff = malloc(COMMON_TICK_STR_SIZE + dataLen);
+	// char *buff = malloc(COMMON_TICK_STR_SIZE + dataLen);
+	char *buff = pvPortMalloc(COMMON_TICK_STR_SIZE + dataLen);
 	memset(buff, 0, COMMON_TICK_STR_SIZE + dataLen);
 
 	CommonTime(buff);
@@ -187,7 +190,8 @@ static void FsPowerSpeedSave(UINT8 *data, UINT16 dataLen)
 
 	FsWriteLogData(buff, strlen(buff), &g_powerSpeedFile, &g_powerAndSpeedFile, POWER_SPEED_PATH, POWER_SPEED_DIR);
 
-	free(buff);
+	// free(buff);
+	vPortFree(buff);
 	buff = NULL;
 }
 

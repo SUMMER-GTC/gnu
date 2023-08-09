@@ -361,6 +361,13 @@ static INT32 DeviceProbe(void)
 	DgusWriteString(TEXT_SOFTWARE_VER, data, sizeof(data));
 
 	DgusSelectPage(PAGE_LOG);
+
+	for (UINT16 addr = DATA_POWER; addr <= DATA_HBP; addr ++) {
+		DgusWriteData(addr, 0);
+	}
+
+	DgusWriteData(KEY_RETURN_POWER_INC_DEC, 0);
+
 	TIM_ITConfig(TIM3, TIM_IT_Update, ENABLE);
 	TIM_Cmd(TIM3, ENABLE);
 	g_logDelayTimeSecond = 3;
