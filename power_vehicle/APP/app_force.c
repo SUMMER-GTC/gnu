@@ -52,7 +52,11 @@ void ForceTask(void *pvParameters)
 		UINT8 cnt = uxQueueSpacesAvailable(xQueue);
 		PrintfLogInfo(DEBUG_LEVEL, "[app_force][ForceTask] queue remain %d\n", cnt);
 
-		ForceDeviceProcess(&queueData);
+		switch (queueData.tag) {
+			case TAG_DEVICE_TASEOMETER:
+				ForceDeviceProcess(&queueData);
+				break;
+		}
 	}
 
 }

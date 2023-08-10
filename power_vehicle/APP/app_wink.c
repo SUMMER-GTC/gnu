@@ -23,7 +23,11 @@ void WinkTask(void *pvParameters)
 	for(;;) {
 		xQueueReceive(xQueue, &queueData, portMAX_DELAY);
 		
-		WinkDeviceProcess(&queueData);
+		switch (queueData.tag) { 
+			case TAG_DEVICE_LED:
+				WinkDeviceProcess(&queueData);			
+				break;
+		}
 	}
 
 }

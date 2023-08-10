@@ -190,7 +190,6 @@ static struct file_operations g_fops = {
 static void DeviceIntervalCall (void *dev)
 {
 	DeviceSampleData(SEND_FROM_NORMAL, TAG_APP_ROTATE_SPEED, dev);
-	DeviceSampleData(SEND_FROM_NORMAL, TAG_APP_DATA_STORAGE, dev);
 }
 
 static struct platform_info g_devicePwmCapture = {

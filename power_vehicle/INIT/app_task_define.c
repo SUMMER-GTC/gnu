@@ -62,7 +62,7 @@ static struct app_define g_appDefine[TAG_APP_END] = {
 				"WheelTask",
 				TASK_STASK_SIZE_BYTES_256,
 				NULL,
-				TASK_PRIORITY_ABOVE_NORMAL,
+				TASK_PRIORITY_HIGH,
 				NULL
 			},
 			.queue = {
@@ -78,7 +78,7 @@ static struct app_define g_appDefine[TAG_APP_END] = {
 				"RotateSpeedTask",
 				TASK_STASK_SIZE_BYTES_256,
 				NULL,
-				TASK_PRIORITY_NORMAL,
+				TASK_PRIORITY_BELOW_NORMAL,
 				NULL
 			},
 			.queue = {

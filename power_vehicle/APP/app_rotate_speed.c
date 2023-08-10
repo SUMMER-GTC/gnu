@@ -11,6 +11,8 @@
 
 #define ROTATE_SPEED_FILTER_FIFO_SIZE 9
 
+#define RPM_SIMULATOR_DATA (1)
+
 static UINT16 g_rotateSpeedFilterData[ROTATE_SPEED_FILTER_FIFO_SIZE] = { 0 };
 static struct fifo g_rotateSpeedFifo = {
 	.data = g_rotateSpeedFilterData,
@@ -38,11 +40,21 @@ static UINT16 RotateSpeedDataFilter(UINT16 rpm)
 	UINT16 retRPM = 0;
 	static UINT16 testRpm = 0;
 	++testRpm;
-	UINT16 ret = WeightMovingAverageFilter(&g_rotateSpeedFilter, 10);
-	RotateSpeedSendData(TAG_APP_WHEEL, &ret, sizeof(ret));
 
+#if RPM_SIMULATOR_DATA
+	UNUSED(g_rotateSpeedFilter);
 	UINT16 simRpm = rand() % 1000;
+	RotateSpeedSendData(TAG_APP_WHEEL, &simRpm, sizeof(simRpm));
 	RotateSpeedSendData(TAG_APP_UI, &simRpm, sizeof(simRpm));
+	RotateSpeedSendData(TAG_APP_COMPUTER, &simRpm, sizeof(simRpm));
+	RotateSpeedSendData(TAG_APP_DATA_STORAGE, &simRpm, sizeof(simRpm));
+#else
+	UINT16 retFilterRpm = WeightMovingAverageFilter(&g_rotateSpeedFilter, rpm);
+	RotateSpeedSendData(TAG_APP_WHEEL, &retFilterRpm, sizeof(retFilterRpm));
+	RotateSpeedSendData(TAG_APP_UI, &retFilterRpm, sizeof(retFilterRpm));
+	RotateSpeedSendData(TAG_APP_COMPUTER, &retFilterRpm, sizeof(retFilterRpm));
+	RotateSpeedSendData(TAG_APP_DATA_STORAGE, &retFilterRpm, sizeof(retFilterRpm));
+#endif
 
 	if (rpm < LOW_ROTATE_SPEED_LIMIT) {
 		retRPM = rpm;
@@ -71,7 +83,11 @@ void RotateSpeedTask(void *pvParameters)
 		UINT8 cnt = uxQueueSpacesAvailable(xQueue);
 		PrintfLogInfo(DEBUG_LEVEL, "[app_rotate_speed][RotateSpeedTask] queue remain %d\n", cnt);
 
-		RotateSpeedDeviceProcess(&queueData);
+		switch (queueData.tag) {
+			case TAG_DEVICE_PWM_CAPTURE:
+				RotateSpeedDeviceProcess(&queueData);
+				break;
+		}
 	}
 
 }

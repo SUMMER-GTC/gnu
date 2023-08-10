@@ -197,20 +197,26 @@ static void FsPowerSpeedSave(UINT8 *data, UINT16 dataLen)
 
 static void DataStorageProcess(struct platform_info *app)
 {
-	UNUSED(app);
 	static UINT32 power = 0;
 	static UINT32 speed = 0;
-
-	if (app->tag == TAG_APP_DATA_STORAGE) {
-		FsLogSave(app->private_data, app->private_data_len);
-	}
-
-	++power;
-	++speed;
-
+	UINT16 value = *(UINT16 *)app->private_data;
 	UINT8 powerSpeedData[16];
-	sprintf((char *)powerSpeedData, "%6ld, %6ld\n", power, speed);
-	FsPowerSpeedSave(powerSpeedData, strlen((char *)powerSpeedData));
+
+	switch (app->tag) {
+		case TAG_APP_DATA_STORAGE:
+			FsLogSave(app->private_data, app->private_data_len);
+			break;
+		case TAG_APP_UI:
+			power = value;
+			break;
+		case TAG_APP_ROTATE_SPEED:
+			speed = value;
+			sprintf((char *)powerSpeedData, "%6ld, %6ld\n", power, speed);
+			FsPowerSpeedSave(powerSpeedData, strlen((char *)powerSpeedData));
+			break;
+		default:
+			break;
+	}
 }
 
 void DataStorageTask(void *pvParameters)

@@ -84,6 +84,8 @@ static void UiPowerUpdate(struct platform_info *dev, struct ui_display_data *uiD
 		UiWriteData(dev, KEY_RETURN_POWER_INC_DEC, uiData->power);
 		UiWriteData(dev, DATA_POWER, uiData->power);
 	}
+	UiSendData(TAG_APP_DATA_STORAGE, (void *)&uiData->power, sizeof(UINT16));
+	UiSendData(TAG_APP_WHEEL, (void *)&uiData->power, sizeof(UINT16));
 }
 
 static bool g_logDelayOver = false;
@@ -175,6 +177,8 @@ static bool DgusPackageAnalyze( UINT16 *pAddress, UINT16 *pKeyData, UINT8 *aucRx
 static void PowerIncDecProcess(struct platform_info *dev, UINT16 value)
 {
 	UiWriteData(dev, DATA_POWER, value);
+	UiSendData(TAG_APP_DATA_STORAGE, (void *)&value, sizeof(UINT16));
+	UiSendData(TAG_APP_WHEEL, (void *)&value, sizeof(UINT16));
 }
 
 static void StartProcess(struct platform_info *dev)
@@ -278,8 +282,9 @@ void UiTask(void *pvParameters)
 		xQueueReceive(xQueue, &queueData, portMAX_DELAY);
 		
 		UINT8 cnt = uxQueueSpacesAvailable(xQueue);
-		PrintfLogInfo(DEBUG_LEVEL, "[app_ui][UiTask] queue remain %d\n", cnt);
-		UINT64 freeHeapSize	= xPortGetMinimumEverFreeHeapSize();
+		UINT64 freeHeapSize	= xPortGetMinimumEverFreeHeapSize();		
+		PrintfLogInfo(DEBUG_LEVEL, "[app_ui][UiTask] queue remain %d, freeHeapSize %d\n", cnt, freeHeapSize);
+
 
 		if (queueData.tag < TAG_APP_END) {
 			UiAppProcess(&queueData);

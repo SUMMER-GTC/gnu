@@ -19,21 +19,18 @@ static INT32 ComputerSendData(UINT8 desTag, void *data, UINT16 dataLen)
 	return SendDataToQueue(TAG_APP_COMPUTER, desTag, data, dataLen);
 }
 
-static void ComputerAppProcessUi(struct platform_info *data)
+static void ComputerAppProcessRotateSpeed(struct platform_info *data)
 {
-	UINT8 recData = *((UINT8*)data->private_data);
-	UINT16 recDataLen = data->private_data_len;
-	PrintfLogInfo(DEBUG_LEVEL, "[app_computer][ComputerAppProcessUi] data=%d, dataLen=%d\n", \
-						 recData, recDataLen);
-
+	struct ui_display_data *uiData = (struct ui_display_data *)g_computerData;
+	uiData->rpm = *((UINT16*)data->private_data);
 }
 
 static void ComputerAppProcess(struct platform_info *data)
 {
 	struct platform_info *pData = data;
 	switch(pData->tag) {
-		case TAG_APP_UI:
-			ComputerAppProcessUi(pData);
+		case TAG_APP_ROTATE_SPEED:
+			ComputerAppProcessRotateSpeed(pData);
 			break;
 		default:
 		
@@ -45,8 +42,6 @@ static void RD800DataSimulator(struct platform_info *dev)
 {
 	struct ui_display_data *uiData = (struct ui_display_data *)g_computerData;
 	uiData->dataType = COMM_POWER_VEHICLE_READ_SPEED;
-	uiData->rpm = rand() % 1000;
-	uiData->power = rand() % 1000;
 	uiData->spo2 = rand() % 1000;
 	uiData->vo2 = rand() % 1000;
 	uiData->vco2 = rand() % 1000;
@@ -190,33 +185,8 @@ static struct platform_info g_appComputer = {
 	.private_data_len = sizeof(g_computerData),
 };
 
-static TimerHandle_t g_simulatorUiDataHandle = NULL;
-
-static void SimulatorUiDataTimerCall(void)
-{
-	// RD800DataSimulator(&g_appComputer);
-}
-
-static INT32 SimulatorUiDataTimer(void)
-{
-	g_simulatorUiDataHandle = xTimerCreate(
-																"SimulatorUiDataTimer",
-																pdMS_TO_TICKS(1000),
-																pdTRUE,
-																0,
-																(TimerCallbackFunction_t)SimulatorUiDataTimerCall);
-	if (g_simulatorUiDataHandle == NULL) {
-		return FAIL;
-	}
-
-	xTimerStart(g_simulatorUiDataHandle, 0);
-	return SUCC;
-}
-
 static INT32 AppComputerInit(void)
 {
-	SimulatorUiDataTimer();
-
 	static TaskHandle_t pComputerTCB = NULL;
 	TaskInit(g_appComputer.tag, ComputerTask, &pComputerTCB);
 	RegisterApp(&g_appComputer);
