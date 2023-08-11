@@ -28,7 +28,7 @@ static struct weight_moving_average_filter g_rotateSpeedFilter = {
 	.weight = g_rotateSpeedFilterWeight,
 	.fifoSize = ROTATE_SPEED_FILTER_FIFO_SIZE
 };
-static UINT16 g_rpm = 0;
+static struct rotate_speed g_rpm = { 0 };
 
 static INT32 RotateSpeedSendData(UINT8 desTag, void *data, UINT16 dataLen)
 {
@@ -38,16 +38,23 @@ static INT32 RotateSpeedSendData(UINT8 desTag, void *data, UINT16 dataLen)
 static UINT16 RotateSpeedDataFilter(UINT16 rpm)
 {
 	UINT16 retRPM = 0;
-	static UINT16 testRpm = 0;
-	++testRpm;
+	static UINT16 rpmCnt = 0;
+	static UINT16 displayRpm = 0;
 
 #if RPM_SIMULATOR_DATA
 	UNUSED(g_rotateSpeedFilter);
-	UINT16 simRpm = rand() % 1000;
-	RotateSpeedSendData(TAG_APP_WHEEL, &simRpm, sizeof(simRpm));
-	RotateSpeedSendData(TAG_APP_UI, &simRpm, sizeof(simRpm));
-	RotateSpeedSendData(TAG_APP_COMPUTER, &simRpm, sizeof(simRpm));
-	RotateSpeedSendData(TAG_APP_DATA_STORAGE, &simRpm, sizeof(simRpm));
+	g_rpm.wheelRpm = rand() % 1000;
+
+	RotateSpeedSendData(TAG_APP_WHEEL, &g_rpm, sizeof(g_rpm));
+
+	if (rpmCnt++ > 33) {
+		rpmCnt = 0;
+		g_rpm.displayRpm = g_rpm.wheelRpm;
+		RotateSpeedSendData(TAG_APP_UI, &g_rpm, sizeof(g_rpm));
+		RotateSpeedSendData(TAG_APP_COMPUTER, &g_rpm, sizeof(g_rpm));
+		RotateSpeedSendData(TAG_APP_DATA_STORAGE, &g_rpm, sizeof(g_rpm));
+	}
+
 #else
 	UINT16 retFilterRpm = WeightMovingAverageFilter(&g_rotateSpeedFilter, rpm);
 	RotateSpeedSendData(TAG_APP_WHEEL, &retFilterRpm, sizeof(retFilterRpm));

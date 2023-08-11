@@ -22,7 +22,8 @@ static INT32 ComputerSendData(UINT8 desTag, void *data, UINT16 dataLen)
 static void ComputerAppProcessRotateSpeed(struct platform_info *data)
 {
 	struct ui_display_data *uiData = (struct ui_display_data *)g_computerData;
-	uiData->rpm = *((UINT16*)data->private_data);
+	struct rotate_speed *speed = (struct rotate_speed *)data->private_data;
+	uiData->rpm = speed->displayRpm;
 }
 
 static void ComputerAppProcess(struct platform_info *data)

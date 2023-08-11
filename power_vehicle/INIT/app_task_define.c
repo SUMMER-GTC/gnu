@@ -14,7 +14,7 @@ static struct app_define g_appDefine[TAG_APP_END] = {
 			 	"UiTask",
 			 	TASK_STASK_SIZE_BYTES_256,
 			 	NULL,
-			 	TASK_PRIORITY_ABOVE_NORMAL,
+			 	TASK_PRIORITY_HIGH,
 			 	NULL
 			},
 			.queue = {

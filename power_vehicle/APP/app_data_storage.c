@@ -200,6 +200,7 @@ static void DataStorageProcess(struct platform_info *app)
 	static UINT32 power = 0;
 	static UINT32 speed = 0;
 	UINT16 value = *(UINT16 *)app->private_data;
+	struct rotate_speed *rotateSpeed = NULL;
 	UINT8 powerSpeedData[16];
 
 	switch (app->tag) {
@@ -210,7 +211,8 @@ static void DataStorageProcess(struct platform_info *app)
 			power = value;
 			break;
 		case TAG_APP_ROTATE_SPEED:
-			speed = value;
+			rotateSpeed = (struct rotate_speed *)app->private_data;
+			speed = rotateSpeed->displayRpm;
 			sprintf((char *)powerSpeedData, "%6ld, %6ld\n", power, speed);
 			FsPowerSpeedSave(powerSpeedData, strlen((char *)powerSpeedData));
 			break;

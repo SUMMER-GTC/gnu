@@ -131,7 +131,8 @@ static void UiAppComputerProcess(struct platform_info *app)
 
 static void UiAppRotateSpeedProcess(struct platform_info *app)
 {
-	g_uiDisplayData.rpm = *(UINT16 *)app->private_data;
+	struct rotate_speed *speed = (struct rotate_speed *)app->private_data;
+	g_uiDisplayData.rpm = speed->displayRpm;
 }
 
 static void UiAppProcess(struct platform_info *data)
@@ -217,6 +218,12 @@ static void UiTimerProcess(struct platform_info *dev)
 	}
 
 	lastRpm = g_uiDisplayData.rpm;
+
+	struct platform_info *max6950Dev = NULL;
+	if (GetDeviceInfo(TAG_DEVICE_MAX6950, &max6950Dev) != SUCC) {
+		return;
+	}
+	max6950Dev->fops->write(max6950Dev, (void *)&g_uiDisplayData.rpm, sizeof(g_uiDisplayData.rpm));
 }
 
 static void UiDgusProcess(struct platform_info *dev, UINT8 *data)

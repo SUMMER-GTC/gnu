@@ -9,6 +9,10 @@ extern "C" {
 #include "FreeRTOS.h"
 #include "task.h"
 
+struct rotate_speed {
+  UINT16 wheelRpm;
+  UINT16 displayRpm;
+} __packed;
 
 #ifdef __cplusplus
 }

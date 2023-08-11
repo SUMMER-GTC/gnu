@@ -50,9 +50,9 @@ static struct neural_pid g_neuralPID = {
   .learningMode = HEBBE_LEARNING_MODE,
 };
 
-static void WheelAppForceProcess(struct platform_info *dev)
+static void WheelAppForceProcess(struct platform_info *app)
 {
-	UINT16 force = *(UINT16 *)dev->private_data;
+	UINT16 force = *(UINT16 *)app->private_data;
 
 	g_incPID.setpoint = g_wheelControl.force;
 	IncPID(&g_incPID, force);
@@ -74,28 +74,29 @@ static void WheelAppForceProcess(struct platform_info *dev)
 	optDev->fops->write(optDev, &pwmOut, sizeof(pwmOut));
 }
 
-static void WheelAppRotateSpeedProcess(struct platform_info *dev)
+static void WheelAppRotateSpeedProcess(struct platform_info *app)
 {
-	g_wheelControl.rpm = *(UINT16 *)dev->private_data;
+	struct rotate_speed *speed = (struct rotate_speed *)app->private_data;
+	g_wheelControl.rpm = speed->wheelRpm;
 	g_wheelControl.force = g_wheelControl.power / g_wheelControl.rpm;
 }
 
-static void WheelAppUiProcess(struct platform_info *dev)
+static void WheelAppUiProcess(struct platform_info *app)
 {
-	g_wheelControl.power = *(UINT8 *)dev->private_data;
+	g_wheelControl.power = *(UINT8 *)app->private_data;
 }
 
-static void WheelProcess(struct platform_info *dev)
+static void WheelProcess(struct platform_info *app)
 {
-	switch (dev->tag) {
+	switch (app->tag) {
 		case TAG_APP_FORCE:
-			WheelAppForceProcess(dev);
+			WheelAppForceProcess(app);
 			break;
 		case TAG_APP_ROTATE_SPEED:
-			WheelAppRotateSpeedProcess(dev);
+			WheelAppRotateSpeedProcess(app);
 			break;
 		case TAG_APP_UI:
-			WheelAppUiProcess(dev);
+			WheelAppUiProcess(app);
 			break;
 		default:
 			break;

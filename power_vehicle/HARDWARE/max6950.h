@@ -1,0 +1,89 @@
+#ifndef __MAX6950_H__
+#define __MAX6950_H__
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include "common_def.h"
+
+#define MAX6950_REG_DECODE        0x01
+#define MAX6950_REG_INTENSITY     0x02
+#define MAX6950_REG_SCAN_LIMIT    0x03
+#define MAX6950_REG_CONFIGURATION 0x04
+#define MAX6950_REG_DISPLAY_TEST  0x07
+#define MAX6950_REG_DIGIT_0       0x60
+#define MAX6950_REG_DIGIT_1       0x61
+#define MAX6950_REG_DIGIT_2       0x62
+#define MAX6950_REG_DIGIT_3       0x63
+#define MAX6950_REG_DIGIT_4       0x64
+#define MAX6950_REG_DIGIT_5       0x65
+#define MAX6950_REG_DIGIT_6       0x66
+#define MAX6950_REG_DIGIT_7       0x67
+
+#define CONFIG_REG_S_BIT (0)
+#define CONFIG_REG_B_BIT (2)
+#define CONFIG_REG_E_BIT (3)
+#define CONFIG_REG_T_BIT (4)
+#define CONFIG_REG_R_BIT (5)
+
+#define MAX6950_SHUTDOWN_DISABLE            (0x01 << CONFIG_REG_S_BIT)
+#define MAX6950_SHUTDOWN_ENABLE             (~MAX6950_SHUTDOWN_DISABLE)
+#define MAX6950_BLINK_RATE_HALF_SECOND      (0x01 << CONFIG_REG_B_BIT)
+#define MAX6950_BLINK_ENABLE                (0x01 << CONFIG_REG_E_BIT)
+#define MAX6950_BLINK_TIMING_CLEAR_ENABLE   (0x01 << CONFIG_REG_T_BIT)
+#define MAX6950_GLOBAL_CLEAR_DIGITA_ENABLE  (0x01 << CONFIG_REG_R_BIT)
+
+#define MAX6950_ALL_DECODE    0xFF
+#define MAX6950_ALL_NO_DECODE 0x00
+
+#define MAX6950_INTENSITY_1_16  0x00
+#define MAX6950_INTENSITY_2_16  0x01
+#define MAX6950_INTENSITY_3_16  0x02
+#define MAX6950_INTENSITY_4_16  0x03
+#define MAX6950_INTENSITY_5_16  0x04
+#define MAX6950_INTENSITY_6_16  0x05
+#define MAX6950_INTENSITY_7_16  0x06
+#define MAX6950_INTENSITY_8_16  0x07
+#define MAX6950_INTENSITY_9_16  0x08
+#define MAX6950_INTENSITY_10_16 0x09
+#define MAX6950_INTENSITY_11_16 0x0A
+#define MAX6950_INTENSITY_12_16 0x0B
+#define MAX6950_INTENSITY_13_16 0x0C
+#define MAX6950_INTENSITY_14_16 0x0D
+#define MAX6950_INTENSITY_15_16 0x0E
+#define MAX6950_INTENSITY_16_16 0x0F
+
+#define MAX6950_SCAN_LIMIT_0  0x00
+#define MAX6950_SCAN_LIMIT_1  0x01
+#define MAX6950_SCAN_LIMIT_2  0x02
+#define MAX6950_SCAN_LIMIT_3  0x03
+#define MAX6950_SCAN_LIMIT_4  0x04
+
+#define MAX6950_DIGIT_0   0
+#define MAX6950_DIGIT_1   1
+#define MAX6950_DIGIT_2   2
+#define MAX6950_DIGIT_3   3
+#define MAX6950_DIGIT_4   4
+#define MAX6950_DIGIT_5   5
+#define MAX6950_DIGIT_6   6
+#define MAX6950_DIGIT_7   7
+#define MAX6950_DIGIT_8   8
+#define MAX6950_DIGIT_9   9
+
+#define MAX6950_SPI SPI1
+
+#define SPIT_FLAG_TIMEOUT         ((uint32_t)0x1000)
+#define SPIT_LONG_TIMEOUT         ((uint32_t)(10 * SPIT_FLAG_TIMEOUT))
+
+struct max6959_config {
+  UINT8 reg;
+  UINT8 data;
+};
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif
+
