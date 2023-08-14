@@ -83,7 +83,29 @@ static void WheelAppRotateSpeedProcess(struct platform_info *app)
 
 static void WheelAppUiProcess(struct platform_info *app)
 {
-	g_wheelControl.power = *(UINT8 *)app->private_data;
+	struct ui_to_wheel uiData = *(struct ui_to_wheel *)app->private_data;
+	
+	switch (uiData.dataType) {
+		case COMM_POWER_VEHICLE_SET_POWER:
+		case KEY_RETURN_POWER_INC_DEC:
+			g_wheelControl.power = uiData.data;		
+			break;
+		case KEY_KCOEF_INC_DEC:
+			g_neuralPID.Kcoef = uiData.data / 100.0;
+			break;
+		case KEY_KP_INC_DEC:
+			g_neuralPID.Kp = uiData.data / 100.0;
+			break;
+		case KEY_KI_INC_DEC:
+			g_neuralPID.Ki = uiData.data / 100.0;
+			break;
+		case KEY_KD_INC_DEC:
+			g_neuralPID.Kd = uiData.data / 100.0;
+			break;
+		default:
+			break;
+	}
+
 }
 
 static void WheelProcess(struct platform_info *app)
@@ -121,6 +143,20 @@ static struct platform_info g_appWheel = {
 
 static INT32 AppWheelInit(void)
 {
+	GetSysConfigOpt()->Read();
+	if (GetSysConfigOpt()->sysConfig->Kcoef != 0xFFFF) {
+		g_neuralPID.Kcoef = GetSysConfigOpt()->sysConfig->Kcoef / 100.0;
+	}
+	if (GetSysConfigOpt()->sysConfig->Kp != 0xFFFF) {
+		g_neuralPID.Kp = GetSysConfigOpt()->sysConfig->Kp / 100.0;
+	}
+	if (GetSysConfigOpt()->sysConfig->Ki != 0xFFFF) {
+		g_neuralPID.Ki = GetSysConfigOpt()->sysConfig->Ki / 100.0;
+	}
+	if (GetSysConfigOpt()->sysConfig->Kd != 0xFFFF) {
+		g_neuralPID.Kd = GetSysConfigOpt()->sysConfig->Kd / 100.0;
+	}
+
 	static TaskHandle_t pwheelTCB = NULL;
 	TaskInit(g_appWheel.tag, WheelTask, &pwheelTCB);
 	RegisterApp(&g_appWheel);

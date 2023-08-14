@@ -289,8 +289,7 @@ static void UartScreenStartTimerCmd(void *data, UINT32 dataLen)
 		TIM_ITConfig(TIM3, TIM_IT_Update, ENABLE);
 		TIM_Cmd(TIM3, ENABLE);		
 	} else {
-		TIM_ITConfig(TIM3, TIM_IT_Update, DISABLE);
-		TIM_Cmd(TIM3, DISABLE);		
+		// close in interrupt
 	}
 }
 
@@ -367,6 +366,8 @@ static INT32 DeviceProbe(void)
 	}
 
 	DgusWriteData(KEY_RETURN_POWER_INC_DEC, 0);
+
+	DgusWriteData(VAR_ICON_START_STOP, START_ICON);
 
 	TIM_ITConfig(TIM3, TIM_IT_Update, ENABLE);
 	TIM_Cmd(TIM3, ENABLE);
@@ -467,19 +468,21 @@ void TIM3_IRQHandler(void)
 
 		if (g_logDelayTimeSecond > 0) {
 			--g_logDelayTimeSecond;
-		}
-
-		if (g_logDelayTimeSecond == 0) {
+			return;
+		} else if (g_logDelayTimeSecond == 0) {
 			g_logDelayTimeSecond = -1;
 			g_uartScreen.dataType = UART_SCREEN_LOG_DELAY_DATA;
 			TIM_ITConfig(TIM3, TIM_IT_Update, DISABLE);
 			TIM_Cmd(TIM3, DISABLE);
 			DeviceSampleData(SEND_FROM_ISR, TAG_APP_UI, &g_deviceDGUS);
+			return;
 		}
 
-		if (g_startTimerFlag) {
-			g_uartScreen.dataType = UART_SCREEN_TIMER_DATA;
-			DeviceSampleData(SEND_FROM_ISR, TAG_APP_UI, &g_deviceDGUS);
+		g_uartScreen.dataType = UART_SCREEN_TIMER_DATA;
+		DeviceSampleData(SEND_FROM_ISR, TAG_APP_UI, &g_deviceDGUS);
+		if (!g_startTimerFlag) {
+			TIM_ITConfig(TIM3, TIM_IT_Update, DISABLE);
+			TIM_Cmd(TIM3, DISABLE);
 		}
 	}
 }

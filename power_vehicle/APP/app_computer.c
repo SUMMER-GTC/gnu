@@ -42,7 +42,7 @@ static void ComputerAppProcess(struct platform_info *data)
 static void RD800DataSimulator(struct platform_info *dev)
 {
 	struct ui_display_data *uiData = (struct ui_display_data *)g_computerData;
-	uiData->dataType = COMM_POWER_VEHICLE_READ_SPEED;
+	uiData->dataType = COMM_POWER_VEHICLE_SPO2_AND_SO_ON;
 	uiData->spo2 = rand() % 1000;
 	uiData->vo2 = rand() % 1000;
 	uiData->vco2 = rand() % 1000;
@@ -66,9 +66,10 @@ static void RD800Process(struct platform_info *dev)
 			ComputerSendData(TAG_APP_UI, uiData, sizeof(struct ui_display_data));
 			break;
 		case COMM_POWER_VEHICLE_READ_SPEED:
-			RD800DataSimulator(dev);
 			itoa(uiData->rpm % 1000, &sendData[1], 10);
 			dev->fops->write(dev, sendData, strlen(sendData));
+			uiData->dataType = COMM_POWER_VEHICLE_READ_SPEED;
+			ComputerSendData(TAG_APP_UI, uiData, sizeof(struct ui_display_data));
 			break;
 		case COMM_POWER_VEHICLE_SET_POWER:
 			char *numStr = (char *)&powerVehicle[1];
@@ -76,6 +77,9 @@ static void RD800Process(struct platform_info *dev)
 			uiData->dataType = COMM_POWER_VEHICLE_SET_POWER;
 			ComputerSendData(TAG_APP_UI, uiData, sizeof(struct ui_display_data));
 		break;
+		case COMM_POWER_VEHICLE_SPO2_AND_SO_ON:
+			RD800DataSimulator(dev);
+			break;
 		default: break;
 	}
 }

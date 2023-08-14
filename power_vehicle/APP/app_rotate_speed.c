@@ -39,7 +39,6 @@ static UINT16 RotateSpeedDataFilter(UINT16 rpm)
 {
 	UINT16 retRPM = 0;
 	static UINT16 rpmCnt = 0;
-	static UINT16 displayRpm = 0;
 
 #if RPM_SIMULATOR_DATA
 	UNUSED(g_rotateSpeedFilter);

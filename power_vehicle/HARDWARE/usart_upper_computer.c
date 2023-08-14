@@ -16,7 +16,7 @@
 #include "sys.h"
 
 #define UPPER_COMPUTER_DMA_SEND_BUFF_SIZE (256)
-#define UART_POWER_VEHICLE_DATA_SIZE (5)
+#define UART_POWER_VEHICLE_DATA_SIZE (32)
 
 #define USART_UPPER_COMPUTER_USE_DMA_SEND (1)
 
@@ -283,11 +283,25 @@ static void CommPowerVehicleIrqHandler(UINT8 ch, struct comm_power_vehicle_data 
 	if (g_testDataCnt > sizeof(g_testData)) {
 		g_testDataCnt = 0;
 	}
+	/*
+		HEAD SPO2  VO2   VCO2  PULSE LBP   HBP   0x0D
+		0x83 3Byte 3Byte 3Byte 3Byte 3Byte 3Byte 0x0D
 
+		eg:
+		0x83 123   100   121   111   065   132   0x0D
+		means
+		spo2:123
+		vo2:100
+		vco2:121
+		pulse:111
+		lbp:65
+		hbp:132
+	*/ 
 	switch(comm->state) {
 		case COMM_IDLE_STATE:
 			comm->rxCnt = 0;
-			if (ch == COMM_POWER_VEHICLE_CONNECT || ch == COMM_POWER_VEHICLE_READ_SPEED || ch == COMM_POWER_VEHICLE_SET_POWER) {
+			if (ch == COMM_POWER_VEHICLE_CONNECT || ch == COMM_POWER_VEHICLE_READ_SPEED || \
+				  ch == COMM_POWER_VEHICLE_SET_POWER || ch == COMM_POWER_VEHICLE_SPO2_AND_SO_ON) {
 				comm->state = COMM_SYN_HEAD1_STATE;
 				++comm->rxCnt;
 			}

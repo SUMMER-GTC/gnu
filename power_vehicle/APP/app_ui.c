@@ -10,8 +10,10 @@
 #include "timers.h"
 
 #define RMP_WARNING_VALUE 400
+#define ENTRY_PARAMETER_CONF_PRESS_CNT 6
 
 static UINT16 g_dgusPage = 0;
+
 static struct ui_display_data g_uiDisplayData;
 
 static INT32 UiSendData(UINT8 desTag, void *data, UINT16 dataLen)
@@ -47,6 +49,9 @@ static void StartTimer(bool startRun)
 	if (g_timerRunning) {
 		g_timerSecond = 0;
 		UiWriteData(dev, DATA_TIME, g_timerSecond);
+		UiWriteData(dev, VAR_ICON_START_STOP, STOP_ICON);
+	} else {
+		UiWriteData(dev, VAR_ICON_START_STOP, START_ICON);
 	}
 
 	dev->fops->ioctl(dev, UART_SCREEN_START_TIMER_CMD, (void*)&g_timerRunning, sizeof(g_timerRunning));
@@ -56,7 +61,10 @@ static UINT8 g_heartLungConnectTimeOutCnt = 0;
 static bool g_heartLungWorking = false;
 static bool g_startBtn = false;
 
-static void UiUpdate(struct platform_info *dev, struct ui_display_data *uiData)
+static UINT8 g_spo2ConnectTimeOutCnt = 0;
+static bool g_spo2Connected = false;
+
+static void UiRd800AutoControlProcess(void)
 {
 	if (!g_heartLungWorking) {
 		g_heartLungWorking = true;
@@ -67,15 +75,41 @@ static void UiUpdate(struct platform_info *dev, struct ui_display_data *uiData)
 	if (g_heartLungWorking) {
 		g_heartLungConnectTimeOutCnt = 6;
 	}
+}
 
-	if (g_timerRunning) {
-		UiWriteData(dev, DATA_SPO2, uiData->spo2);
-		UiWriteData(dev, DATA_VO2, uiData->vo2);
-		UiWriteData(dev, DATA_VCO2, uiData->vco2);
-		UiWriteData(dev, DATA_HR, uiData->heartRate);
-		UiWriteData(dev, DATA_LBP, uiData->lbp);
-		UiWriteData(dev, DATA_HBP, uiData->hbp);		
+static void UiSpo2AndSoOnUpdate(struct platform_info *dev, struct ui_display_data *uiData)
+{
+	if (!g_timerRunning) {
+		return;
 	}
+
+	if (g_dgusPage != PAGE_HEART_LUNG) {
+		return;
+	}
+
+	if (!g_spo2Connected) {
+		g_spo2Connected = true;
+	}
+
+	if (g_spo2Connected) {
+		g_spo2ConnectTimeOutCnt = 6;
+	}
+
+	UiWriteData(dev, DATA_SPO2, uiData->spo2);
+	UiWriteData(dev, DATA_VO2, uiData->vo2);
+	UiWriteData(dev, DATA_VCO2, uiData->vco2);
+	UiWriteData(dev, DATA_HR, uiData->heartRate);
+	UiWriteData(dev, DATA_LBP, uiData->lbp);
+	UiWriteData(dev, DATA_HBP, uiData->hbp);
+}
+
+static void UiSendDataToWheel(UINT8 dataType, UINT16 data)
+{
+	struct ui_to_wheel uiToWheelData;
+	uiToWheelData.dataType = dataType;
+	uiToWheelData.data = data;
+
+	UiSendData(TAG_APP_WHEEL, (void *)&uiToWheelData, sizeof(uiToWheelData));
 }
 
 static void UiPowerUpdate(struct platform_info *dev, struct ui_display_data *uiData)
@@ -85,7 +119,7 @@ static void UiPowerUpdate(struct platform_info *dev, struct ui_display_data *uiD
 		UiWriteData(dev, DATA_POWER, uiData->power);
 	}
 	UiSendData(TAG_APP_DATA_STORAGE, (void *)&uiData->power, sizeof(UINT16));
-	UiSendData(TAG_APP_WHEEL, (void *)&uiData->power, sizeof(UINT16));
+	UiSendDataToWheel(COMM_POWER_VEHICLE_SET_POWER, uiData->power);
 }
 
 static bool g_logDelayOver = false;
@@ -109,6 +143,12 @@ static void UiAppComputerProcess(struct platform_info *app)
 		case COMM_POWER_VEHICLE_CONNECT:
 			break;
 		case COMM_POWER_VEHICLE_READ_SPEED:
+			UiRd800AutoControlProcess();
+			break;
+		case COMM_POWER_VEHICLE_SET_POWER:
+			UiPowerUpdate(dev, &g_uiDisplayData);
+			break;
+		case COMM_POWER_VEHICLE_SPO2_AND_SO_ON:
 			if (g_dgusPage != PAGE_HEART_LUNG) {
 				UiWriteData(dev, DATA_SPO2, 0);
 				UiWriteData(dev, DATA_VO2, 0);
@@ -119,10 +159,7 @@ static void UiAppComputerProcess(struct platform_info *app)
 				g_dgusPage = PAGE_HEART_LUNG;
 				dev->fops->ioctl(dev, DGUS_PAGE_W_CMD, (void*)&g_dgusPage, sizeof(g_dgusPage));
 			}
-			UiUpdate(dev, &g_uiDisplayData);
-			break;
-		case COMM_POWER_VEHICLE_SET_POWER:
-			UiPowerUpdate(dev, &g_uiDisplayData);
+			UiSpo2AndSoOnUpdate(dev, &g_uiDisplayData);
 			break;
 		default:
 			break;
@@ -179,7 +216,7 @@ static void PowerIncDecProcess(struct platform_info *dev, UINT16 value)
 {
 	UiWriteData(dev, DATA_POWER, value);
 	UiSendData(TAG_APP_DATA_STORAGE, (void *)&value, sizeof(UINT16));
-	UiSendData(TAG_APP_WHEEL, (void *)&value, sizeof(UINT16));
+	UiSendDataToWheel(KEY_RETURN_POWER_INC_DEC, value);
 }
 
 static void StartProcess(struct platform_info *dev)
@@ -198,6 +235,15 @@ static void UiLogDelayProcess(struct platform_info *dev)
 
 static void UiTimerProcess(struct platform_info *dev)
 {
+	if (!g_spo2Connected && g_dgusPage == PAGE_HEART_LUNG) {
+		g_dgusPage = PAGE_STANDALONE;
+		dev->fops->ioctl(dev, DGUS_PAGE_W_CMD, (void*)&g_dgusPage, sizeof(g_dgusPage));
+	}
+
+	if (!g_timerRunning) {
+		return;
+	}
+
 	++g_timerSecond;
 	UiWriteData(dev, DATA_TIME, g_timerSecond);
 
@@ -226,6 +272,29 @@ static void UiTimerProcess(struct platform_info *dev)
 	max6950Dev->fops->write(max6950Dev, (void *)&g_uiDisplayData.rpm, sizeof(g_uiDisplayData.rpm));
 }
 
+static UINT16 g_entryParameterConfPageBefor = 0;
+static void EntryParameterConfProcess(struct platform_info *dev)
+{
+	static UINT8 pressCnt = 0;
+
+	if (++pressCnt >= ENTRY_PARAMETER_CONF_PRESS_CNT) {
+		pressCnt = 0;
+		g_entryParameterConfPageBefor = g_dgusPage;
+		GetSysConfigOpt()->Read();
+
+		g_dgusPage = PAGE_PARAMETER_CONF;
+		dev->fops->ioctl(dev, DGUS_PAGE_W_CMD, (void*)&g_dgusPage, sizeof(g_dgusPage));
+	}
+}
+
+static void ExitParameterConfProcess(struct platform_info *dev)
+{
+	GetSysConfigOpt()->Write();
+
+	g_dgusPage = g_entryParameterConfPageBefor;
+	dev->fops->ioctl(dev, DGUS_PAGE_W_CMD, (void*)&g_dgusPage, sizeof(g_dgusPage));
+}
+
 static void UiDgusProcess(struct platform_info *dev, UINT8 *data)
 {
 	UINT16 keyAddr = 0;
@@ -240,6 +309,32 @@ static void UiDgusProcess(struct platform_info *dev, UINT8 *data)
 			break;
 		case KEY_RETURN_START:
 			StartProcess(dev);
+			break;
+		case KEY_RETURN_ENTRY_PARAMETER_CONF:
+			EntryParameterConfProcess(dev);
+			break;
+		case KEY_RETURN_EXIT_PARAMETER_CONF:
+			ExitParameterConfProcess(dev);
+			break;
+		case KEY_KCOEF_INC_DEC:
+			GetSysConfigOpt()->sysConfig->Kcoef = keyData;
+			UiWriteData(dev, DATA_KCOEF, keyData);
+			UiSendDataToWheel(KEY_KCOEF_INC_DEC, keyData);
+			break;
+		case KEY_KP_INC_DEC:
+			GetSysConfigOpt()->sysConfig->Kp = keyData;
+			UiWriteData(dev, DATA_KP, keyData);
+			UiSendDataToWheel(KEY_KP_INC_DEC, keyData);
+			break;
+		case KEY_KI_INC_DEC:
+			GetSysConfigOpt()->sysConfig->Ki = keyData;
+			UiWriteData(dev, DATA_KI, keyData);
+			UiSendDataToWheel(KEY_KI_INC_DEC, keyData);
+			break;
+		case KEY_KD_INC_DEC:
+			GetSysConfigOpt()->sysConfig->Kd = keyData;
+			UiWriteData(dev, DATA_KD, keyData);
+			UiSendDataToWheel(KEY_KD_INC_DEC, keyData);
 			break;
 		default:
 			break;
@@ -310,10 +405,15 @@ static TimerHandle_t g_heartLungHandle = NULL;
 static void HeartLungConnectTimerCall(void)
 {
 	g_heartLungConnectTimeOutCnt = (g_heartLungConnectTimeOutCnt > 0)? (g_heartLungConnectTimeOutCnt - 1): 0;
-	if (g_heartLungWorking && g_dgusPage == PAGE_HEART_LUNG && g_heartLungConnectTimeOutCnt == 0) {
+	if (g_heartLungWorking && g_heartLungConnectTimeOutCnt == 0) {
 		g_heartLungWorking = false;
 		g_startBtn = false;
 		StartTimer(false);
+	}
+
+	g_spo2ConnectTimeOutCnt = (g_spo2ConnectTimeOutCnt > 0)? (g_spo2ConnectTimeOutCnt - 1): 0;
+	if (g_spo2Connected && g_dgusPage == PAGE_HEART_LUNG && g_spo2ConnectTimeOutCnt == 0) {
+		g_spo2Connected = false;
 	}
 }
 

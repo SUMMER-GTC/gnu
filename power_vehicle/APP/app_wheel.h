@@ -10,6 +10,11 @@ extern "C" {
 #include "task.h"
 
 
+struct ui_to_wheel {
+  UINT8 dataType;
+  UINT16 data;
+} __packed;
+
 #ifdef __cplusplus
 }
 #endif

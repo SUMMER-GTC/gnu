@@ -36,6 +36,7 @@ extern "C" {
 #define PAGE_LOG						0		/* log */
 #define PAGE_STANDALONE			1		/* standalone */
 #define PAGE_HEART_LUNG			2		/* heart lung */
+#define PAGE_PARAMETER_CONF 3
 
 #define KEY_RETURN_POWER_INC_DEC	0x0001
 #define KEY_RETURN_START					0x0002
@@ -51,6 +52,22 @@ extern "C" {
 #define DATA_HBP		0x0018
 
 #define TEXT_SOFTWARE_VER		0x0020
+
+#define VAR_ICON_START_STOP	0x0030
+#define START_ICON 0
+#define STOP_ICON 1
+
+// parameter config
+#define DATA_KCOEF				0x0040
+#define DATA_KP						0x0041
+#define DATA_KI						0x0042
+#define DATA_KD						0x0043
+#define KEY_KCOEF_INC_DEC	0x0044
+#define KEY_KP_INC_DEC		0x0045
+#define KEY_KI_INC_DEC		0x0046
+#define KEY_KD_INC_DEC		0x0047
+#define KEY_RETURN_ENTRY_PARAMETER_CONF	0x0048 // press 6 times entry
+#define KEY_RETURN_EXIT_PARAMETER_CONF	0x0049
 
 #define DATA_RPM_SP_COLOR	0x6003
 #define DATA_RPM_RED			0xF800

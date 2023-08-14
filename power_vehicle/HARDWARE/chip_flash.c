@@ -4,7 +4,7 @@
 
 const char g_appDeviceNameBuf[] __attribute__((__used__, __section__(".device_name"))) = "power vehicle";
 const char g_appHardwareVersionBuf[] __attribute__((__used__, __section__(".hardware_ver"))) = "v1.0";
-const char g_appSoftwareVersionBuf[] __attribute__((__used__, __section__(".software_ver"))) = "v1.0.0";
+const char g_appSoftwareVersionBuf[] __attribute__((__used__, __section__(".software_ver"))) = "V1.0.0.0";
 
 void ChipFlashEraseAppRom(void)
 {
