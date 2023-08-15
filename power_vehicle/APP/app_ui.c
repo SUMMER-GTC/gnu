@@ -273,6 +273,7 @@ static void UiTimerProcess(struct platform_info *dev)
 }
 
 static UINT16 g_entryParameterConfPageBefor = 0;
+static struct sys_config g_lastParameterConfig = { 0 };
 static void EntryParameterConfProcess(struct platform_info *dev)
 {
 	static UINT8 pressCnt = 0;
@@ -280,7 +281,7 @@ static void EntryParameterConfProcess(struct platform_info *dev)
 	if (++pressCnt >= ENTRY_PARAMETER_CONF_PRESS_CNT) {
 		pressCnt = 0;
 		g_entryParameterConfPageBefor = g_dgusPage;
-		GetSysConfigOpt()->Read();
+		g_lastParameterConfig = *GetSysConfigOpt()->sysConfig;
 
 		g_dgusPage = PAGE_PARAMETER_CONF;
 		dev->fops->ioctl(dev, DGUS_PAGE_W_CMD, (void*)&g_dgusPage, sizeof(g_dgusPage));
@@ -289,7 +290,11 @@ static void EntryParameterConfProcess(struct platform_info *dev)
 
 static void ExitParameterConfProcess(struct platform_info *dev)
 {
-	GetSysConfigOpt()->Write();
+	struct sys_config *sysConfig = GetSysConfigOpt()->sysConfig;
+	if (g_lastParameterConfig.Kcoef != sysConfig->Kcoef || g_lastParameterConfig.Kp != sysConfig->Kp || \
+	    g_lastParameterConfig.Ki != sysConfig->Ki || g_lastParameterConfig.Kd != sysConfig->Kd) {
+		GetSysConfigOpt()->Write();		
+	}
 
 	g_dgusPage = g_entryParameterConfPageBefor;
 	dev->fops->ioctl(dev, DGUS_PAGE_W_CMD, (void*)&g_dgusPage, sizeof(g_dgusPage));
@@ -440,6 +445,21 @@ static struct platform_info g_appUi = {
 
 static INT32 AppUiInit(void)
 {
+	GetSysConfigOpt()->Read();
+
+	struct platform_info *dev = NULL;
+	if (GetDeviceInfo(TAG_DEVICE_UART_SCREEN, &dev) == SUCC) {
+		UiWriteData(dev, DATA_KCOEF, GetSysConfigOpt()->sysConfig->Kcoef);
+		UiWriteData(dev, DATA_KP, GetSysConfigOpt()->sysConfig->Kp);
+		UiWriteData(dev, DATA_KI, GetSysConfigOpt()->sysConfig->Ki);
+		UiWriteData(dev, DATA_KD, GetSysConfigOpt()->sysConfig->Kd);
+
+		UiWriteData(dev, KEY_KCOEF_INC_DEC, GetSysConfigOpt()->sysConfig->Kcoef);
+		UiWriteData(dev, KEY_KP_INC_DEC, GetSysConfigOpt()->sysConfig->Kp);
+		UiWriteData(dev, KEY_KI_INC_DEC, GetSysConfigOpt()->sysConfig->Ki);
+		UiWriteData(dev, KEY_KD_INC_DEC, GetSysConfigOpt()->sysConfig->Kd);
+	}
+
 	HeartLungConnectTimer();
 
 	static TaskHandle_t pUiTCB = NULL;

@@ -25,6 +25,10 @@ struct sys_config {
 	u32 hardWareErrCnt;
 	u32 deviceNameErrCnt;
 	u32 romCheckErrCnt;
+	u16 Kcoef;
+	u16 Kp;
+	u16 Ki;
+	u16 Kd;
 } __packed;
 
 struct sys_config_opt {
