@@ -7,6 +7,8 @@
 #include "queue.h"		
 #include "alg.h"
 
+#include "device_manager.h"
+
 #define FORCE_FILTER_FIFO_SIZE 9
 
 static UINT16 g_forceFilterData[FORCE_FILTER_FIFO_SIZE] = { 0 };
@@ -31,15 +33,50 @@ static INT32 ForceSendData(UINT8 desTag, void *data, UINT16 dataLen)
 	return SendDataToQueue(TAG_APP_FORCE, desTag, data, dataLen);
 }
 
+#define FORCE_CALIBRATION_BUFF_SIZE 16
+#define FORCE_CALIBRATION_ONE_SECOND_NUM 30
+static UINT16 g_forceCalibrationSum = 0;
+static void ForceCalibration(UINT16 data)
+{
+	static UINT8 oneSecondCnt = 0;
+	static UINT8 index = 0;
+
+	if (++oneSecondCnt > FORCE_CALIBRATION_ONE_SECOND_NUM) {
+		oneSecondCnt = 0;
+		++index;
+
+		g_forceCalibrationSum += data;
+		if (index < FORCE_CALIBRATION_BUFF_SIZE) {
+			return;
+		}
+
+		struct sys_config *sysConfig = GetSysConfigOpt()->sysConfig;
+		sysConfig->cal.calibratedFlag = true;
+		sysConfig->cal.value = g_forceCalibrationSum / FORCE_CALIBRATION_BUFF_SIZE;
+		GetSysConfigOpt()->Write();
+		NVIC_SystemReset();
+	}
+}
+
+static bool g_forceCalibration = false;
 static void ForceDeviceProcess(struct platform_info *dev)
 {
 	struct platform_info *devFops = dev;
 
 	devFops->fops->read(dev);
 	UINT16 millivolt = *(UINT16 *)devFops->private_data;
-	UINT16 ret = WeightMovingAverageFilter(&g_forceFilter, millivolt);
 
+	if (g_forceCalibration) {
+		ForceCalibration(millivolt);
+	}
+
+	UINT16 ret = WeightMovingAverageFilter(&g_forceFilter, millivolt);
 	ForceSendData(TAG_APP_WHEEL, &ret, sizeof(ret));
+}
+
+static void ForceAppWheelProcess(struct platform_info *app)
+{
+	g_forceCalibration = true;
 }
 
 void ForceTask(void *pvParameters)
@@ -55,6 +92,9 @@ void ForceTask(void *pvParameters)
 		switch (queueData.tag) {
 			case TAG_DEVICE_TASEOMETER:
 				ForceDeviceProcess(&queueData);
+				break;
+			case TAG_APP_WHEEL:
+				ForceAppWheelProcess(&queueData);
 				break;
 		}
 	}

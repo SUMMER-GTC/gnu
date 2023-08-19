@@ -120,6 +120,11 @@ struct common_time {
 #define DEVICE_NAME_SIZE 32
 #define HARDWARE_VER_SIZE 32
 
+struct calibration {
+	bool calibratedFlag;
+	INT16 value;
+};
+
 struct sys_config {
 	UINT32 firstUseId;
 	UINT32 otaState;
@@ -130,6 +135,7 @@ struct sys_config {
 	UINT16 Kp;
 	UINT16 Ki;
 	UINT16 Kd;
+	struct calibration cal;
 } __packed;
 
 struct sys_config_opt {

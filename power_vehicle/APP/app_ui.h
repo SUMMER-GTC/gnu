@@ -25,6 +25,8 @@ struct ui_display_data {
 
 #define UI_DISPLAY_DATA_OFFSET(member) (UINT32)&(((struct ui_display_data *)0)->member)
 
+#define UI_CALIBRATION_FORCE 0x11
+
 #ifdef __cplusplus
 }
 #endif

@@ -8,6 +8,7 @@ extern "C" {
 #include "common_def.h"
 #include "app_rotate_speed.h"
 #include "app_wheel.h"
+#include "app_ui.h"
 
 #define APP_ATTATCH_DEVICE_SIZE 10
 #define DEV_INTERVAL_BUFF_SIZE 10

@@ -6,6 +6,10 @@ const char g_appDeviceNameBuf[] __attribute__((__used__, __section__(".device_na
 const char g_appHardwareVersionBuf[] __attribute__((__used__, __section__(".hardware_ver"))) = "v1.0";
 const char g_appSoftwareVersionBuf[] __attribute__((__used__, __section__(".software_ver"))) = "V1.0.0.0";
 
+const char g_calibratingBuff[] __attribute__((__used__, __section__(".calibrating"))) = "calibrating...";
+const char g_calibratedBuff[] __attribute__((__used__, __section__(".calibrated"))) = "calibrated";
+const char g_noCalibrateBuff[] __attribute__((__used__, __section__(".not_calibrated"))) = "not calibrated";
+
 void ChipFlashEraseAppRom(void)
 {
 	FLASH_Unlock();

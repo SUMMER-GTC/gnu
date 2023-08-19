@@ -50,6 +50,12 @@ static struct neural_pid g_neuralPID = {
   .learningMode = HEBBE_LEARNING_MODE,
 };
 
+static INT32 WheelSendData(UINT8 desTag, void *data, UINT16 dataLen)
+{
+	return SendDataToQueue(TAG_APP_WHEEL, desTag, data, dataLen);
+}
+
+static bool g_forceCalibrationFlag = false;
 static void WheelAppForceProcess(struct platform_info *app)
 {
 	UINT16 force = *(UINT16 *)app->private_data;
@@ -58,6 +64,10 @@ static void WheelAppForceProcess(struct platform_info *app)
 	IncPID(&g_incPID, force);
 	g_neuralPID.setpoint = g_wheelControl.force;
 	NeuralPID(&g_neuralPID, force);
+
+	if (g_forceCalibrationFlag) {
+		return;
+	}
 
 	struct platform_info *optDev = NULL;
 	if (GetDeviceInfo(TAG_DEVICE_PWM_OUT, &optDev) != SUCC) {
@@ -81,6 +91,24 @@ static void WheelAppRotateSpeedProcess(struct platform_info *app)
 	g_wheelControl.force = g_wheelControl.power / g_wheelControl.rpm;
 }
 
+static void WheelAppUiCalibration(void)
+{
+	struct platform_info *optDev = NULL;
+	if (GetDeviceInfo(TAG_DEVICE_PWM_OUT, &optDev) != SUCC) {
+		return;
+	}
+	
+	g_forceCalibrationFlag = true;
+
+	struct pwm_out pwmOut;
+	pwmOut.dev = PWM_OUT_WHEEL;
+	pwmOut.duty = 0;
+	optDev->fops->write(optDev, &pwmOut, sizeof(pwmOut));
+
+	UINT8 data = 0;
+	WheelSendData(TAG_APP_FORCE, &data, sizeof(data));
+}
+
 static void WheelAppUiProcess(struct platform_info *app)
 {
 	struct ui_to_wheel uiData = *(struct ui_to_wheel *)app->private_data;
@@ -101,6 +129,9 @@ static void WheelAppUiProcess(struct platform_info *app)
 			break;
 		case KEY_KD_INC_DEC:
 			g_neuralPID.Kd = uiData.data / 100.0;
+			break;
+		case UI_CALIBRATION_FORCE:
+			WheelAppUiCalibration();
 			break;
 		default:
 			break;
@@ -137,8 +168,11 @@ void WheelTask(void *pvParameters)
 
 }
 
+static UINT8 g_wheelData = 0;
 static struct platform_info g_appWheel = {
 	.tag = TAG_APP_WHEEL,
+	.private_data = (void *)&g_wheelData,
+	.private_data_len = sizeof(g_wheelData),
 };
 
 static INT32 AppWheelInit(void)

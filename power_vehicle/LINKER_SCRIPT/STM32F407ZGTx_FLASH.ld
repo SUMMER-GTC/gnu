@@ -209,6 +209,15 @@ SECTIONS
 
     . = ALIGN(32);
     KEEP (*(.software_ver*))
+
+    . = ALIGN(32);
+    KEEP (*(.calibrating*))
+
+    . = ALIGN(32);
+    KEEP (*(.calibrated*))
+
+    . = ALIGN(32);
+    KEEP (*(.not_calibrated*))
   } >BOOT_CHECK
 
   /* Remove information from the standard libraries */

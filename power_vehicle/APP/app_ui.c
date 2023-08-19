@@ -30,6 +30,24 @@ static void UiWriteData(struct platform_info *dev, UINT16 addr, UINT16 value)
 	dev->fops->ioctl(dev, DGUS_DATA_W_CMD, (void*)&dgus, sizeof(dgus.addr) + sizeof(UINT16));
 }
 
+static void UiWriteText(struct platform_info *dev, UINT16 addr, const char *str)
+{
+	struct dgus_addr_data dgus;
+	char *des = (char *)dgus.data;
+	UINT8 dataLen;
+
+	if (strlen(str) > sizeof(dgus.data)) {
+		dataLen = sizeof(dgus.data);
+	} else {
+		dataLen = strlen(str);
+	}
+
+	dgus.addr = addr;
+	memcpy(des, str, dataLen);
+
+	dev->fops->ioctl(dev, DGUS_TEXT_W_CMD, (void*)&dgus, sizeof(dgus.addr) + dataLen);
+}
+
 static UINT16 g_timerSecond = 0;
 static bool g_timerRunning = false;
 
@@ -300,6 +318,12 @@ static void ExitParameterConfProcess(struct platform_info *dev)
 	dev->fops->ioctl(dev, DGUS_PAGE_W_CMD, (void*)&g_dgusPage, sizeof(g_dgusPage));
 }
 
+static void CalibrateProcess(struct platform_info *dev)
+{
+	UiWriteText(dev, TEXT_CALIBRATION_DIS, g_calibratingBuff);
+	UiSendDataToWheel(UI_CALIBRATION_FORCE, 0);
+}
+
 static void UiDgusProcess(struct platform_info *dev, UINT8 *data)
 {
 	UINT16 keyAddr = 0;
@@ -340,6 +364,9 @@ static void UiDgusProcess(struct platform_info *dev, UINT8 *data)
 			GetSysConfigOpt()->sysConfig->Kd = keyData;
 			UiWriteData(dev, DATA_KD, keyData);
 			UiSendDataToWheel(KEY_KD_INC_DEC, keyData);
+			break;
+		case KEY_RETURN_CALIBRATION:
+			CalibrateProcess(dev);
 			break;
 		default:
 			break;
@@ -446,18 +473,25 @@ static struct platform_info g_appUi = {
 static INT32 AppUiInit(void)
 {
 	GetSysConfigOpt()->Read();
+	struct sys_config *sysConfig = GetSysConfigOpt()->sysConfig;
 
 	struct platform_info *dev = NULL;
 	if (GetDeviceInfo(TAG_DEVICE_UART_SCREEN, &dev) == SUCC) {
-		UiWriteData(dev, DATA_KCOEF, GetSysConfigOpt()->sysConfig->Kcoef);
-		UiWriteData(dev, DATA_KP, GetSysConfigOpt()->sysConfig->Kp);
-		UiWriteData(dev, DATA_KI, GetSysConfigOpt()->sysConfig->Ki);
-		UiWriteData(dev, DATA_KD, GetSysConfigOpt()->sysConfig->Kd);
+		UiWriteData(dev, DATA_KCOEF, sysConfig->Kcoef);
+		UiWriteData(dev, DATA_KP, sysConfig->Kp);
+		UiWriteData(dev, DATA_KI, sysConfig->Ki);
+		UiWriteData(dev, DATA_KD, sysConfig->Kd);
 
-		UiWriteData(dev, KEY_KCOEF_INC_DEC, GetSysConfigOpt()->sysConfig->Kcoef);
-		UiWriteData(dev, KEY_KP_INC_DEC, GetSysConfigOpt()->sysConfig->Kp);
-		UiWriteData(dev, KEY_KI_INC_DEC, GetSysConfigOpt()->sysConfig->Ki);
-		UiWriteData(dev, KEY_KD_INC_DEC, GetSysConfigOpt()->sysConfig->Kd);
+		UiWriteData(dev, KEY_KCOEF_INC_DEC, sysConfig->Kcoef);
+		UiWriteData(dev, KEY_KP_INC_DEC, sysConfig->Kp);
+		UiWriteData(dev, KEY_KI_INC_DEC, sysConfig->Ki);
+		UiWriteData(dev, KEY_KD_INC_DEC, sysConfig->Kd);
+
+		if (sysConfig->cal.calibratedFlag) {
+				UiWriteText(dev, TEXT_CALIBRATION_DIS, g_calibratedBuff);
+		} else {
+				UiWriteText(dev, TEXT_CALIBRATION_DIS, g_noCalibrateBuff);
+		}
 	}
 
 	HeartLungConnectTimer();

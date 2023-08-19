@@ -39,6 +39,9 @@ struct sys_config_opt* GetSysConfigOpt(void);
 
 extern const char g_appHardwareVersionBuf[];
 extern const char g_appSoftwareVersionBuf[];
+extern const char g_calibratingBuff[];
+extern const char g_calibratedBuff[];
+extern const char g_noCalibrateBuff[];
 
 #endif
 

@@ -19,6 +19,12 @@ typedef void (*jump_t)(void);
 
 #define DEVICE_NAME_SIZE 32
 #define HARDWARE_VER_SIZE 32
+
+struct calibration {
+	bool calibratedFlag;
+	vs16 value;
+};
+
 struct sys_config {
 	u32 firstUseId;
 	u32 otaState;
@@ -29,6 +35,7 @@ struct sys_config {
 	u16 Kp;
 	u16 Ki;
 	u16 Kd;
+	struct calibration cal;
 } __packed;
 
 struct sys_config_opt {
