@@ -36,6 +36,7 @@ struct sys_config {
 	u16 Ki;
 	u16 Kd;
 	struct calibration cal;
+	u32 languageVer; // 0 is english, 1 is chinese
 } __packed;
 
 struct sys_config_opt {

@@ -361,6 +361,7 @@ static INT32 DeviceProbe(void)
 
 	DgusSelectPage(PAGE_LOG);
 
+	DgusWriteData(DATA_RPM_SP_COLOR, DATA_RPM_BLUE);
 	for (UINT16 addr = DATA_POWER; addr <= DATA_HBP; addr ++) {
 		DgusWriteData(addr, 0);
 	}
@@ -368,6 +369,11 @@ static INT32 DeviceProbe(void)
 	DgusWriteData(KEY_RETURN_POWER_INC_DEC, 0);
 
 	DgusWriteData(VAR_ICON_START_STOP, START_ICON);
+	DgusWriteData(VAR_ICON_UART, START_ICON);
+	DgusWriteData(VAR_ICON_BLE, START_ICON);
+	DgusWriteData(VAR_ICON_WIFI, START_ICON);
+
+	DgusWriteData(ANIMATION_ICON, 0);
 
 	TIM_ITConfig(TIM3, TIM_IT_Update, ENABLE);
 	TIM_Cmd(TIM3, ENABLE);

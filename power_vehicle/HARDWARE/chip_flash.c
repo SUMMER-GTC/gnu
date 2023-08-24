@@ -48,7 +48,7 @@ s32 ChipFlashPageWrite(u8 *dataBuff, u32 chipAddr, u32 dataLen, bool eraseSysCon
   	FLASH_EraseSector(SYS_CONFIG_SECTOR, VoltageRange_3);
 	}
 	
-	for(u32 i = 0; i < dataLen / sizeof(u32); i++)
+	for(u32 i = 0; i < (dataLen + 3) / sizeof(u32); i++)
 	{
 		data = *p++;
 		(void)FLASH_ProgramWord(writeAddr , data);  

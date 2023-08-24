@@ -9,10 +9,27 @@
 #include "device_manager.h"	
 #include "timers.h"
 
-#define RMP_WARNING_VALUE 400
-#define ENTRY_PARAMETER_CONF_PRESS_CNT 6
+#define RMP_WARNING_VALUE (400)
+#define ENTRY_PARAMETER_CONF_PRESS_CNT (6)
+#define UI_LANGUAGE_VER_ENGLISH (0)
+#define UI_LANGUAGE_VER_CHINESE (1)
+#define UI_SECOND_DISPLAY_NUM 	(9999)
+#define UI_SPO2_CONNECT_TIMEOUT (6)
+
+struct connect_flag {
+	bool uartConnect;
+	bool bluetoothConnect;
+	bool wifiConnect;
+};
+
+struct connect_flag g_connectFlags = {
+	.uartConnect = false,
+	.bluetoothConnect = false,
+	.wifiConnect = false
+};
 
 static UINT16 g_dgusPage = 0;
+static UINT8 g_languageVer = 0;
 
 static struct ui_display_data g_uiDisplayData;
 
@@ -68,8 +85,10 @@ static void StartTimer(bool startRun)
 		g_timerSecond = 0;
 		UiWriteData(dev, DATA_TIME, g_timerSecond);
 		UiWriteData(dev, VAR_ICON_START_STOP, STOP_ICON);
+		UiWriteData(dev, ANIMATION_ICON, 1);
 	} else {
 		UiWriteData(dev, VAR_ICON_START_STOP, START_ICON);
+		UiWriteData(dev, ANIMATION_ICON, 0);
 	}
 
 	dev->fops->ioctl(dev, UART_SCREEN_START_TIMER_CMD, (void*)&g_timerRunning, sizeof(g_timerRunning));
@@ -97,20 +116,9 @@ static void UiRd800AutoControlProcess(void)
 
 static void UiSpo2AndSoOnUpdate(struct platform_info *dev, struct ui_display_data *uiData)
 {
-	if (!g_timerRunning) {
+	if ((g_languageVer == UI_LANGUAGE_VER_ENGLISH && g_dgusPage != PAGE_HEART_LUNG) || \
+			(g_languageVer == UI_LANGUAGE_VER_CHINESE && g_dgusPage != PAGE_HEART_LUNG_CHN)) {
 		return;
-	}
-
-	if (g_dgusPage != PAGE_HEART_LUNG) {
-		return;
-	}
-
-	if (!g_spo2Connected) {
-		g_spo2Connected = true;
-	}
-
-	if (g_spo2Connected) {
-		g_spo2ConnectTimeOutCnt = 6;
 	}
 
 	UiWriteData(dev, DATA_SPO2, uiData->spo2);
@@ -157,6 +165,11 @@ static void UiAppComputerProcess(struct platform_info *app)
 		return;
 	}
 
+	if (!g_connectFlags.uartConnect) {
+		g_connectFlags.uartConnect = true;
+		UiWriteData(dev, VAR_ICON_UART, 1);
+	}
+
 	switch(g_uiDisplayData.dataType) {
 		case COMM_POWER_VEHICLE_CONNECT:
 			break;
@@ -167,14 +180,36 @@ static void UiAppComputerProcess(struct platform_info *app)
 			UiPowerUpdate(dev, &g_uiDisplayData);
 			break;
 		case COMM_POWER_VEHICLE_SPO2_AND_SO_ON:
-			if (g_dgusPage != PAGE_HEART_LUNG) {
-				UiWriteData(dev, DATA_SPO2, 0);
-				UiWriteData(dev, DATA_VO2, 0);
-				UiWriteData(dev, DATA_VCO2, 0);
-				UiWriteData(dev, DATA_HR, 0);
-				UiWriteData(dev, DATA_LBP, 0);
-				UiWriteData(dev, DATA_HBP, 0);
+			if (!g_spo2Connected) {
+				g_spo2Connected = true;
+			}
+			g_spo2ConnectTimeOutCnt = UI_SPO2_CONNECT_TIMEOUT;
+
+			if (g_dgusPage == PAGE_PARAMETER_CONF || !g_timerRunning) {
+				break;
+			}
+
+			if (g_languageVer == UI_LANGUAGE_VER_ENGLISH && g_dgusPage != PAGE_HEART_LUNG) {
+				if (g_dgusPage != PAGE_HEART_LUNG_CHN) {
+					UiWriteData(dev, DATA_SPO2, 0);
+					UiWriteData(dev, DATA_VO2, 0);
+					UiWriteData(dev, DATA_VCO2, 0);
+					UiWriteData(dev, DATA_HR, 0);
+					UiWriteData(dev, DATA_LBP, 0);
+					UiWriteData(dev, DATA_HBP, 0);
+				}
 				g_dgusPage = PAGE_HEART_LUNG;
+				dev->fops->ioctl(dev, DGUS_PAGE_W_CMD, (void*)&g_dgusPage, sizeof(g_dgusPage));
+			} else if (g_languageVer == UI_LANGUAGE_VER_CHINESE && g_dgusPage != PAGE_HEART_LUNG_CHN) {
+				if (g_dgusPage != PAGE_HEART_LUNG) {
+					UiWriteData(dev, DATA_SPO2, 0);
+					UiWriteData(dev, DATA_VO2, 0);
+					UiWriteData(dev, DATA_VCO2, 0);
+					UiWriteData(dev, DATA_HR, 0);
+					UiWriteData(dev, DATA_LBP, 0);
+					UiWriteData(dev, DATA_HBP, 0);
+				}
+				g_dgusPage = PAGE_HEART_LUNG_CHN;
 				dev->fops->ioctl(dev, DGUS_PAGE_W_CMD, (void*)&g_dgusPage, sizeof(g_dgusPage));
 			}
 			UiSpo2AndSoOnUpdate(dev, &g_uiDisplayData);
@@ -188,6 +223,27 @@ static void UiAppRotateSpeedProcess(struct platform_info *app)
 {
 	struct rotate_speed *speed = (struct rotate_speed *)app->private_data;
 	g_uiDisplayData.rpm = speed->displayRpm;
+
+	struct platform_info *dev;
+	if (GetDeviceInfo(TAG_DEVICE_UART_SCREEN, &dev) != SUCC) {
+		return;
+	}
+
+	if (!g_spo2Connected && g_languageVer == UI_LANGUAGE_VER_ENGLISH && g_dgusPage == PAGE_HEART_LUNG) {
+		g_dgusPage = PAGE_STANDALONE;
+		dev->fops->ioctl(dev, DGUS_PAGE_W_CMD, (void*)&g_dgusPage, sizeof(g_dgusPage));
+	} else if (!g_spo2Connected && g_languageVer == UI_LANGUAGE_VER_CHINESE && g_dgusPage == PAGE_HEART_LUNG_CHN) {
+		g_dgusPage = PAGE_STANDALONE_CHN;
+		dev->fops->ioctl(dev, DGUS_PAGE_W_CMD, (void*)&g_dgusPage, sizeof(g_dgusPage));
+	}
+
+#if 0
+	if (!g_spo2Connected && g_connectFlags.uartConnect) {
+		g_connectFlags.uartConnect = false;
+
+		UiWriteData(dev, VAR_ICON_UART, 0);
+	}
+#endif
 }
 
 static void UiAppProcess(struct platform_info *data)
@@ -247,22 +303,18 @@ static void UiLogDelayProcess(struct platform_info *dev)
 {
 	// change to home page 
 	g_logDelayOver = true;
-	g_dgusPage = PAGE_STANDALONE;
 	dev->fops->ioctl(dev, DGUS_PAGE_W_CMD, (void*)&g_dgusPage, sizeof(g_dgusPage));
 }
 
 static void UiTimerProcess(struct platform_info *dev)
 {
-	if (!g_spo2Connected && g_dgusPage == PAGE_HEART_LUNG) {
-		g_dgusPage = PAGE_STANDALONE;
-		dev->fops->ioctl(dev, DGUS_PAGE_W_CMD, (void*)&g_dgusPage, sizeof(g_dgusPage));
-	}
-
 	if (!g_timerRunning) {
 		return;
 	}
 
-	++g_timerSecond;
+	if (++g_timerSecond > UI_SECOND_DISPLAY_NUM) {
+		g_timerSecond = 0;
+	}
 	UiWriteData(dev, DATA_TIME, g_timerSecond);
 
 	static UINT16 lastRpm = 0;
@@ -275,10 +327,10 @@ static void UiTimerProcess(struct platform_info *dev)
 	// change font color
 	if (g_uiDisplayData.rpm <= RMP_WARNING_VALUE && lastRpm > RMP_WARNING_VALUE) {
 		UiWriteData(dev, DATA_RPM_SP_COLOR, DATA_RPM_RED);
-		UiWriteData(dev, DATA_RPM_SP_COLOR, DATA_RPM_RED);
+		// UiWriteData(dev, DATA_RPM_SP_COLOR, DATA_RPM_RED);
 	} else if (g_uiDisplayData.rpm > RMP_WARNING_VALUE && lastRpm <= RMP_WARNING_VALUE) {
-		UiWriteData(dev, DATA_RPM_SP_COLOR, DATA_RPM_GREEN);
-		UiWriteData(dev, DATA_RPM_SP_COLOR, DATA_RPM_GREEN);
+		UiWriteData(dev, DATA_RPM_SP_COLOR, DATA_RPM_BLUE);
+		// UiWriteData(dev, DATA_RPM_SP_COLOR, DATA_RPM_BLUE);
 	}
 
 	lastRpm = g_uiDisplayData.rpm;
@@ -324,6 +376,40 @@ static void CalibrateProcess(struct platform_info *dev)
 	UiSendDataToWheel(UI_CALIBRATION_FORCE, 0);
 }
 
+static void EnglishUiProcess(struct platform_info *dev)
+{
+	g_languageVer = UI_LANGUAGE_VER_ENGLISH;
+
+	if (g_dgusPage == PAGE_STANDALONE_CHN) {
+		g_dgusPage = PAGE_STANDALONE;		
+	} else if (g_dgusPage == PAGE_HEART_LUNG_CHN) {
+		g_dgusPage = PAGE_HEART_LUNG;
+	}
+
+	dev->fops->ioctl(dev, DGUS_PAGE_W_CMD, (void*)&g_dgusPage, sizeof(g_dgusPage));
+
+	struct sys_config *sysConfig = GetSysConfigOpt()->sysConfig;
+	sysConfig->languageVer = g_languageVer;
+	GetSysConfigOpt()->Write();
+}
+
+static void ChineseUiProcess(struct platform_info *dev)
+{
+	g_languageVer = UI_LANGUAGE_VER_CHINESE;
+
+	if (g_dgusPage == PAGE_STANDALONE) {
+		g_dgusPage = PAGE_STANDALONE_CHN;		
+	} else if (g_dgusPage == PAGE_HEART_LUNG) {
+		g_dgusPage = PAGE_HEART_LUNG_CHN;
+	}
+
+	dev->fops->ioctl(dev, DGUS_PAGE_W_CMD, (void*)&g_dgusPage, sizeof(g_dgusPage));
+
+	struct sys_config *sysConfig = GetSysConfigOpt()->sysConfig;
+	sysConfig->languageVer = g_languageVer;
+	GetSysConfigOpt()->Write();
+}
+
 static void UiDgusProcess(struct platform_info *dev, UINT8 *data)
 {
 	UINT16 keyAddr = 0;
@@ -367,6 +453,12 @@ static void UiDgusProcess(struct platform_info *dev, UINT8 *data)
 			break;
 		case KEY_RETURN_CALIBRATION:
 			CalibrateProcess(dev);
+			break;
+		case KEY_RETURN_LANGUAGE_ENG:
+			EnglishUiProcess(dev);
+			break;
+		case KEY_RETURN_LANGUAGE_CHN:
+			ChineseUiProcess(dev);
 			break;
 		default:
 			break;
@@ -444,7 +536,7 @@ static void HeartLungConnectTimerCall(void)
 	}
 
 	g_spo2ConnectTimeOutCnt = (g_spo2ConnectTimeOutCnt > 0)? (g_spo2ConnectTimeOutCnt - 1): 0;
-	if (g_spo2Connected && g_dgusPage == PAGE_HEART_LUNG && g_spo2ConnectTimeOutCnt == 0) {
+	if (g_spo2Connected && g_spo2ConnectTimeOutCnt == 0) {
 		g_spo2Connected = false;
 	}
 }
@@ -491,6 +583,14 @@ static INT32 AppUiInit(void)
 				UiWriteText(dev, TEXT_CALIBRATION_DIS, g_calibratedBuff);
 		} else {
 				UiWriteText(dev, TEXT_CALIBRATION_DIS, g_noCalibrateBuff);
+		}
+
+		if (sysConfig->languageVer == UI_LANGUAGE_VER_ENGLISH) {
+			g_languageVer = UI_LANGUAGE_VER_ENGLISH;
+			g_dgusPage = PAGE_STANDALONE;
+		} else {
+			g_languageVer = UI_LANGUAGE_VER_CHINESE;
+			g_dgusPage = PAGE_STANDALONE_CHN;
 		}
 	}
 

@@ -136,6 +136,7 @@ struct sys_config {
 	UINT16 Ki;
 	UINT16 Kd;
 	struct calibration cal;
+	UINT32 languageVer; // 0 is english, 1 is chinese
 } __packed;
 
 struct sys_config_opt {

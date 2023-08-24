@@ -36,7 +36,9 @@ extern "C" {
 #define PAGE_LOG						0		/* log */
 #define PAGE_STANDALONE			1		/* standalone */
 #define PAGE_HEART_LUNG			2		/* heart lung */
-#define PAGE_PARAMETER_CONF 3
+#define PAGE_STANDALONE_CHN	3
+#define PAGE_HEART_LUNG_CHN	4
+#define PAGE_PARAMETER_CONF 5
 
 #define KEY_RETURN_POWER_INC_DEC	0x0001
 #define KEY_RETURN_START					0x0002
@@ -54,6 +56,9 @@ extern "C" {
 #define TEXT_SOFTWARE_VER		0x0020
 
 #define VAR_ICON_START_STOP	0x0030
+#define VAR_ICON_UART 			0x0031
+#define VAR_ICON_BLE 				0x0032
+#define VAR_ICON_WIFI 			0x0033
 #define START_ICON 0
 #define STOP_ICON 1
 
@@ -69,11 +74,16 @@ extern "C" {
 #define KEY_RETURN_ENTRY_PARAMETER_CONF	0x0048 // press 6 times entry
 #define KEY_RETURN_EXIT_PARAMETER_CONF	0x0049
 #define KEY_RETURN_CALIBRATION					0x004A
+#define KEY_RETURN_LANGUAGE_CHN					0x004B
+#define KEY_RETURN_LANGUAGE_ENG					0x004C
 #define TEXT_CALIBRATION_DIS 						0x0050
+
+#define ANIMATION_ICON 	0x0060
 
 #define DATA_RPM_SP_COLOR	0x6003
 #define DATA_RPM_RED			0xF800
 #define DATA_RPM_GREEN		0x07E8
+#define DATA_RPM_BLUE			0x02B4
 
 
 #define GET_UINT16_H(wValue) (UINT8)((wValue & 0xff00) >> 8)
