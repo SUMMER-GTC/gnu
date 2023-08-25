@@ -586,7 +586,7 @@ static INT32 AppUiInit(void)
 		UiWriteData(dev, KEY_KI_INC_DEC, sysConfig->Ki);
 		UiWriteData(dev, KEY_KD_INC_DEC, sysConfig->Kd);
 
-		if (sysConfig->cal.calibratedFlag) {
+		if (sysConfig->cal.calibratedFlag == 1) {
 				UiWriteText(dev, TEXT_CALIBRATION_DIS, g_calibrateClearBuff);
 				UiWriteText(dev, TEXT_CALIBRATION_DIS, g_calibratedBuff);
 				UiWriteData(dev, DATA_CALIBRATION_DIS, sysConfig->cal.value);

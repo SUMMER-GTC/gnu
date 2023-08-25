@@ -53,7 +53,7 @@ static void ForceCalibration(INT16 data)
 
 		g_forceCalibration = false;
 		struct sys_config *sysConfig = GetSysConfigOpt()->sysConfig;
-		sysConfig->cal.calibratedFlag = true;
+		sysConfig->cal.calibratedFlag = 1;
 		sysConfig->cal.value = g_forceCalibrationSum / FORCE_CALIBRATION_BUFF_SIZE;
 		GetSysConfigOpt()->Write();
 		NVIC_SystemReset();

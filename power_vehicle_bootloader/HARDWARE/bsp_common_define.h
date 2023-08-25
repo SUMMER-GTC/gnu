@@ -21,7 +21,7 @@ typedef void (*jump_t)(void);
 #define HARDWARE_VER_SIZE 32
 
 struct calibration {
-	bool calibratedFlag;
+	u16 calibratedFlag;
 	vs16 value;
 };
 

@@ -133,7 +133,7 @@ struct common_time {
 #define HARDWARE_VER_SIZE 32
 
 struct calibration {
-	bool calibratedFlag;
+	UINT16 calibratedFlag;
 	INT16 value;
 };
 
