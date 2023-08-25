@@ -147,7 +147,7 @@ static void SysConfigInit(void)
 		g_sysConfig.hardWareErrCnt = 0;
 		g_sysConfig.deviceNameErrCnt = 0;
 		g_sysConfig.romCheckErrCnt = 0;
-		g_sysConfig.otaState = OTA_RUN_BOOTLOADER;
+		g_sysConfig.otaState = OTA_RUN_APPLICATION;
 		WriteSysConfigToFlash();
 	}
 }
