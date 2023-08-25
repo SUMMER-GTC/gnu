@@ -52,6 +52,7 @@ extern "C" {
 #define DATA_HR			0x0016
 #define DATA_LBP		0x0017
 #define DATA_HBP		0x0018
+#define DATA_CALIBRATION_DIS 0x0019
 
 #define TEXT_SOFTWARE_VER		0x0020
 

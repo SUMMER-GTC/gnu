@@ -27,6 +27,11 @@ struct ui_display_data {
 
 #define UI_CALIBRATION_FORCE 0x11
 
+#define UI_DEFAULT_DATA_KCOEF (12)
+#define UI_DEFAULT_DATA_KP    (40)
+#define UI_DEFAULT_DATA_KI    (35)
+#define UI_DEFAULT_DATA_KD    (40)
+
 #ifdef __cplusplus
 }
 #endif

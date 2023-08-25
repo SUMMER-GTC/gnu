@@ -108,7 +108,6 @@ static bool OtaReplyProcess(struct platform_info *dev, struct ota_protocol *pOta
 
 static INT32 OtaRunBootloader(struct platform_info *dev, struct ota_protocol *pOta)
 {
-  GetSysConfigOpt()->Read();
 	GetSysConfigOpt()->sysConfig->otaState = OTA_RUN_BOOTLOADER;
 	GetSysConfigOpt()->Write();
   OtaReplyProcess(dev, pOta);

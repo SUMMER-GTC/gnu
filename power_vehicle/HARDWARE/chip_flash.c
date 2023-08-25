@@ -9,6 +9,7 @@ const char g_appSoftwareVersionBuf[] __attribute__((__used__, __section__(".soft
 const char g_calibratingBuff[] __attribute__((__used__, __section__(".calibrating"))) = "calibrating...";
 const char g_calibratedBuff[] __attribute__((__used__, __section__(".calibrated"))) = "calibrated";
 const char g_noCalibrateBuff[] __attribute__((__used__, __section__(".not_calibrated"))) = "not calibrated";
+const char g_calibrateClearBuff[] __attribute__((__used__, __section__(".calibrated_clear"))) = "              "; // 14 space symbols
 
 void ChipFlashEraseAppRom(void)
 {

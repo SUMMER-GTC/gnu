@@ -42,6 +42,7 @@ extern const char g_appSoftwareVersionBuf[];
 extern const char g_calibratingBuff[];
 extern const char g_calibratedBuff[];
 extern const char g_noCalibrateBuff[];
+extern const char g_calibrateClearBuff[];
 
 #endif
 

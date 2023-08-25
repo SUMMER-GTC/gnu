@@ -43,7 +43,7 @@ struct inc_pid {
   float error;    // error[n]
 } __packed;
 struct fifo {
-	UINT16 *data;
+	INT16 *data;
 	UINT32 head;
 	UINT32 tail;
 } __packed;
@@ -54,7 +54,7 @@ struct weight_moving_average_filter {
   UINT16 fifoSize;
 } __packed;
 
-UINT16 WeightMovingAverageFilter(struct weight_moving_average_filter *weightMovingAverageFilter, UINT16 data);
+INT16 WeightMovingAverageFilter(struct weight_moving_average_filter *weightMovingAverageFilter, INT16 data);
 void IncPID(struct inc_pid *pid, float curVal);
 void NeuralPID(struct neural_pid *pid, float curVal);
 

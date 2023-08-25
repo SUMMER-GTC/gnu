@@ -11,7 +11,7 @@
 
 #define FORCE_FILTER_FIFO_SIZE 9
 
-static UINT16 g_forceFilterData[FORCE_FILTER_FIFO_SIZE] = { 0 };
+static INT16 g_forceFilterData[FORCE_FILTER_FIFO_SIZE] = { 0 };
 static struct fifo g_forceFifo = {
 	.data = g_forceFilterData,
 	.head = 0,
@@ -26,7 +26,7 @@ static struct weight_moving_average_filter g_forceFilter = {
 	.weight = g_forceFilterWeight,
 	.fifoSize = FORCE_FILTER_FIFO_SIZE
 };
-static UINT16 g_force = 0;
+static INT16 g_force = 0;
 
 static INT32 ForceSendData(UINT8 desTag, void *data, UINT16 dataLen)
 {
@@ -35,8 +35,9 @@ static INT32 ForceSendData(UINT8 desTag, void *data, UINT16 dataLen)
 
 #define FORCE_CALIBRATION_BUFF_SIZE 16
 #define FORCE_CALIBRATION_ONE_SECOND_NUM 30
-static UINT16 g_forceCalibrationSum = 0;
-static void ForceCalibration(UINT16 data)
+static INT32 g_forceCalibrationSum = 0;
+static bool g_forceCalibration = false;
+static void ForceCalibration(INT16 data)
 {
 	static UINT8 oneSecondCnt = 0;
 	static UINT8 index = 0;
@@ -50,6 +51,7 @@ static void ForceCalibration(UINT16 data)
 			return;
 		}
 
+		g_forceCalibration = false;
 		struct sys_config *sysConfig = GetSysConfigOpt()->sysConfig;
 		sysConfig->cal.calibratedFlag = true;
 		sysConfig->cal.value = g_forceCalibrationSum / FORCE_CALIBRATION_BUFF_SIZE;
@@ -58,19 +60,21 @@ static void ForceCalibration(UINT16 data)
 	}
 }
 
-static bool g_forceCalibration = false;
 static void ForceDeviceProcess(struct platform_info *dev)
 {
 	struct platform_info *devFops = dev;
 
 	devFops->fops->read(dev);
-	UINT16 millivolt = *(UINT16 *)devFops->private_data;
+	INT16 millivolt = *(INT16 *)devFops->private_data;
 
 	if (g_forceCalibration) {
 		ForceCalibration(millivolt);
 	}
 
-	UINT16 ret = WeightMovingAverageFilter(&g_forceFilter, millivolt);
+	if (GetSysConfigOpt()->sysConfig->cal.calibratedFlag) {
+		millivolt -= GetSysConfigOpt()->sysConfig->cal.value;
+	}
+	INT16 ret = WeightMovingAverageFilter(&g_forceFilter, millivolt);
 	ForceSendData(TAG_APP_WHEEL, &ret, sizeof(ret));
 }
 

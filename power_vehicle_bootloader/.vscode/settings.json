@@ -28,6 +28,7 @@
         "string": "c",
         "core_cm4.h": "c",
         "bsp_timer.h": "c",
-        "stat.h": "c"
+        "stat.h": "c",
+        "bsp_common_define.h": "c"
     }
 }

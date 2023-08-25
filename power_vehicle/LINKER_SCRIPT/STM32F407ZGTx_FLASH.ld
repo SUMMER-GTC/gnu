@@ -65,6 +65,7 @@ RAM (xrw)      : ORIGIN = 0x20000000, LENGTH = 128K
 CCMRAM (xrw)      : ORIGIN = 0x10000000, LENGTH = 64K
 FLASH (rx)      : ORIGIN = 0x800C000, LENGTH = 976K
 BOOT_CHECK (rx)      : ORIGIN = 0x8008000, LENGTH = 16K
+SYS_CONFIG (rx)      : ORIGIN = 0x8004000, LENGTH = 16K
 }
 
 /* Define output sections */
@@ -218,7 +219,17 @@ SECTIONS
 
     . = ALIGN(32);
     KEEP (*(.not_calibrated*))
+
+    . = ALIGN(32);
+    KEEP (*(.calibrated_clear*))
   } >BOOT_CHECK
+
+  .sys_config :
+  {
+    . = ALIGN(4);
+    KEEP (*(.sys_config*))
+
+  } >SYS_CONFIG
 
   /* Remove information from the standard libraries */
   /DISCARD/ :

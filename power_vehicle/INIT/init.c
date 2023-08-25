@@ -20,6 +20,7 @@ INT32 Init(void)
 	volatile initcall_t callFunc = NULL;
 	volatile UINT32 *funAddr = &__initcall_start;
 
+	GetSysConfigOpt()->Read();
 	do {
 		callFunc = (initcall_t)(*(funAddr));
 		DoInit(callFunc);	

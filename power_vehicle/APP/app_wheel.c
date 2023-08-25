@@ -33,10 +33,10 @@ static struct inc_pid g_incPID = {
 
 static struct neural_pid g_neuralPID = {
   .setpoint = 5000,         
-  .Kcoef = 0.12,            
-  .Kp = 0.4,               
-  .Ki = 0.35,               
-  .Kd = 0.4,               
+  .Kcoef = UI_DEFAULT_DATA_KCOEF / 100,            
+  .Kp = UI_DEFAULT_DATA_KP / 100,               
+  .Ki = UI_DEFAULT_DATA_KI / 100,               
+  .Kd = UI_DEFAULT_DATA_KD / 100,               
   .error1 = 0.0,           
   .error2 = 0.0,           
   .deadband = (10000 - (- 10000)) * 0.0005,         
@@ -177,17 +177,16 @@ static struct platform_info g_appWheel = {
 
 static INT32 AppWheelInit(void)
 {
-	GetSysConfigOpt()->Read();
-	if (GetSysConfigOpt()->sysConfig->Kcoef != 0xFFFF) {
+	if (GetSysConfigOpt()->sysConfig->Kcoef != UINT16_MAX) {
 		g_neuralPID.Kcoef = GetSysConfigOpt()->sysConfig->Kcoef / 100.0;
 	}
-	if (GetSysConfigOpt()->sysConfig->Kp != 0xFFFF) {
+	if (GetSysConfigOpt()->sysConfig->Kp != UINT16_MAX) {
 		g_neuralPID.Kp = GetSysConfigOpt()->sysConfig->Kp / 100.0;
 	}
-	if (GetSysConfigOpt()->sysConfig->Ki != 0xFFFF) {
+	if (GetSysConfigOpt()->sysConfig->Ki != UINT16_MAX) {
 		g_neuralPID.Ki = GetSysConfigOpt()->sysConfig->Ki / 100.0;
 	}
-	if (GetSysConfigOpt()->sysConfig->Kd != 0xFFFF) {
+	if (GetSysConfigOpt()->sysConfig->Kd != UINT16_MAX) {
 		g_neuralPID.Kd = GetSysConfigOpt()->sysConfig->Kd / 100.0;
 	}
 

@@ -1,6 +1,7 @@
 #include "stm32f4xx_flash.h"
 #include "bsp_chip_flash.h"
 #include "bsp_common_define.h"
+#include "bsp_comm_protocol.h"
 
 #define CHIP_SECTOR_TOTAL_NUMBER (12)
 #define CHIP_APPLICATION_START_SECTOR_NUMBER (2)
@@ -146,6 +147,7 @@ static void SysConfigInit(void)
 		g_sysConfig.hardWareErrCnt = 0;
 		g_sysConfig.deviceNameErrCnt = 0;
 		g_sysConfig.romCheckErrCnt = 0;
+		g_sysConfig.otaState = OTA_RUN_BOOTLOADER;
 		WriteSysConfigToFlash();
 	}
 }

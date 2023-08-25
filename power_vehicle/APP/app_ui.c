@@ -564,8 +564,15 @@ static struct platform_info g_appUi = {
 
 static INT32 AppUiInit(void)
 {
-	GetSysConfigOpt()->Read();
 	struct sys_config *sysConfig = GetSysConfigOpt()->sysConfig;
+
+	if (sysConfig->Kcoef == UINT16_MAX || sysConfig->Kp == UINT16_MAX || \
+			sysConfig->Ki== UINT16_MAX || sysConfig->Kd == UINT16_MAX) {
+		sysConfig->Kcoef = UI_DEFAULT_DATA_KCOEF;
+		sysConfig->Kp = UI_DEFAULT_DATA_KP;
+		sysConfig->Ki = UI_DEFAULT_DATA_KI;
+		sysConfig->Kd = UI_DEFAULT_DATA_KD;
+	}
 
 	struct platform_info *dev = NULL;
 	if (GetDeviceInfo(TAG_DEVICE_UART_SCREEN, &dev) == SUCC) {
@@ -580,9 +587,13 @@ static INT32 AppUiInit(void)
 		UiWriteData(dev, KEY_KD_INC_DEC, sysConfig->Kd);
 
 		if (sysConfig->cal.calibratedFlag) {
+				UiWriteText(dev, TEXT_CALIBRATION_DIS, g_calibrateClearBuff);
 				UiWriteText(dev, TEXT_CALIBRATION_DIS, g_calibratedBuff);
+				UiWriteData(dev, DATA_CALIBRATION_DIS, sysConfig->cal.value);
 		} else {
+				UiWriteText(dev, TEXT_CALIBRATION_DIS, g_calibrateClearBuff);
 				UiWriteText(dev, TEXT_CALIBRATION_DIS, g_noCalibrateBuff);
+				UiWriteData(dev, DATA_CALIBRATION_DIS, -1);
 		}
 
 		if (sysConfig->languageVer == UI_LANGUAGE_VER_ENGLISH) {

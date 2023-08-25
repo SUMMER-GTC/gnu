@@ -13,7 +13,7 @@
 
 #define RPM_SIMULATOR_DATA (1)
 
-static UINT16 g_rotateSpeedFilterData[ROTATE_SPEED_FILTER_FIFO_SIZE] = { 0 };
+static INT16 g_rotateSpeedFilterData[ROTATE_SPEED_FILTER_FIFO_SIZE] = { 0 };
 static struct fifo g_rotateSpeedFifo = {
 	.data = g_rotateSpeedFilterData,
 	.head = 0,

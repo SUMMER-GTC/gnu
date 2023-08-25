@@ -26,6 +26,18 @@ extern "C"{
 
 #define UNUSED(X) (void)X      /* To avoid gcc/g++ warnings */
 
+#ifndef UINT32_MAX
+#define UINT32_MAX 	0xFFFFFFFF
+#endif
+
+#ifndef UINT16_MAX
+#define UINT16_MAX 	0xFFFF
+#endif
+
+#ifndef UINT8_MAX
+#define UINT8_MAX 	0xFF
+#endif
+
 #ifndef SUCC
 #define SUCC (0UL)
 #endif

@@ -1,11 +1,11 @@
 #include "alg.h"
 
-UINT16 WeightMovingAverageFilter(struct weight_moving_average_filter *weightMovingAverageFilter, UINT16 data)
+INT16 WeightMovingAverageFilter(struct weight_moving_average_filter *weightMovingAverageFilter, INT16 data)
 {
-	UINT32 retVal = 0;
+	INT32 retVal = 0;
 	UINT32 head = 0;
 	UINT16 weightSum = 0;
-	UINT32 valSum = 0;
+	INT32 valSum = 0;
 
 	// fifo full
 	if ((weightMovingAverageFilter->fifo->tail + 1) % weightMovingAverageFilter->fifoSize == weightMovingAverageFilter->fifo->head) { 
